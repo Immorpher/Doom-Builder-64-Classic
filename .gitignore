@@ -31,3 +31,4 @@ Build/Plugins/WadAuthorMode.dll
 /Source/Plugins/CommentsPanel/obj
 Build/Builder.xml
 Build/Builder.exe
+/Source/Plugins/AutomapMode/obj
