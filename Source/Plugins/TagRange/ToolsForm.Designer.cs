@@ -54,7 +54,7 @@ namespace CodeImp.DoomBuilder.TagRange
 			this.tagrangebutton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.tagrangebutton.Name = "tagrangebutton";
 			this.tagrangebutton.Size = new System.Drawing.Size(23, 22);
-			this.tagrangebutton.Tag = "rangetagselectedsectors";
+			this.tagrangebutton.Tag = "rangetagselection";
 			this.tagrangebutton.Text = "Tag Range";
 			this.tagrangebutton.Click += new System.EventHandler(this.InvokeTaggedAction);
 			// 
