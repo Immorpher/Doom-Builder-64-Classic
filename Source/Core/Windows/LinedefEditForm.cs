@@ -117,7 +117,6 @@ namespace CodeImp.DoomBuilder.Windows
             {
                 this.activationtype.Show();
                 activationtype.Top = idgroup.Bottom + idgroup.Margin.Bottom + activationtype.Margin.Top;
-                switchsetupbox.Top = activationtype.Bottom + activationtype.Margin.Bottom + switchsetupbox.Margin.Top;
                 this.Height = heightpanel3.Height;
             }
 		}
