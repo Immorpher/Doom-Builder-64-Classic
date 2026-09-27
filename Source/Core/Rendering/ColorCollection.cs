@@ -183,7 +183,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(colors[THINGCOLOR17].ToInt() == 0) colors[THINGCOLOR17] = PixelColor.FromColor(Color.DarkOrange);
 			if(colors[THINGCOLOR18].ToInt() == 0) colors[THINGCOLOR18] = PixelColor.FromColor(Color.DarkKhaki);
 			if(colors[THINGCOLOR19].ToInt() == 0) colors[THINGCOLOR19] = PixelColor.FromColor(Color.Goldenrod);
-			if(colors[NOBLOCKMAP].ToInt() == 0) colors[NOBLOCKMAP] = PixelColor.FromColor(Color.FromArgb(255, 128, 64, 0)); // No Blockmap default color (BSP64 En.)
+			if(colors[NOBLOCKMAP].ToInt() == 0) colors[NOBLOCKMAP] = PixelColor.FromColor(Color.FromArgb(255, 96, 32, 64)); // No Blockmap default color (BSP64 En.)
 			
 			// Create assist colors
 			CreateAssistColors();
