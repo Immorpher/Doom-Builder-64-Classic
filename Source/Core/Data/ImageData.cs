@@ -54,6 +54,7 @@ namespace CodeImp.DoomBuilder.Data
 		protected Vector2D scale;
 		protected bool worldpanning;
 		protected bool usecolorcorrection;
+		private bool istranslucent;	// True when texture has partial transparency
         private int palindex;   // villsa
 		
 		// Loading
@@ -102,6 +103,9 @@ namespace CodeImp.DoomBuilder.Data
 		public float ScaledHeight { get { return height * scale.y; } }
 		public Vector2D Scale { get { return scale; } }
 		public bool WorldPanning { get { return worldpanning; } }
+
+		// True when texture has partial transparency
+		public bool IsTranslucent { get { return istranslucent; } }
         public int PalIndex { get { return palindex; } set { palindex = value; } } // villsa
 		
 		#endregion
@@ -329,6 +333,29 @@ namespace CodeImp.DoomBuilder.Data
                                 }
                             }
                         }
+                    }
+
+                    // Determine when texture has partial transparency
+                    istranslucent = false;
+                    try
+                    {
+                        BitmapData scandata = bitmap.LockBits(new Rectangle(0, 0, bitmap.Size.Width, bitmap.Size.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                        PixelColor* scanpixels = (PixelColor*)(scandata.Scan0.ToPointer());
+                        int pixelcount = scandata.Width * scandata.Height;
+                        for(int i = 0; i < pixelcount; i++)
+                        {
+                            if((scanpixels[i].a > 0) && (scanpixels[i].a < 255))
+                            {
+                                istranslucent = true;
+                                break;
+                            }
+                        }
+                        bitmap.UnlockBits(scandata);
+                    }
+                    catch(Exception e)
+                    {
+                        General.ErrorLogger.Add(ErrorType.Warning, "Cannot scan image '" + name + "' for translucency.\n" + e.GetType().Name + ": " + e.Message);
+                        istranslucent = false;
                     }
 
                     // This applies brightness correction on the image

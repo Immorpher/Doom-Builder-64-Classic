@@ -166,6 +166,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
                 setuponloadedtexture = switchtex;
             }
 
+            // If texture has partial transparency use alpha-blending
+            this.RenderPass = (base.Texture.IsImageLoaded && base.Texture.IsTranslucent) ? RenderPass.Alpha : RenderPass.Mask;
+
             float topY = switchY;
             float bottomY = topY - SWITCH_SIZE;
 

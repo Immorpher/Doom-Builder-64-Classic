@@ -117,6 +117,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
                             setuponloadedtexture = Sidedef.LongMiddleTexture;
                     }
 
+                    // If texture has partial transparency use alpha-blending.
+                    this.RenderPass = (base.Texture.IsImageLoaded && base.Texture.IsTranslucent) ? RenderPass.Alpha : RenderPass.Mask;
+
                     // Get texture scaled size
                     Vector2D tsz = new Vector2D(base.Texture.ScaledWidth, base.Texture.ScaledHeight);
 
