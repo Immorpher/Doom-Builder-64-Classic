@@ -73,6 +73,9 @@ namespace CodeImp.DoomBuilder.Map
         private bool secretflag;    // villsa
         private bool monsterblockflag;  // villsa
         private bool tagonlyflag;   // villsa
+        private bool noblockmapflag;        // BSP64 En. "No Blockmap" flag
+        private bool hideonautomapflag;     // "Hide on Automap" flag
+        private bool showonautomapflag;     // "Show on Automap" flag
 		
 		// Properties
 		private Dictionary<string, bool> flags;
@@ -116,6 +119,12 @@ namespace CodeImp.DoomBuilder.Map
         internal bool MonsterBlockFlag { get { return monsterblockflag; } }   // villsa
         internal bool SecretFlag { get { return secretflag; } }   // villsa
         internal bool TagonlyFlag { get { return tagonlyflag; } set { tagonlyflag = value; } }   // villsa
+        internal bool NoBlockmapFlag { get { return noblockmapflag; } }
+        internal bool HideOnAutomapFlag { get { return hideonautomapflag; } }
+        internal bool ShowOnAutomapFlag { get { return showonautomapflag; } }
+
+        // True when the line is hidden from the BSP64 Enhanced blockmap calculation either directly via the "No Blockmap (BSP64 En.)" flag or by simultaneously setting both "Hide on Automap" and "Show on Automap"
+        internal bool NoBlockmapCombined { get { return noblockmapflag || (hideonautomapflag && showonautomapflag); } }
 		
 		#endregion
 
@@ -300,6 +309,9 @@ namespace CodeImp.DoomBuilder.Map
             l.secretflag = secretflag;
             l.monsterblockflag = monsterblockflag;
             l.tagonlyflag = tagonlyflag;
+            l.noblockmapflag = noblockmapflag;
+            l.hideonautomapflag = hideonautomapflag;
+            l.showonautomapflag = showonautomapflag;
 			base.CopyPropertiesTo(l);
 		}
 		
@@ -392,6 +404,9 @@ namespace CodeImp.DoomBuilder.Map
                 invisibleflag = IsFlagSet(General.Map.Config.InvisibleFlag);   // villsa
                 monsterblockflag = IsFlagSet(General.Map.Config.MonsterblockFlag);
                 secretflag = IsFlagSet(General.Map.Config.SecretFlag);
+                noblockmapflag = IsFlagSet(General.Map.Config.NoBlockmapFlag);
+                hideonautomapflag = IsFlagSet(General.Map.Config.HideOnAutomapFlag);
+                showonautomapflag = IsFlagSet(General.Map.Config.ShowOnAutomapFlag);
 				
 				// Updated
 				updateneeded = false;
@@ -556,6 +571,9 @@ namespace CodeImp.DoomBuilder.Map
                 if (flagname == General.Map.Config.InvisibleFlag) invisibleflag = value;   // villsa
                 if (flagname == General.Map.Config.MonsterblockFlag) monsterblockflag = value;   // villsa
                 if (flagname == General.Map.Config.SecretFlag) secretflag = value;   // villsa
+                if (flagname == General.Map.Config.NoBlockmapFlag) noblockmapflag = value;
+                if (flagname == General.Map.Config.HideOnAutomapFlag) hideonautomapflag = value;
+                if (flagname == General.Map.Config.ShowOnAutomapFlag) showonautomapflag = value;
 			}
 		}
 
@@ -575,6 +593,9 @@ namespace CodeImp.DoomBuilder.Map
             invisibleflag = false;  // villsa
             monsterblockflag = false;
             secretflag = false;
+            noblockmapflag = false;
+            hideonautomapflag = false;
+            showonautomapflag = false;
 		}
 		
 		// This flips the linedef's vertex attachments

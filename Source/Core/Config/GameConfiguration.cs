@@ -61,6 +61,9 @@ namespace CodeImp.DoomBuilder.Config
         private string monsterblockflag;    // villsa
         private string secretflag;  // villsa
         private string tagonlyflag; // villsa
+        private string noblockmapflag;      // "No Blockmap (BSP64 En.)" flag
+        private string hideonautomapflag;   // "Hide on Automap" flag
+        private string showonautomapflag;   // "Show on Automap" flag
 		private string upperunpeggedflag;
 		private string lowerunpeggedflag;
 		private bool mixtexturesflats;
@@ -164,6 +167,9 @@ namespace CodeImp.DoomBuilder.Config
         public string MonsterblockFlag { get { return monsterblockflag; } }   // villsa
         public string SecretFlag { get { return secretflag; } }   // villsa
         public string TagonlyFlag { get { return tagonlyflag; } }   // villsa
+        public string NoBlockmapFlag { get { return noblockmapflag; } }
+        public string HideOnAutomapFlag { get { return hideonautomapflag; } }
+        public string ShowOnAutomapFlag { get { return showonautomapflag; } }
 		public string UpperUnpeggedFlag { get { return upperunpeggedflag; } }
 		public string LowerUnpeggedFlag { get { return lowerunpeggedflag; } }
 		public bool MixTexturesFlats { get { return mixtexturesflats; } }
@@ -321,6 +327,12 @@ namespace CodeImp.DoomBuilder.Config
             if (obj is int) monsterblockflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else monsterblockflag = obj.ToString(); // villsa
             obj = cfg.ReadSettingObject("secretflag", 0);    // villsa
             if (obj is int) secretflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else secretflag = obj.ToString(); // villsa
+            obj = cfg.ReadSettingObject("noblockmapflag", 0);
+            if (obj is int) noblockmapflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else noblockmapflag = obj.ToString();
+            obj = cfg.ReadSettingObject("hideonautomapflag", 0);
+            if (obj is int) hideonautomapflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else hideonautomapflag = obj.ToString();
+            obj = cfg.ReadSettingObject("showonautomapflag", 0);
+            if (obj is int) showonautomapflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else showonautomapflag = obj.ToString();
             obj = cfg.ReadSettingObject("invisibleflag", 0);    // villsa
             if (obj is int) invisibleflag = ((int)obj).ToString(CultureInfo.InvariantCulture); else invisibleflag = obj.ToString(); // villsa
 

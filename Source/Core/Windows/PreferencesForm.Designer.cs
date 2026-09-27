@@ -48,6 +48,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.defaultviewmode = new System.Windows.Forms.ComboBox();
             this.keyusedlabel = new System.Windows.Forms.Label();
             this.colorsgroup1 = new System.Windows.Forms.GroupBox();
+            this.colorNoBlockmap = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorTagonly = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorSecret = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorMblock = new CodeImp.DoomBuilder.Controls.ColorControl();
@@ -368,6 +369,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.colorsgroup1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
+            this.colorsgroup1.Controls.Add(this.colorNoBlockmap);
             this.colorsgroup1.Controls.Add(this.colorTagonly);
             this.colorsgroup1.Controls.Add(this.colorSecret);
             this.colorsgroup1.Controls.Add(this.colorMblock);
@@ -389,6 +391,18 @@ namespace CodeImp.DoomBuilder.Windows
             this.colorsgroup1.TabStop = false;
             this.colorsgroup1.Text = " Display ";
             this.colorsgroup1.Visible = false;
+            // 
+            // colorNoBlockmap
+            // 
+            this.colorNoBlockmap.BackColor = System.Drawing.Color.Transparent;
+            this.colorNoBlockmap.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.colorNoBlockmap.Label = "No Blockmap:";
+            this.colorNoBlockmap.Location = new System.Drawing.Point(15, 405);
+            this.colorNoBlockmap.MaximumSize = new System.Drawing.Size(10000, 23);
+            this.colorNoBlockmap.MinimumSize = new System.Drawing.Size(100, 23);
+            this.colorNoBlockmap.Name = "colorNoBlockmap";
+            this.colorNoBlockmap.Size = new System.Drawing.Size(168, 23);
+            this.colorNoBlockmap.TabIndex = 18;
             // 
             // colorTagonly
             // 
@@ -990,7 +1004,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.fieldofviewlabel.Name = "fieldofviewlabel";
             this.fieldofviewlabel.Size = new System.Drawing.Size(23, 14);
             this.fieldofviewlabel.TabIndex = 19;
-            this.fieldofviewlabel.Text = "50°";
+            this.fieldofviewlabel.Text = "50ï¿½";
             // 
             // label4
             // 
@@ -1680,6 +1694,7 @@ namespace CodeImp.DoomBuilder.Windows
         private System.Windows.Forms.Label lightintensitylabel;
         private CodeImp.DoomBuilder.Controls.ColorControl colorTagonly;
         private CodeImp.DoomBuilder.Controls.ColorControl colorSecret;
+        private CodeImp.DoomBuilder.Controls.ColorControl colorNoBlockmap;
         private CodeImp.DoomBuilder.Controls.ColorControl colorMblock;
         private CodeImp.DoomBuilder.Controls.ColorControl coloinvisiblelinedef;
 	}

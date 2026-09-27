@@ -591,8 +591,13 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This returns the color for a linedef
 		public PixelColor DetermineLinedefColor(Linedef l)
 		{
+			// Lines excluded from the BSP64 blockmap calculation according to BSP64 Enhanced
+			bool isnoblockmap = l.NoBlockmapFlag || (l.HideOnAutomapFlag && l.ShowOnAutomapFlag);
+
 			if(l.Selected)
 				return General.Colors.Selection;
+			else if(isnoblockmap)
+				return General.Colors.NoBlockmap;
             else if (l.TagonlyFlag)
                 return General.Colors.Tagonly.WithAlpha(General.Settings.DoubleSidedAlphaByte); // villsa
 			else if(l.ImpassableFlag)
