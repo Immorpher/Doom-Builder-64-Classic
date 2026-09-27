@@ -93,7 +93,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				verts[i].c = brightness;
 
 				// Grid aligned texture coordinates
-				if(base.Texture.IsImageLoaded)
+				// Make sure ceiling textures stretch to 64x64 for Doom 64
+				if(base.Texture.IsImageLoaded && !General.Map.FormatInterface.InDoom64Mode)
 				{
 					verts[i].u = s.Triangles.Vertices[i].x / base.Texture.ScaledWidth;
 					verts[i].v = -s.Triangles.Vertices[i].y / base.Texture.ScaledHeight;

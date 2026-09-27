@@ -242,9 +242,18 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			ImageData img = General.Map.Data.GetFlatImage(s.LongFloorTexture);
 			if((img != null) && img.IsImageLoaded)
 			{
-				// Make scalars
-				float sw = 1.0f / img.ScaledWidth;
-				float sh = 1.0f / img.ScaledHeight;
+				// Make sure floor textures stretch to 64x64 for Doom 64
+				float sw, sh;
+				if(General.Map.FormatInterface.InDoom64Mode)
+				{
+					sw = 1.0f / 64f;
+					sh = 1.0f / 64f;
+				}
+				else
+				{
+					sw = 1.0f / img.ScaledWidth;
+					sh = 1.0f / img.ScaledHeight;
+				}
 				
 				// Make proper texture coordinates
 				for(int i = 0; i < vertices.Length; i++)
@@ -261,9 +270,18 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			ImageData img = General.Map.Data.GetFlatImage(s.LongCeilTexture);
 			if((img != null) && img.IsImageLoaded)
 			{
-				// Make scalars
-				float sw = 1.0f / img.ScaledWidth;
-				float sh = 1.0f / img.ScaledHeight;
+				// Make sure ceiling textures stretch to 64x64 for Doom 64
+				float sw, sh;
+				if(General.Map.FormatInterface.InDoom64Mode)
+				{
+					sw = 1.0f / 64f;
+					sh = 1.0f / 64f;
+				}
+				else
+				{
+					sw = 1.0f / img.ScaledWidth;
+					sh = 1.0f / img.ScaledHeight;
+				}
 
 				// Make proper texture coordinates
 				for(int i = 0; i < vertices.Length; i++)
