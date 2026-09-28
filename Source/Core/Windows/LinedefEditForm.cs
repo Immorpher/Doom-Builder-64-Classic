@@ -286,6 +286,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// Keep this list
 			this.lines = lines;
 			if(lines.Count > 1) this.Text = "Edit Linedefs (" + lines.Count + ")";
+			else if(lines.Count == 1) this.Text = "Edit Linedef (Index: " + General.GetByIndex(lines, 0).Index + ")";
 
             ////////////////////////////////////////////////////////////////////////
             // Set all options to the first linedef properties

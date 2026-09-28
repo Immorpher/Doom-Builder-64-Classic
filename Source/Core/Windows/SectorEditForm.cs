@@ -114,6 +114,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// Keep this list
 			this.sectors = sectors;
 			if(sectors.Count > 1) this.Text = "Edit Sectors (" + sectors.Count + ")";
+			else if(sectors.Count == 1) this.Text = "Edit Sector (Index: " + General.GetByIndex(sectors, 0).Index + ")";
 
 			////////////////////////////////////////////////////////////////////////
 			// Set all options to the first sector properties

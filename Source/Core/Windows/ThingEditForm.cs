@@ -84,6 +84,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// Keep this list
 			this.things = things;
 			if(things.Count > 1) this.Text = "Edit Things (" + things.Count + ")";
+			else if(things.Count == 1) this.Text = "Edit Thing (Index: " + General.GetByIndex(things, 0).Index + ")";
 			
 			////////////////////////////////////////////////////////////////////////
 			// Set all options to the first thing properties
