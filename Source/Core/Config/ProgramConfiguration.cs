@@ -73,6 +73,7 @@ namespace CodeImp.DoomBuilder.Config
 		private bool scriptfontbold;
 		private bool scriptontop;
 		private bool scriptautoindent;
+		private bool scripthidehints;
 		private int scripttabwidth;
 		private int previewimagesize;
 		private int autoscrollspeed;
@@ -141,6 +142,7 @@ namespace CodeImp.DoomBuilder.Config
 		public bool AnimateVisualSelection { get { return animatevisualselection; } internal set { animatevisualselection = value; } }
 		public int ScriptTabWidth { get { return scripttabwidth; } internal set { scripttabwidth = value; } }
 		public bool ScriptAutoIndent { get { return scriptautoindent; } internal set { scriptautoindent = value; } }
+		public bool ScriptHideHints { get { return scripthidehints; } set { scripthidehints = value; } }
 		internal int PreviousVersion { get { return previousversion; } }
 		internal PasteOptions PasteOptions { get { return pasteoptions; } set { pasteoptions = value; } }
 		public int DockersPosition { get { return dockersposition; } internal set { dockersposition = value; } }
@@ -213,6 +215,7 @@ namespace CodeImp.DoomBuilder.Config
 				scriptfontsize = cfg.ReadSetting("scriptfontsize", 10);
 				scriptfontbold = cfg.ReadSetting("scriptfontbold", false);
 				scriptautoindent = cfg.ReadSetting("scriptautoindent", true);
+				scripthidehints = cfg.ReadSetting("scripthidehints", false);
 				scriptontop = cfg.ReadSetting("scriptontop", true);
 				scripttabwidth = cfg.ReadSetting("scripttabwidth", 4);
 				previewimagesize = cfg.ReadSetting("previewimagesize", 1);
@@ -276,6 +279,7 @@ namespace CodeImp.DoomBuilder.Config
 			cfg.WriteSetting("scriptontop", scriptontop);
 			cfg.WriteSetting("scripttabwidth", scripttabwidth);
 			cfg.WriteSetting("scriptautoindent", scriptautoindent);
+			cfg.WriteSetting("scripthidehints", scripthidehints);
 			cfg.WriteSetting("previewimagesize", previewimagesize);
 			cfg.WriteSetting("autoscrollspeed", autoscrollspeed);
 			cfg.WriteSetting("zoomfactor", zoomfactor);

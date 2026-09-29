@@ -53,6 +53,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.label1 = new System.Windows.Forms.Label();
 			this.heightbysidedef = new System.Windows.Forms.ComboBox();
 			this.autodragonpaste = new System.Windows.Forms.CheckBox();
+			this.scripthidehints = new System.Windows.Forms.CheckBox();
 			this.tabs.SuspendLayout();
 			this.taboptions.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -89,6 +90,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this.scripthidehints);
 			this.groupBox3.Controls.Add(this.autodragonpaste);
 			this.groupBox3.Controls.Add(this.visualmodeclearselection);
 			this.groupBox3.Controls.Add(this.autoclearselection);
@@ -97,7 +99,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.groupBox3.Controls.Add(this.additiveselect);
 			this.groupBox3.Location = new System.Drawing.Point(308, 90);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(332, 200);
+			this.groupBox3.Size = new System.Drawing.Size(332, 226);
 			this.groupBox3.TabIndex = 18;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = " Options ";
@@ -342,6 +344,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.autodragonpaste.Text = "Drag selection automatically on paste";
 			this.autodragonpaste.UseVisualStyleBackColor = true;
 			// 
+			// scripthidehints
+			// 
+			this.scripthidehints.AutoSize = true;
+			this.scripthidehints.Location = new System.Drawing.Point(23, 189);
+			this.scripthidehints.Name = "scripthidehints";
+			this.scripthidehints.Size = new System.Drawing.Size(130, 18);
+			this.scripthidehints.TabIndex = 7;
+			this.scripthidehints.Text = "Hide scripting hints";
+			this.scripthidehints.UseVisualStyleBackColor = true;
+			// 
 			// PreferencesForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -393,5 +405,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox highlightthingsrange;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox highlightrange;
 		private System.Windows.Forms.CheckBox autodragonpaste;
+		private System.Windows.Forms.CheckBox scripthidehints;
 	}
 }

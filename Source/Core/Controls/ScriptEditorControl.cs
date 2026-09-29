@@ -768,6 +768,13 @@ namespace CodeImp.DoomBuilder.Controls
 			
 			UpdatePositionInfo();
 			
+			// User chose to hide scripting hints: make sure no call tip stays visible
+			if(General.Settings.ScriptHideHints)
+			{
+				if(scriptedit.IsCallTipActive) scriptedit.CallTipCancel();
+				return;
+			}
+
 			// Call tip shown
 			if(scriptedit.IsCallTipActive)
 			{

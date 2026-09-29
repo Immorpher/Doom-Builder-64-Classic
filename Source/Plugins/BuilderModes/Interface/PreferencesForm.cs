@@ -67,6 +67,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			autoclearselection.Checked = BuilderPlug.Me.AutoClearSelection;
 			visualmodeclearselection.Checked = BuilderPlug.Me.VisualModeClearSelection;
 			autodragonpaste.Checked = BuilderPlug.Me.AutoDragOnPaste;
+			scripthidehints.Checked = General.Settings.ScriptHideHints;
 		}
 
 		#endregion
@@ -88,6 +89,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			General.Settings.WritePluginSetting("autoclearselection", autoclearselection.Checked);
 			General.Settings.WritePluginSetting("visualmodeclearselection", visualmodeclearselection.Checked);
 			General.Settings.WritePluginSetting("autodragonpaste", autodragonpaste.Checked);
+			General.Settings.ScriptHideHints = scripthidehints.Checked;
 		}
 		
 		// When Cancel is pressed on the preferences dialog
