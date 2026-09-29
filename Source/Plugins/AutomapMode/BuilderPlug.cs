@@ -77,6 +77,12 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			get { return General.Map.FormatInterface.InDoom64Mode ? "256" : null; }
 		}
 
+		// Doom 64 only: linedef flag 33554432 = "Hide Special on Automap"
+		public string HideSpecialFlag
+		{
+			get { return "33554432"; }
+		}
+
 		private static bool IsUDMF
 		{
 			get { return General.Map.Config.FormatInterface == "UniversalMapSetIO"; }

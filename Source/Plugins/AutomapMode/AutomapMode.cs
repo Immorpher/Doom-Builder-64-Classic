@@ -48,6 +48,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			DOOM,
 			HEXEN,
 			STRIFE,
+			DOOM64,
 		}
 
 		#endregion
@@ -68,6 +69,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		// Colors
 		private PixelColor ColorSingleSided;
 		private PixelColor ColorSecret;
+		private PixelColor ColorSpecial;
 		private PixelColor ColorFloorDiff;
 		private PixelColor ColorCeilDiff;
 		private PixelColor ColorMatchingHeight;
@@ -92,6 +94,14 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			menusform.ShowHiddenLines = General.Settings.ReadPluginSetting("automapmode.showhiddenlines", false);
 			menusform.ShowSecretSectors = General.Settings.ReadPluginSetting("automapmode.showsecretsectors", false);
 			menusform.ColorPreset = (ColorPreset)General.Settings.ReadPluginSetting("automapmode.colorpreset", (int)ColorPreset.DOOM);
+
+			// Doom 64 maps default to the Doom 64 preset the first time this map is opened
+			if(General.Map != null && General.Map.FormatInterface.InDoom64Mode &&
+			   General.Settings.ReadPluginSetting("automapmode.colorpreset64set", 0) == 0)
+			{
+				menusform.ColorPreset = ColorPreset.DOOM64;
+				General.Settings.WritePluginSetting("automapmode.colorpreset64set", 1);
+			}
 
 			// Handle events
 			menusform.OnShowHiddenLinesChanged += delegate
@@ -184,6 +194,9 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			if(ld.IsFlagSet(BuilderPlug.Me.HiddenFlag)) return ColorHiddenFlag;
 			if(LinedefIsInHiddenSector(ld)) return ColorInvisible;
 			if(ld.Back == null || ld.Front == null || ld.IsFlagSet(BuilderPlug.Me.SecretFlag)) return ColorSingleSided;
+
+			// Doom 64: two-sided lines with an action are drawn in the special color
+			if(LinedefIsSpecial(ld)) return ColorSpecial;
 			if(ld.Front.Sector.FloorHeight != ld.Back.Sector.FloorHeight) return ColorFloorDiff;
 			if(ld.Front.Sector.CeilHeight != ld.Back.Sector.CeilHeight) return ColorCeilDiff;
 
@@ -208,11 +221,26 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			// One-sided lines and lines drawn as one-sided are always shown
 			if(ld.Back == null || ld.Front == null || ld.IsFlagSet(BuilderPlug.Me.SecretFlag)) return true;
 
+			// Doom 64: lines with an action are shown unless "Hide Special on Automap" is set
+			if(LinedefIsSpecial(ld)) return true;
+
+			// In Doom 64 every remaining two-sided line is drawn
+			if(General.Map.FormatInterface.InDoom64Mode) return true;
+
 			// Two-sided lines are only shown when there's a height difference
 			if(ld.Front.Sector.FloorHeight != ld.Back.Sector.FloorHeight ||
 			   ld.Front.Sector.CeilHeight != ld.Back.Sector.CeilHeight) return true;
 
 			return false;
+		}
+
+		// Doom 64: a line with an action is drawn as a special line unless
+		// the "Hide Special on Automap" flag (33554432) is set
+		private bool LinedefIsSpecial(Linedef ld)
+		{
+			if(!General.Map.FormatInterface.InDoom64Mode) return false;
+			if(ld.Action == 0) return false;
+			return !ld.IsFlagSet(BuilderPlug.Me.HideSpecialFlag);
 		}
 
 		// A line is hidden when every sector it borders is flagged "Hide on Automap"
@@ -287,6 +315,19 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorHiddenFlag = new PixelColor(255, 0, 87, 130);
 					ColorInvisible = new PixelColor(255, 192, 192, 192);
 					ColorMatchingHeight = new PixelColor(255, 112, 112, 160);
+					ColorBackground = new PixelColor(255, 0, 0, 0);
+					break;
+
+				case ColorPreset.DOOM64:
+					// Doom 64 automap palette
+					ColorSingleSided = new PixelColor(255, 0xE5, 0x00, 0x00);		// #e50000
+					ColorSecret = new PixelColor(255, 255, 0, 255);
+					ColorFloorDiff = new PixelColor(255, 0xC0, 0x80, 0x43);			// #c08043 (two-sided)
+					ColorCeilDiff = new PixelColor(255, 0xC0, 0x80, 0x43);			// #c08043 (two-sided)
+					ColorMatchingHeight = new PixelColor(255, 0xC0, 0x80, 0x43);	// #c08043 (two-sided)
+					ColorSpecial = new PixelColor(255, 0xFF, 0xFF, 0x00);			// #ffff00
+					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
+					ColorInvisible = new PixelColor(255, 128, 128, 128);
 					ColorBackground = new PixelColor(255, 0, 0, 0);
 					break;
 			}

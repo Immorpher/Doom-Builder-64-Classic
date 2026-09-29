@@ -69,7 +69,8 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			this.colorpreset.Items.AddRange(new object[] {
             "Doom",
             "Hexen",
-            "Strife"});
+            "Strife",
+            "Doom 64"});
 			this.colorpreset.Name = "colorpreset";
 			this.colorpreset.Size = new System.Drawing.Size(75, 25);
 			this.colorpreset.SelectedIndexChanged += new System.EventHandler(this.colorpreset_SelectedIndexChanged);
