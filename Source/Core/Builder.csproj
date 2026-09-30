@@ -455,6 +455,7 @@
     <Compile Include="IO\IMapSetIO.cs" />
     <Compile Include="General\Launcher.cs" />
     <Compile Include="IO\Lump.cs" />
+    <Compile Include="IO\NestedWad.cs" />
     <Compile Include="IO\MapSetIO.cs" />
     <Compile Include="IO\UniversalMapSetIO.cs" />
     <Compile Include="IO\UnknownImageReader.cs" />

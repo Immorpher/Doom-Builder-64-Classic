@@ -63,6 +63,12 @@ namespace CodeImp.DoomBuilder
 		private string filepathname;
 		private string temppath;
 
+		// Nested map information: set when the map was loaded from a WAD file within the
+		// WAD file (like the maps in the Doom 64 IWAD). Such a map is written back the same way.
+		private bool nestedmap;
+		private string nestedmarker;	// Name of the map marker lump inside the nested WAD
+		private string nestedtype;		// Type (IWAD/PWAD) of the nested WAD
+
 		// Main objects
 		private MapSet map;
 		private MapSetIO io;
@@ -101,6 +107,7 @@ namespace CodeImp.DoomBuilder
 		public string FilePathName { get { return filepathname; } }
 		public string FileTitle { get { return filetitle; } }
 		public string TempPath { get { return temppath; } }
+		public bool IsNestedWadMap { get { return nestedmap; } }
 		public MapOptions Options { get { return options; } }
 		public MapSet Map { get { return map; } }
 		public DataManager Data { get { return data; } }
@@ -379,10 +386,52 @@ namespace CodeImp.DoomBuilder
 				}
 			#endif
 			
-			// Copy the map lumps to the temp file
-			General.WriteLogLine("Copying map lumps to temporary file...");
-			CopyLumpsByType(mapwad, options.CurrentName, tempwad, TEMP_MAP_HEADER,
-							true, true, true, true);
+			// Is the map a WAD file within the WAD file (like in the Doom 64 IWAD)?
+			string foundmarker;
+			Lump nestedlump = NestedWad.FindNestedMapLump(mapwad, options.CurrentName,
+									General.LoadGameConfiguration(options.ConfigFile), out foundmarker);
+			if(nestedlump != null)
+			{
+				// Extract the nested WAD to a temporary file and open it
+				General.WriteLogLine("Map " + options.CurrentName + " is a WAD file within the WAD file, map marker is " + foundmarker);
+				string innertype;
+				NestedWad.ReadLumpNames(nestedlump, out innertype);
+				string innerfile = General.MakeTempFilename(temppath);
+				WAD innerwad = null;
+				try
+				{
+					NestedWad.ExtractLump(nestedlump, innerfile);
+					innerwad = new WAD(innerfile, true);
+				}
+				catch(Exception e)
+				{
+					if(innerwad != null) innerwad.Dispose();
+					mapwad.Dispose();
+					General.ShowErrorMessage("Error while opening the map WAD within the source wad file:\n" + e.GetType().Name + ": " + e.Message, MessageBoxButtons.OK);
+					return false;
+				}
+
+				// Copy the map lumps to the temp file
+				General.WriteLogLine("Copying map lumps to temporary file...");
+				CopyLumpsByType(innerwad, foundmarker, tempwad, TEMP_MAP_HEADER,
+								true, true, true, true);
+
+				// Done with the nested WAD
+				innerwad.Dispose();
+				try { File.Delete(innerfile); } catch(Exception) { }
+
+				// Remember that this map must be saved as a WAD file within the WAD file
+				nestedmap = true;
+				nestedmarker = foundmarker;
+				nestedtype = innertype;
+			}
+			else
+			{
+				// Copy the map lumps to the temp file
+				General.WriteLogLine("Copying map lumps to temporary file...");
+				CopyLumpsByType(mapwad, options.CurrentName, tempwad, TEMP_MAP_HEADER,
+								true, true, true, true);
+			}
 			
 			// Close the map file
 			mapwad.Dispose();
@@ -456,6 +505,7 @@ namespace CodeImp.DoomBuilder
 			int index;
 			bool includenodes = false;
 			string origmapname;
+			string nestedinnerfile = null;
 			bool success = true;
 			
 			General.WriteLogLine("Saving map to file: " + newfilepathname);
@@ -613,8 +663,15 @@ namespace CodeImp.DoomBuilder
 					if(File.Exists(filepathname)) File.Copy(filepathname, newfilepathname, true);
 				}
 				
+				// Nested maps are first built as a separate WAD file, which is then
+				// stored as a lump in the target file after the map lumps are copied
+				if(nestedmap)
+				{
+					nestedinnerfile = General.MakeTempFilename(temppath);
+					targetwad = new WAD(nestedinnerfile);
+				}
 				// If the target file exists, we need to rebuild it
-				if(File.Exists(newfilepathname))
+				else if(File.Exists(newfilepathname))
 				{
 					// Move the target file aside
 					string origwadfile = newfilepathname + ".temp";
@@ -655,10 +712,37 @@ namespace CodeImp.DoomBuilder
 			}
 			
 			// Copy map lumps to target file
-			CopyLumpsByType(tempwad, TEMP_MAP_HEADER, targetwad, origmapname, true, true, includenodes, true);
+			CopyLumpsByType(tempwad, TEMP_MAP_HEADER, targetwad, nestedmap ? nestedmarker : origmapname, true, true, includenodes, true);
 
+			// Nested map? Then store the map WAD as a lump in the target file
+			if(nestedmap)
+			{
+				General.WriteLogLine("Writing map " + options.CurrentName + " as a WAD file within the WAD file...");
+				try
+				{
+					// Build the nested WAD and close the temporary file
+					targetwad.Flush();
+					byte[] nesteddata = NestedWad.Serialize(targetwad, nestedtype);
+					targetwad.Dispose();
+					try { File.Delete(nestedinnerfile); } catch(Exception) { }
+
+					// Replace (and rename, if needed) the map lump in the target file
+					NestedWad.WriteMapLump(newfilepathname, origmapname, options.CurrentName, nesteddata, nestedtype);
+					options.PreviousName = "";
+				}
+				catch(Exception e)
+				{
+					try { targetwad.Dispose(); } catch(Exception) { }
+					try { File.Delete(nestedinnerfile); } catch(Exception) { }
+					General.WriteLogLine(e.GetType().Name + " while writing nested map WAD: " + e.Message);
+					General.ShowErrorMessage("Error while writing the map to target file: " + newfilepathname + ".\n" + e.Message, MessageBoxButtons.OK);
+					data.Resume();
+					General.WriteLogLine("Map saving failed");
+					return false;
+				}
+			}
 			// Was the map lump name renamed?
-			if((options.PreviousName != options.CurrentName) &&
+			else if((options.PreviousName != options.CurrentName) &&
 			   (options.PreviousName != ""))
 			{
 				General.WriteLogLine("Renaming map lump name from " + options.PreviousName + " to " + options.CurrentName);
@@ -681,7 +765,7 @@ namespace CodeImp.DoomBuilder
 			}
 
 			// Done with the target file
-			targetwad.Dispose();
+			if(!nestedmap) targetwad.Dispose();
 
 			// Resume data resources
 			data.Resume();

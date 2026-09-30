@@ -280,6 +280,23 @@ namespace CodeImp.DoomBuilder.Windows
 					}
 				}
 
+				// Go for all the lumps that are named MAPxx and are a WAD file within the WAD
+				// (like the maps in the Doom 64 IWAD) and hold a map
+				for(scanindex = 0; scanindex < wadfile.Lumps.Count; scanindex++)
+				{
+					Lump nestedlump = wadfile.Lumps[scanindex];
+					if(NestedWad.FindMapMarker(nestedlump, cfg) != null)
+					{
+						// Add it to the list, unless it is already there
+						bool alreadylisted = false;
+						foreach(ListViewItem existingitem in mapnames)
+						{
+							if(existingitem.Text == nestedlump.Name) { alreadylisted = true; break; }
+						}
+						if(!alreadylisted) mapnames.Add(new ListViewItem(nestedlump.Name));
+					}
+				}
+
 				// Clear the list and add the new map names
 				mapslist.BeginUpdate();
 				mapslist.Items.Clear();
