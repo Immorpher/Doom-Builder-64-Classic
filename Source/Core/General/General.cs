@@ -1008,6 +1008,30 @@ namespace CodeImp.DoomBuilder
 			openfile.Dispose();
 		}
 		
+		// This reopens the WAD file of the current map to select another map from it
+		[BeginAction("openmapincurrentwad")]
+		internal static void OpenMapInCurrentWad()
+		{
+			// Needs a map that is stored in a WAD file
+			if((map == null) || string.IsNullOrEmpty(map.FilePathName)) return;
+
+			// Cancel volatile mode, if any
+			General.Editing.DisengageVolatileMode();
+
+			// Remember the WAD and the game configuration of the current map
+			string filename = map.FilePathName;
+			string configfile = map.Options.ConfigFile;
+
+			// Ask the user to save changes (if any)
+			if(General.AskSaveMap())
+			{
+				// Open map options dialog with the current configuration preselected
+				OpenMapOptionsForm openmapwindow = new OpenMapOptionsForm(filename, configfile);
+				if(openmapwindow.ShowDialog(mainwindow) == DialogResult.OK)
+					OpenMapFileWithOptions(filename, openmapwindow.Options);
+			}
+		}
+
 		// This opens the specified file
 		internal static void OpenMapFile(string filename)
 		{

@@ -51,6 +51,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.menufile = new System.Windows.Forms.ToolStripMenuItem();
             this.itemnewmap = new System.Windows.Forms.ToolStripMenuItem();
             this.itemopenmap = new System.Windows.Forms.ToolStripMenuItem();
+            this.itemopenmapincurrentwad = new System.Windows.Forms.ToolStripMenuItem();
             this.itemclosemap = new System.Windows.Forms.ToolStripMenuItem();
             this.itemsavemap = new System.Windows.Forms.ToolStripMenuItem();
             this.itemsavemapas = new System.Windows.Forms.ToolStripMenuItem();
@@ -334,6 +335,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.menufile.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.itemnewmap,
             this.itemopenmap,
+            this.itemopenmapincurrentwad,
             this.itemclosemap,
             this.seperatorfileopen,
             this.itemsavemap,
@@ -365,6 +367,14 @@ namespace CodeImp.DoomBuilder.Windows
             this.itemopenmap.Tag = "builder_openmap";
             this.itemopenmap.Text = "Open Map...";
             this.itemopenmap.Click += new System.EventHandler(this.InvokeTaggedAction);
+            // 
+            // itemopenmapincurrentwad
+            // 
+            this.itemopenmapincurrentwad.Name = "itemopenmapincurrentwad";
+            this.itemopenmapincurrentwad.Size = new System.Drawing.Size(202, 22);
+            this.itemopenmapincurrentwad.Tag = "builder_openmapincurrentwad";
+            this.itemopenmapincurrentwad.Text = "Open Map in Current WAD";
+            this.itemopenmapincurrentwad.Click += new System.EventHandler(this.InvokeTaggedAction);
             // 
             // itemclosemap
             // 
@@ -1753,6 +1763,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.ToolStripMenuItem menufile;
 		private System.Windows.Forms.ToolStripMenuItem itemnewmap;
 		private System.Windows.Forms.ToolStripMenuItem itemopenmap;
+		private System.Windows.Forms.ToolStripMenuItem itemopenmapincurrentwad;
 		private System.Windows.Forms.ToolStripMenuItem itemsavemap;
 		private System.Windows.Forms.ToolStripMenuItem itemsavemapas;
 		private System.Windows.Forms.ToolStripMenuItem itemsavemapinto;

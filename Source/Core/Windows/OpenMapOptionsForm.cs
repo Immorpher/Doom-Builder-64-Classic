@@ -43,6 +43,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private WAD wadfile;
 		private string filepathname;
 		private string selectedmapname;
+		private string preferredconfig;
 		
 		// Properties
 		public string FilePathName { get { return filepathname; } }
@@ -56,6 +57,13 @@ namespace CodeImp.DoomBuilder.Windows
 			this.Text = "Open Map from " + Path.GetFileName(filepathname);
 			this.filepathname = filepathname;
 			this.options = new MapOptions();
+		}
+
+		// Constructor with a game configuration that will be preselected
+		// (overrides the configuration stored in the map settings file)
+		public OpenMapOptionsForm(string filepathname, string preferredconfig) : this(filepathname)
+		{
+			this.preferredconfig = preferredconfig;
 		}
 
 		// This loads the settings and attempt to find a suitable config
@@ -106,6 +114,7 @@ namespace CodeImp.DoomBuilder.Windows
 			
 			// Check what game configuration is preferred
 			gameconfig = mapsettings.ReadSetting("gameconfig", "");
+			if(!string.IsNullOrEmpty(preferredconfig)) gameconfig = preferredconfig;
 
 			// Go for all configurations
 			for(int i = 0; i < General.Configs.Count; i++)

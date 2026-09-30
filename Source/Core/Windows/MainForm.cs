@@ -1901,6 +1901,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private void UpdateFileMenu()
 		{
 			// Enable/disable items
+			itemopenmapincurrentwad.Enabled = (General.Map != null) && !string.IsNullOrEmpty(General.Map.FilePathName);
 			itemclosemap.Enabled = (General.Map != null);
 			itemsavemap.Enabled = (General.Map != null);
 			itemsavemapas.Enabled = (General.Map != null);
