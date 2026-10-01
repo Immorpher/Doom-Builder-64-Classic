@@ -92,6 +92,11 @@ namespace CodeImp.DoomBuilder
         // villsa
         private List<uint> hashkeys;
         private List<string> hashkeynames;
+
+		// The texture hashes stored in the map file are only valid until they have been resolved
+		// to texture names while loading the map. After that the names are authoritative, so a
+		// resources reload must not resolve the (now stale) hashes again.
+		private bool resolvetexturehashes = true;
 		
 		// Disposing
 		private bool isdisposed = false;
@@ -103,6 +108,7 @@ namespace CodeImp.DoomBuilder
         // villsa
         public List<uint> TextureHashKey { get { return hashkeys; } }
         public List<string> TextureHashName { get { return hashkeynames; } }
+        public bool ResolveTextureHashes { get { return resolvetexturehashes; } }
 
 		public string FilePathName { get { return filepathname; } }
 		public string FileTitle { get { return filetitle; } }
@@ -1667,6 +1673,7 @@ namespace CodeImp.DoomBuilder
 			
 			// Reload data resources
 			General.WriteLogLine("Reloading data resources...");
+			resolvetexturehashes = false;
 			data = new DataManager();
 			if(!string.IsNullOrEmpty(filepathname))
 			{

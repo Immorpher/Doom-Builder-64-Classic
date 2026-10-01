@@ -1492,8 +1492,8 @@ namespace CodeImp.DoomBuilder.Data
 				{
 					// Add used textures to dictionary
 					if(sd.HighTexture.Length > 0) usedimages[sd.LongHighTexture] = 0;
-					if(sd.LowTexture.Length > 0) usedimages[sd.LongMiddleTexture] = 0;
-					if(sd.MiddleTexture.Length > 0) usedimages[sd.LongLowTexture] = 0;
+					if(sd.LowTexture.Length > 0) usedimages[sd.LongLowTexture] = 0;
+					if(sd.MiddleTexture.Length > 0) usedimages[sd.LongMiddleTexture] = 0;
 				}
 
 				// Go through the map to find the used flats

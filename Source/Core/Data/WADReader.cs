@@ -362,6 +362,9 @@ namespace CodeImp.DoomBuilder.Data
 				LoadTexturesRange(range.start, range.end, ref images, pnames);
 			}
 			
+            // Resolve the texture hashes read from the map file to texture names. This must only happen
+            // while loading the map; on a resources reload the hashes are stale and would undo texture edits.
+            if (General.Map.ResolveTextureHashes)
             foreach (Sector s in General.Map.Map.Sectors)
             {
                 for (int j = 0; j < General.Map.TextureHashKey.Count; j++)
@@ -383,6 +386,7 @@ namespace CodeImp.DoomBuilder.Data
                 }
             }
 
+            if (General.Map.ResolveTextureHashes)
             foreach (Sidedef sd in General.Map.Map.Sidedefs)
             {
                 for (int j = 0; j < General.Map.TextureHashKey.Count; j++)
