@@ -34,3 +34,4 @@ Build/Builder.exe
 /Source/Plugins/AutomapMode/obj
 /Source/Core/obj
 Source/Plugins/GZDoomEditing/obj/x86/Debug/GZDoomEditing.csproj.FileListAbsolute.txt
+/Source/Plugins/StairSectorBuilder/obj
