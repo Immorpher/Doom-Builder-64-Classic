@@ -58,7 +58,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		private CustomPresentation automappresentation;
 		private List<Linedef> validlinedefs;
 		private HashSet<Sector> secretsectors;
-		private HashSet<Sector> hiddensectors;
 
 		// Highlighted item
 		private Linedef highlighted;
@@ -74,7 +73,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		private PixelColor ColorCeilDiff;
 		private PixelColor ColorMatchingHeight;
 		private PixelColor ColorHiddenFlag;
-		private PixelColor ColorInvisible;
 		private PixelColor ColorBackground;
 
 		#endregion
@@ -170,17 +168,15 @@ namespace CodeImp.DoomBuilder.AutomapMode
 				if(LinedefIsValid(ld)) validlinedefs.Add(ld);
 		}
 
-		// This rebuilds the secret / hidden sector lookups
+		// This rebuilds the secret sector lookup
 		internal void UpdateSectorFlags()
 		{
 			secretsectors = new HashSet<Sector>();
-			hiddensectors = new HashSet<Sector>();
 			if(General.Map == null) return;
 
 			foreach(Sector s in General.Map.Map.Sectors)
 			{
 				if(SectorIsSecret(s)) secretsectors.Add(s);
-				if(SectorIsHidden(s)) hiddensectors.Add(s);
 			}
 		}
 
@@ -192,7 +188,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 				return ColorSecret;
 
 			if(ld.IsFlagSet(BuilderPlug.Me.HiddenFlag)) return ColorHiddenFlag;
-			if(LinedefIsInHiddenSector(ld)) return ColorInvisible;
 			if(ld.Back == null || ld.Front == null || ld.IsFlagSet(BuilderPlug.Me.SecretFlag)) return ColorSingleSided;
 
 			// Doom 64: two-sided lines with an action are drawn in the special color
@@ -211,9 +206,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 			// "Hide on Automap" linedef flag always wins
 			if(ld.IsFlagSet(BuilderPlug.Me.HiddenFlag)) return false;
-
-			// Doom 64: sectors can be hidden from the automap as a whole
-			if(LinedefIsInHiddenSector(ld)) return false;
 
 			// Doom 64: "Show on Automap" forces the line to be drawn
 			if(BuilderPlug.Me.AlwaysShowFlag != null && ld.IsFlagSet(BuilderPlug.Me.AlwaysShowFlag)) return true;
@@ -243,28 +235,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			return !ld.IsFlagSet(BuilderPlug.Me.HideSpecialFlag);
 		}
 
-		// A line is hidden when every sector it borders is flagged "Hide on Automap"
-		private bool LinedefIsInHiddenSector(Linedef ld)
-		{
-			if(hiddensectors == null || hiddensectors.Count == 0) return false;
-
-			bool hashiddenside = false;
-
-			if(ld.Front != null)
-			{
-				if(!hiddensectors.Contains(ld.Front.Sector)) return false;
-				hashiddenside = true;
-			}
-
-			if(ld.Back != null)
-			{
-				if(!hiddensectors.Contains(ld.Back.Sector)) return false;
-				hashiddenside = true;
-			}
-
-			return hashiddenside;
-		}
-
 		private static bool SectorIsSecret(Sector s)
 		{
 			// Doom 64 stores "secret" as a sector flag instead of a sector effect
@@ -272,13 +242,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 			// Everything else: sector effect 9
 			return (s.Effect == 9);
-		}
-
-		private static bool SectorIsHidden(Sector s)
-		{
-			// Doom 64 only: sector flag 512 = "Hide on Automap"
-			if(General.Map.FormatInterface.InDoom64Mode) return s.IsFlagSet("512");
-			return false;
 		}
 
 		private void ApplyColorPreset(ColorPreset preset)
@@ -291,7 +254,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorFloorDiff = new PixelColor(255, 188, 120, 72);
 					ColorCeilDiff = new PixelColor(255, 252, 252, 0);
 					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorInvisible = new PixelColor(255, 128, 128, 128);
 					ColorMatchingHeight = new PixelColor(255, 108, 108, 108);
 					ColorBackground = new PixelColor(255, 0, 0, 0);
 					break;
@@ -302,7 +264,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorFloorDiff = new PixelColor(255, 208, 176, 133);
 					ColorCeilDiff = new PixelColor(255, 103, 59, 31);
 					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorInvisible = new PixelColor(255, 108, 108, 108);
 					ColorMatchingHeight = new PixelColor(255, 108, 108, 108);
 					ColorBackground = new PixelColor(255, 163, 129, 84);
 					break;
@@ -313,7 +274,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorFloorDiff = new PixelColor(255, 55, 59, 91);
 					ColorCeilDiff = new PixelColor(255, 108, 108, 108);
 					ColorHiddenFlag = new PixelColor(255, 0, 87, 130);
-					ColorInvisible = new PixelColor(255, 192, 192, 192);
 					ColorMatchingHeight = new PixelColor(255, 112, 112, 160);
 					ColorBackground = new PixelColor(255, 0, 0, 0);
 					break;
@@ -327,7 +287,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorMatchingHeight = new PixelColor(255, 0xC0, 0x80, 0x43);	// #c08043 (two-sided)
 					ColorSpecial = new PixelColor(255, 0xFF, 0xFF, 0x00);			// #ffff00
 					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorInvisible = new PixelColor(255, 128, 128, 128);
 					ColorBackground = new PixelColor(255, 0, 0, 0);
 					break;
 			}
