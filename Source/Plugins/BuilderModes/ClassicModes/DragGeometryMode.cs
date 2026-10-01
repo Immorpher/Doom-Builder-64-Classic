@@ -210,7 +210,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 							// Find nearest grid intersection
 							float found_distance = float.MaxValue;
-							Vector2D found_coord = new Vector2D();
+							
+							// A linedef that does not cross any grid line has no grid intersections.
+							// Fall back to the nearest point on the line rather than (0,0).
+							Vector2D found_coord = nl.NearestOnLine(anchorpos);
 							foreach(Vector2D v in coords)
 							{
 								Vector2D delta = anchorpos - v;
