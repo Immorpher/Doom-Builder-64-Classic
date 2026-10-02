@@ -41,6 +41,13 @@ namespace CodeImp.DoomBuilder.Windows
 
 		// Closing?
 		private bool appclose;
+
+		// Busy handling FormClosing?
+		// Windows can deliver another WM_CLOSE while we are showing the
+		// "save changes" dialogs from the FormClosing handler. Without this
+		// guard the handler re-enters after the map already released this
+		// window, which caused a NullReferenceException in ApplyScriptChanged.
+		private bool handlingclose;
 		
 		#endregion
 		
@@ -121,6 +128,18 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			int windowstate;
 
+			// Already busy closing this window? Then ignore this request,
+			// otherwise we would run the save/close logic a second time.
+			if(handlingclose)
+			{
+				e.Cancel = true;
+				return;
+			}
+
+			handlingclose = true;
+			try
+			{
+
 			// Determine window state to save
 			if(this.WindowState != FormWindowState.Minimized)
 				windowstate = (int)this.WindowState;
@@ -139,13 +158,14 @@ namespace CodeImp.DoomBuilder.Windows
 			if(!appclose)
 			{
 				// Remember if scipts are changed
-				General.Map.ApplyScriptChanged();
+				// (the map may already have been closed from under us)
+				if(General.Map != null) General.Map.ApplyScriptChanged();
 				
 				// Ask to save scripts
 				if(AskSaveAll())
 				{
 					// Let the general call close the editor
-					General.Map.CloseScriptEditor(true);
+					if(General.Map != null) General.Map.CloseScriptEditor(true);
 				}
 				else
 				{
@@ -156,6 +176,13 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Not cancelling?
 			if(!e.Cancel) editor.OnClose();
+
+			}
+			finally
+			{
+				// Allow closing to be attempted again when we cancelled it
+				if(e.Cancel) handlingclose = false;
+			}
 		}
 
 		// Window resized

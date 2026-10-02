@@ -1347,7 +1347,7 @@ namespace CodeImp.DoomBuilder
 		internal bool AskSaveScriptChanges()
 		{
 			// Window open?
-			if(scriptwindow != null)
+			if(IsScriptsWindowOpen)
 			{
 				// Ask to save changes
 				// This also saves implicitly
@@ -1363,6 +1363,13 @@ namespace CodeImp.DoomBuilder
 		// This applies the changed status for internal scripts
 		internal void ApplyScriptChanged()
 		{
+			// The script editor window may already be closed, closing or disposed by
+			// the time this is called (for example when Windows delivers another
+			// WM_CLOSE while the editor is busy saving, or when the map was closed
+			// while the editor was still open). In that case there is nothing left
+			// to pick up implicit changes from, so don't dereference it.
+			if(!IsScriptsWindowOpen) return;
+
 			// Remember if lumps are changed
 			scriptschanged |= scriptwindow.Editor.CheckImplicitChanges();
 		}
@@ -1391,7 +1398,7 @@ namespace CodeImp.DoomBuilder
 		// This checks if the scripts are changed
 		internal bool CheckScriptChanged()
 		{
-			if(scriptwindow != null)
+			if(IsScriptsWindowOpen)
 			{
 				// Check if scripts are changed			
 				return scriptschanged || scriptwindow.Editor.CheckImplicitChanges();
