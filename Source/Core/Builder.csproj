@@ -68,7 +68,6 @@
   </Target>
   -->
   <ItemGroup>
-    <Compile Include="Compilers\AccCompiler.cs" />
     <Compile Include="Compilers\NodesCompiler.cs" />
     <Compile Include="Config\ArgumentInfo.cs" />
     <Compile Include="Config\MapLumpInfo.cs" />
