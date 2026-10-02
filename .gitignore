@@ -12,7 +12,6 @@ UpgradeLog.htm
 /Backup
 Source/Plugins/TagRange/obj/x86/Release/TagRange.csproj.FileListAbsolute.txt
 Source/Plugins/CommentsPanel/obj/x86/Release/CommentsPanel.csproj.FileListAbsolute.txt
-Source/Plugins/GZDoomEditing/obj/x86/Release/GZDoomEditing.csproj.FileListAbsolute.txt
 *.pdb
 Build/Plugins/BuilderModes.dll
 Build/Plugins/CommentsPanel.dll
@@ -33,7 +32,6 @@ Build/Builder.xml
 Build/Builder.exe
 /Source/Plugins/AutomapMode/obj
 /Source/Core/obj
-Source/Plugins/GZDoomEditing/obj/x86/Debug/GZDoomEditing.csproj.FileListAbsolute.txt
 /Source/Plugins/StairSectorBuilder/obj
 /Backup2
 /Source/Plugins/StairSectorBuilder/.vs
