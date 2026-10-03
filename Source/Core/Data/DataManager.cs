@@ -320,15 +320,16 @@ namespace CodeImp.DoomBuilder.Data
 			texcount = LoadTextures(texturesonly);
 			flatcount = LoadFlats(flatsonly);
 			colormapcount = LoadColormaps(colormapsonly);
-            LoadSprites();
-            thingcount = LoadDecorateThings();
-            spritecount = LoadThingSprites();
-            LoadInternalSprites();
-
+            // Thing palettes must be available before any palette-swapped sprite is created/loaded
             foreach (TextureIndexInfo tp in General.Map.Config.ThingPalettes)
             {
                 LoadThingPalette(tp.Title);
             }
+
+            LoadSprites();
+            thingcount = LoadDecorateThings();
+            spritecount = LoadThingSprites();
+            LoadInternalSprites();
 			
 			// Process colormaps (we just put them in as textures)
 			foreach(KeyValuePair<long, ImageData> t in colormapsonly)
@@ -440,6 +441,7 @@ namespace CodeImp.DoomBuilder.Data
             foreach(KeyValuePair<long, ImageData> i in textures) i.Value.Dispose();
 			foreach(KeyValuePair<long, ImageData> i in flats) i.Value.Dispose();
 			foreach(KeyValuePair<long, ImageData> i in sprites) i.Value.Dispose();
+			foreach(KeyValuePair<string, ImageData> i in palettesprites) i.Value.Dispose();
 			palette = null;
 			
 			// Dispose containers
@@ -453,6 +455,7 @@ namespace CodeImp.DoomBuilder.Data
             thingpalettes = null;   // villsa
 			flats = null;
 			sprites = null;
+			palettesprites = null;
 			texturenames = null;
 			flatnames = null;
 			imageque = null;
@@ -742,7 +745,7 @@ namespace CodeImp.DoomBuilder.Data
                 pal = containers[i].LoadThingPalette(name);
                 if (pal != null)
                 {
-                    thingpalettes.Add(name, pal);
+                    thingpalettes[name] = pal;
                     return;
                 }
             }
@@ -751,6 +754,21 @@ namespace CodeImp.DoomBuilder.Data
             // (e.g. the game configuration's IWAD/resource isn't loaded, or the lump name is wrong)
             // silently falls back to the default palette with zero indication why.
             General.ErrorLogger.Add(ErrorType.Warning, "Could not find thing palette lump '" + name + "' in any loaded resource. Monster palette variants using this palette will not display correctly.");
+        }
+
+        // Returns the alternate thing palette registered under the given palette index
+        // in the game configuration's "thingpalettes" section (or null when not loaded).
+        public Playpal GetThingPaletteByIndex(int palindex)
+        {
+            if (thingpalettes == null || General.Map == null) return null;
+
+            foreach (TextureIndexInfo tp in General.Map.Config.ThingPalettes)
+            {
+                if (tp.Index == palindex && thingpalettes.ContainsKey(tp.Title))
+                    return thingpalettes[tp.Title];
+            }
+
+            return null;
         }
 
         // styd: on-demand palette loader for a sprite's OWN base palette (e.g. PALTROO0 for any

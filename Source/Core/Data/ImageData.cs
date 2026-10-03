@@ -56,7 +56,8 @@ namespace CodeImp.DoomBuilder.Data
 		protected bool usecolorcorrection;
 		private bool istranslucent;	// True when texture has partial transparency
         private int palindex;   // villsa
-		
+		protected bool palettebaked;	// True when the alternate thing palette was already applied at decode time
+
 		// Loading
 		private volatile ImageLoadState previewstate;
 		private volatile ImageLoadState imagestate;
@@ -277,7 +278,8 @@ namespace CodeImp.DoomBuilder.Data
                     // for any TROO* sprite, derived from the sprite name's 4-letter prefix, matching
                     // Doom's sprite-name convention) to recover its original palette index, then
                     // replace it with the alternate palette's (e.g. PALTROO1) color at that same index.
-                    if (palindex > 0 && General.Map != null && General.Map.FormatInterface != null &&
+                    // Skipped when the palette was already swapped exactly at decode time (SpriteImage).
+                    if (palindex > 0 && !palettebaked && General.Map != null && General.Map.FormatInterface != null &&
                         General.Map.FormatInterface.InDoom64Mode &&
                         bitmap.PixelFormat == PixelFormat.Format32bppArgb && name.Length >= 4)
                     {
