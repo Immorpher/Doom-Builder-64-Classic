@@ -89,7 +89,10 @@ namespace CodeImp.DoomBuilder.Windows
 			
 			// This is sent by the background thread when images are loaded
 			// but only when first loaded or when dimensions were changed
-			ImageDataLoaded = General.WM_USER + 2
+			ImageDataLoaded = General.WM_USER + 2,
+
+			// This is sent when a sprite image was loaded (things in the 2D view show their sprite)
+			SpriteDataLoaded = General.WM_USER + 3
 		}
 		
 		#endregion
@@ -2611,6 +2614,12 @@ namespace CodeImp.DoomBuilder.Windows
 						ImageData img = General.Map.Data.GetFlatImage(imagename);
 						if(img != null) ImageDataLoaded(img);
 					}
+					break;
+
+				case (int)ThreadMessages.SpriteDataLoaded:
+					Marshal.FreeCoTaskMem(m.WParam);
+					if((General.Map != null) && (General.Map.Data != null))
+						DelayedRedraw();
 					break;
 
 				case General.WM_SYSCOMMAND:

@@ -51,6 +51,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private ThingTypeInfo info;
 		private bool isloaded;
 		private ImageData sprite;
+		private ImageData[] sprites;	// All rotations of the sprite (a single one when it has no rotations)
 		private float cageradius2;
 		private Vector2D pos2d;
 		private Vector3D boxp1;
@@ -94,7 +95,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Find the sector in which the thing resides
 			Thing.DetermineSector(mode.BlockMap);
 
-			if(sprite != null)
+			if((sprite != null) && (sprites != null))
 			{
 				if(Thing.Sector != null)
 				{
@@ -143,34 +144,80 @@ namespace CodeImp.DoomBuilder.BuilderModes
                 }
                 else
                 {
-                    // Check if the texture is loaded
-                    sprite.LoadImage();
-                    isloaded = sprite.IsImageLoaded;
+                    // Check if all the textures (all sprite rotations) are loaded
+                    isloaded = true;
+                    bool alldone = true;
+                    foreach (ImageData s in sprites)
+                    {
+                        if (!s.IsImageLoaded) s.LoadImage();
+                        isloaded &= s.IsImageLoaded;
+                        alldone &= (s.IsImageLoaded || s.LoadFailed);
+                    }
+
+                    // The sprites to make geometry for, and which of them are mirrored
+                    ImageData[] usesprites = sprites;
+                    SpriteFrameInfo[] frames = info.SpriteFrame;
+
+                    // When some of the rotations cannot be loaded at all, show the first one that
+                    // did load without rotations, instead of leaving the thing without a sprite
+                    if (!isloaded && alldone)
+                    {
+                        foreach (ImageData s in sprites)
+                        {
+                            if (s.IsImageLoaded)
+                            {
+                                usesprites = new ImageData[] { s };
+                                frames = new SpriteFrameInfo[1];
+                                isloaded = true;
+                                break;
+                            }
+                        }
+                    }
+
                     if (isloaded)
                     {
-                        float offsetx = 0.0f;
-                        float offsety = 0.0f;
+                        // Make the geometry for each sprite rotation
+                        WorldVertex[][] allverts = new WorldVertex[usesprites.Length][];
 
-                        base.Texture = sprite;
-
-                        // Determine sprite size and offset
-                        float radius = sprite.ScaledWidth * 0.5f;
-                        float height = sprite.ScaledHeight;
-                        if (sprite is SpriteImage)
+                        for (int i = 0; i < usesprites.Length; i++)
                         {
-                            offsetx = (sprite as SpriteImage).OffsetX - radius;
-                            offsety = (sprite as SpriteImage).OffsetY - height;
+                            ImageData frametex = usesprites[i];
+                            bool mirror = ((i < frames.Length) && frames[i].Mirror);
+                            float offsetx = 0.0f;
+                            float offsety = 0.0f;
+
+                            // Determine sprite size and offset
+                            float radius = frametex.ScaledWidth * 0.5f;
+                            float height = frametex.ScaledHeight;
+                            if (frametex is SpriteImage)
+                            {
+                                offsetx = (frametex as SpriteImage).OffsetX - radius;
+                                offsety = (frametex as SpriteImage).OffsetY - height;
+                            }
+
+                            // A mirrored sprite is also mirrored around the thing origin
+                            float ul = 0.0f;
+                            float ur = 1.0f;
+                            if (mirror)
+                            {
+                                offsetx = -offsetx;
+                                ul = 1.0f;
+                                ur = 0.0f;
+                            }
+
+                            // Make vertices
+                            WorldVertex[] verts = new WorldVertex[6];
+                            verts[0] = new WorldVertex(-radius + offsetx, 0.0f, 0.0f + offsety, sectorcolor, ul, 1.0f);
+                            verts[1] = new WorldVertex(-radius + offsetx, 0.0f, height + offsety, sectorcolor, ul, 0.0f);
+                            verts[2] = new WorldVertex(+radius + offsetx, 0.0f, height + offsety, sectorcolor, ur, 0.0f);
+                            verts[3] = verts[0];
+                            verts[4] = verts[2];
+                            verts[5] = new WorldVertex(+radius + offsetx, 0.0f, 0.0f + offsety, sectorcolor, ur, 1.0f);
+                            allverts[i] = verts;
                         }
 
-                        // Make vertices
-                        WorldVertex[] verts = new WorldVertex[6];
-                        verts[0] = new WorldVertex(-radius + offsetx, 0.0f, 0.0f + offsety, sectorcolor, 0.0f, 1.0f);
-                        verts[1] = new WorldVertex(-radius + offsetx, 0.0f, height + offsety, sectorcolor, 0.0f, 0.0f);
-                        verts[2] = new WorldVertex(+radius + offsetx, 0.0f, height + offsety, sectorcolor, 1.0f, 0.0f);
-                        verts[3] = verts[0];
-                        verts[4] = verts[2];
-                        verts[5] = new WorldVertex(+radius + offsetx, 0.0f, 0.0f + offsety, sectorcolor, 1.0f, 1.0f);
-                        SetVertices(verts);
+                        SetFrameTextures(usesprites);
+                        SetFrameVertices(allverts);
                     }
                     else
                     {
@@ -249,11 +296,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			if(!IsDisposed)
 			{
-				if(sprite != null)
+				if(sprites != null)
 				{
-					sprite.RemoveReference();
-					sprite = null;
+					foreach(ImageData s in sprites)
+						if(s != null) s.RemoveReference();
+					sprites = null;
 				}
+				sprite = null;
 			}
 			
 			base.Dispose();
@@ -269,11 +318,29 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Find thing information
 			info = General.Map.Data.GetThingInfo(Thing.Type);
 
-            // Find sprite texture
+            // Find the sprite textures (one for each sprite rotation)
+            ImageData[] oldsprites = sprites;
+            sprite = null;
+            sprites = null;
             if(info.Sprite.Length > 0)
             {
-                sprite = General.Map.Data.GetSpriteImage(info.Sprite, info.PalIndex);
-                if(sprite != null) sprite.AddReference();
+                SpriteFrameInfo[] frames = info.SpriteFrame;
+                sprites = new ImageData[frames.Length];
+                for(int i = 0; i < frames.Length; i++)
+                {
+                    sprites[i] = General.Map.Data.GetSpriteImage(frames[i].Sprite, info.PalIndex);
+                    if(sprites[i] != null) sprites[i].AddReference();
+                }
+
+                // The first one is the one used for everything that doesn't care about rotations
+                sprite = sprites[0];
+            }
+
+            // Release the previous references
+            if(oldsprites != null)
+            {
+                foreach(ImageData s in oldsprites)
+                    if(s != null) s.RemoveReference();
             }
 
             // Setup visual thing
@@ -283,13 +350,18 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// This updates the thing when needed
 		public override void Update()
 		{
-			if(!isloaded)
+			if(!isloaded && (sprites != null))
 			{
-				// Rebuild sprite geometry when sprite is loaded
-				if(sprite.IsImageLoaded)
+				// Rebuild sprite geometry when all sprites are loaded
+				bool allloaded = true;
+				bool anyloaded = false;
+				foreach(ImageData s in sprites)
 				{
-					Setup();
+					if(s.IsImageLoaded) anyloaded = true;
+					else if(!s.LoadFailed) allloaded = false;
 				}
+
+				if(allloaded && anyloaded) Setup();
 			}
 			
 			// Let the base update

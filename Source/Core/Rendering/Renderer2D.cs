@@ -33,6 +33,7 @@ using SlimDX;
 using CodeImp.DoomBuilder.Geometry;
 using System.Drawing.Imaging;
 using CodeImp.DoomBuilder.Data;
+using CodeImp.DoomBuilder.Config;
 using CodeImp.DoomBuilder.Editing;
 
 #endregion
@@ -54,6 +55,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float THING_ARROW_SHRINK = 2f;
 		private const float THING_CIRCLE_SIZE = 1f;
 		private const float THING_CIRCLE_SHRINK = 0f;
+		private const float THING_SPRITE_SHRINK = 2f;
+		private const float MINIMUM_SPRITE_RADIUS = 8.0f;
         private const int THING_BUFFER_SIZE = 100;
         private const float THINGS_BACK_ALPHA = 0.3f;
 
@@ -909,115 +912,280 @@ namespace CodeImp.DoomBuilder.Rendering
 
 		#region ================== Things
 
-		// This makes vertices for a thing
-		// Returns false when not on the screen
-		private bool CreateThingVerts(Thing t, ref FlatVertex[] verts, int offset, PixelColor c)
+		// Everything needed to draw one thing
+		private struct ThingDrawInfo
 		{
-			float circlesize;
-			float arrowsize;
-			int color;
+			public Thing thing;
+			public Vector2D screenpos;
+			public float circlesize;
+			public float arrowsize;
+			public PixelColor color;
+		}
+
+		// This determines where and how large a thing is drawn.
+		// Returns false when not on the screen
+		private bool GetThingDrawInfo(Thing t, PixelColor c, out ThingDrawInfo info)
+		{
+			info = new ThingDrawInfo();
+			info.thing = t;
+			info.color = c;
 			
 			// Transform to screen coordinates
-			Vector2D screenpos = ((Vector2D)t.Position).GetTransformed(translatex, translatey, scale, -scale);
+			info.screenpos = ((Vector2D)t.Position).GetTransformed(translatex, translatey, scale, -scale);
 			
 			// Determine sizes
 			if(t.FixedSize && (scale > 1.0f))
 			{
-				circlesize = (t.Size - THING_CIRCLE_SHRINK) * THING_CIRCLE_SIZE;
-				arrowsize = (t.Size - THING_ARROW_SHRINK) * THING_ARROW_SIZE;
+				info.circlesize = (t.Size - THING_CIRCLE_SHRINK) * THING_CIRCLE_SIZE;
+				info.arrowsize = (t.Size - THING_ARROW_SHRINK) * THING_ARROW_SIZE;
 			}
 			else
 			{
-				circlesize = (t.Size - THING_CIRCLE_SHRINK) * scale * THING_CIRCLE_SIZE;
-				arrowsize = (t.Size - THING_ARROW_SHRINK) * scale * THING_ARROW_SIZE;
+				info.circlesize = (t.Size - THING_CIRCLE_SHRINK) * scale * THING_CIRCLE_SIZE;
+				info.arrowsize = (t.Size - THING_ARROW_SHRINK) * scale * THING_ARROW_SIZE;
 			}
 			
 			// Check if the thing is actually on screen
-			if(((screenpos.x + circlesize) > 0.0f) && ((screenpos.x - circlesize) < (float)windowsize.Width) &&
-				((screenpos.y + circlesize) > 0.0f) && ((screenpos.y - circlesize) < (float)windowsize.Height))
+			return ((info.screenpos.x + info.circlesize) > 0.0f) && ((info.screenpos.x - info.circlesize) < (float)windowsize.Width) &&
+				   ((info.screenpos.y + info.circlesize) > 0.0f) && ((info.screenpos.y - info.circlesize) < (float)windowsize.Height);
+		}
+
+		// This makes the vertices (6) for the box (circle or square) of a thing
+		private static void CreateThingBoxVerts(ThingDrawInfo info, FlatVertex[] verts, int offset)
+		{
+			float circlesize = info.circlesize;
+			Vector2D screenpos = info.screenpos;
+			int color = info.color.ToInt();
+			
+			verts[offset].x = screenpos.x - circlesize;
+			verts[offset].y = screenpos.y - circlesize;
+			verts[offset].c = color;
+			verts[offset].u = 1f / 512f;
+			verts[offset].v = 1f / 128f;
+			offset++;
+			verts[offset].x = screenpos.x + circlesize;
+			verts[offset].y = screenpos.y - circlesize;
+			verts[offset].c = color;
+			verts[offset].u = 0.25f - 1f / 512f;
+			verts[offset].v = 1f / 128f;
+			offset++;
+			verts[offset].x = screenpos.x - circlesize;
+			verts[offset].y = screenpos.y + circlesize;
+			verts[offset].c = color;
+			verts[offset].u = 1f / 512f;
+			verts[offset].v = 1f - 1f / 128f;
+			offset++;
+			verts[offset] = verts[offset - 2];
+			offset++;
+			verts[offset] = verts[offset - 2];
+			offset++;
+			verts[offset].x = screenpos.x + circlesize;
+			verts[offset].y = screenpos.y + circlesize;
+			verts[offset].c = color;
+			verts[offset].u = 0.25f - 1f / 512f;
+			verts[offset].v = 1f - 1f / 128f;
+		}
+
+		// This makes the vertices (6) for the direction arrow of a thing
+		private static void CreateThingArrowVerts(ThingDrawInfo info, FlatVertex[] verts, int offset)
+		{
+			Thing t = info.thing;
+			Vector2D screenpos = info.screenpos;
+			float arrowsize = info.arrowsize;
+			
+			// Setup rotated rect for arrow
+			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
+			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
+			verts[offset].c = -1;
+			verts[offset].u = 0.50f + t.IconOffset;
+			verts[offset].v = 0f;
+			offset++;
+			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
+			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
+			verts[offset].c = -1;
+			verts[offset].u = 0.75f + t.IconOffset;
+			verts[offset].v = 0f;
+			offset++;
+			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
+			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
+			verts[offset].c = -1;
+			verts[offset].u = 0.50f + t.IconOffset;
+			verts[offset].v = 1f;
+			offset++;
+			verts[offset] = verts[offset - 2];
+			offset++;
+			verts[offset] = verts[offset - 2];
+			offset++;
+			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
+			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
+			verts[offset].c = -1;
+			verts[offset].u = 0.75f + t.IconOffset;
+			verts[offset].v = 1f;
+		}
+
+		// This adds the vertices (6) for the sprite of a thing. Width and height are half sizes.
+		private static void AddThingSpriteVerts(List<FlatVertex> verts, Vector2D screenpos, float width, float height, int color, bool mirror)
+		{
+			float ul = (mirror ? 1f : 0f);
+			float ur = (mirror ? 0f : 1f);
+			
+			FlatVertex topleft = new FlatVertex();
+			topleft.x = screenpos.x - width;
+			topleft.y = screenpos.y - height;
+			topleft.c = color;
+			topleft.u = ul;
+			topleft.v = 0f;
+
+			FlatVertex topright = new FlatVertex();
+			topright.x = screenpos.x + width;
+			topright.y = screenpos.y - height;
+			topright.c = color;
+			topright.u = ur;
+			topright.v = 0f;
+
+			FlatVertex bottomleft = new FlatVertex();
+			bottomleft.x = screenpos.x - width;
+			bottomleft.y = screenpos.y + height;
+			bottomleft.c = color;
+			bottomleft.u = ul;
+			bottomleft.v = 1f;
+
+			FlatVertex bottomright = new FlatVertex();
+			bottomright.x = screenpos.x + width;
+			bottomright.y = screenpos.y + height;
+			bottomright.c = color;
+			bottomright.u = ur;
+			bottomright.v = 1f;
+
+			verts.Add(topleft);
+			verts.Add(topright);
+			verts.Add(bottomleft);
+			verts.Add(bottomleft);
+			verts.Add(topright);
+			verts.Add(bottomright);
+		}
+
+		// This draws triangles from the given vertices (in chunks that fit the things buffer)
+		private void DrawThingVerts(FlatVertex[] verts, int vertcount)
+		{
+			int chunk = THING_BUFFER_SIZE * 6;
+			for(int start = 0; start < vertcount; start += chunk)
 			{
-				// Get integral color
-				color = c.ToInt();
+				int count = Math.Min(chunk, vertcount - start);
 
-				// Setup fixed rect for circle
-				verts[offset].x = screenpos.x - circlesize;
-				verts[offset].y = screenpos.y - circlesize;
-				verts[offset].c = color;
-				verts[offset].u = 1f / 512f;
-				verts[offset].v = 1f / 128f;
-				offset++;
-				verts[offset].x = screenpos.x + circlesize;
-				verts[offset].y = screenpos.y - circlesize;
-				verts[offset].c = color;
-				verts[offset].u = 0.25f - 1f / 512f;
-				verts[offset].v = 1f / 128f;
-				offset++;
-				verts[offset].x = screenpos.x - circlesize;
-				verts[offset].y = screenpos.y + circlesize;
-				verts[offset].c = color;
-				verts[offset].u = 1f / 512f;
-				verts[offset].v = 1f - 1f / 128f;
-				offset++;
-				verts[offset] = verts[offset - 2];
-				offset++;
-				verts[offset] = verts[offset - 2];
-				offset++;
-				verts[offset].x = screenpos.x + circlesize;
-				verts[offset].y = screenpos.y + circlesize;
-				verts[offset].c = color;
-				verts[offset].u = 0.25f - 1f / 512f;
-				verts[offset].v = 1f - 1f / 128f;
-				offset++;
+				DataStream stream = thingsvertices.Lock(0, count * FlatVertex.Stride, LockFlags.Discard);
+				stream.WriteRange(verts, start, count);
+				thingsvertices.Unlock();
+				stream.Dispose();
 
-				// Setup rotated rect for arrow
-				verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
-				verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
-				verts[offset].c = -1;
-				verts[offset].u = 0.50f + t.IconOffset;
-				verts[offset].v = 0f;
-				offset++;
-				verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
-				verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
-				verts[offset].c = -1;
-				verts[offset].u = 0.75f + t.IconOffset;
-				verts[offset].v = 0f;
-				offset++;
-				verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
-				verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
-				verts[offset].c = -1;
-				verts[offset].u = 0.50f + t.IconOffset;
-				verts[offset].v = 1f;
-				offset++;
-				verts[offset] = verts[offset - 2];
-				offset++;
-				verts[offset] = verts[offset - 2];
-				offset++;
-				verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
-				verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
-				verts[offset].c = -1;
-				verts[offset].u = 0.75f + t.IconOffset;
-				verts[offset].v = 1f;
-
-				// Done
-				return true;
+				graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, 0, count / 3);
 			}
-			else
+		}
+
+		// This draws the sprites of things (on top of their boxes).
+		// A sprite that has rotations shows the rotation that matches the direction of the thing.
+		private void RenderThingSprites(List<ThingDrawInfo> visible)
+		{
+			int selectioncolor = General.Colors.Selection.ToInt();
+			Dictionary<ImageData, List<FlatVertex>> spriteverts = new Dictionary<ImageData, List<FlatVertex>>();
+
+			foreach(ThingDrawInfo info in visible)
 			{
-				// Not on screen
-				return false;
+				Thing t = info.thing;
+				
+				// Find thing information
+				ThingTypeInfo ti = General.Map.Data.GetThingInfo(t.Type);
+				if((ti.Sprite.Length == 0) || (ti.Sprite.Length > 8)) continue;
+				
+				// Choose which sprite rotation to show. The view is from the south, so a thing
+				// that faces south shows its front. Convert to [0..7] range; 292 == 270 + 45/2
+				SpriteFrameInfo[] frames = ti.SpriteFrame;
+				int frameindex = 0;
+				if(frames.Length == 8)
+					frameindex = General.ClampAngle(-t.AngleDoom + 292) / 45;
+				
+				// Find the sprite image
+				ImageData sprite = General.Map.Data.GetSpriteImage(frames[frameindex].Sprite, ti.PalIndex);
+				if((sprite == null) || (sprite is UnknownImage)) continue;
+				
+				// Load the sprite when needed (the screen is redrawn when it is loaded)
+				if(!sprite.IsImageLoaded)
+				{
+					sprite.SetUsedInMap(true);
+					continue;
+				}
+				if((sprite.Width < 1) || (sprite.Height < 1)) continue;
+				
+				// Calculate half size of the sprite. It fits in the thing box, keeping its proportions
+				float spritescale = (t.FixedSize && (scale > 1.0f)) ? 1.0f : scale;
+				float spritewidth, spriteheight;
+				if(sprite.Width > sprite.Height)
+				{
+					spritewidth = (t.Size - THING_SPRITE_SHRINK) * spritescale;
+					spriteheight = spritewidth * ((float)sprite.Height / sprite.Width);
+				}
+				else if(sprite.Width < sprite.Height)
+				{
+					spriteheight = (t.Size - THING_SPRITE_SHRINK) * spritescale;
+					spritewidth = spriteheight * ((float)sprite.Width / sprite.Height);
+				}
+				else
+				{
+					spritewidth = (t.Size - THING_SPRITE_SHRINK) * spritescale;
+					spriteheight = spritewidth;
+				}
+				
+				// Don't draw tiny little sprites, the box and arrow are enough then
+				if(Math.Max(spritewidth, spriteheight) < MINIMUM_SPRITE_RADIUS) continue;
+				
+				List<FlatVertex> list;
+				if(!spriteverts.TryGetValue(sprite, out list))
+				{
+					list = new List<FlatVertex>();
+					spriteverts.Add(sprite, list);
+				}
+				
+				AddThingSpriteVerts(list, info.screenpos, spritewidth, spriteheight, (t.Selected ? selectioncolor : 0xFFFFFF), frames[frameindex].Mirror);
 			}
+			
+			if(spriteverts.Count == 0) return;
+			
+			// Draw the sprites, one texture at a time
+			graphics.Shaders.Things2D.BeginPass(1);
+			foreach(KeyValuePair<ImageData, List<FlatVertex>> group in spriteverts)
+			{
+				ImageData sprite = group.Key;
+				if((sprite.Texture == null) || sprite.Texture.Disposed) sprite.CreateTexture();
+				if(sprite.Texture == null) continue;
+				
+				graphics.Device.SetTexture(0, sprite.Texture);
+				graphics.Shaders.Things2D.Texture1 = sprite.Texture;
+				graphics.Shaders.Things2D.ApplySettings();
+				
+				DrawThingVerts(group.Value.ToArray(), group.Value.Count);
+			}
+			graphics.Shaders.Things2D.EndPass();
 		}
 
         // This draws a set of things
         private void RenderThingsBatch(ICollection<Thing> things, float alpha, bool fixedcolor, PixelColor c)
         {
             int thingtextureindex = 0;
-            PixelColor tc;
-            DataStream stream;
 
             // Anything to render?
             if (things.Count > 0)
             {
+                // Find the things that are on the screen
+                List<ThingDrawInfo> visible = new List<ThingDrawInfo>(things.Count);
+                foreach (Thing t in things)
+                {
+                    ThingDrawInfo info;
+                    PixelColor tc = fixedcolor ? c : DetermineThingColor(t);
+                    if (GetThingDrawInfo(t, tc, out info))
+                        visible.Add(info);
+                }
+                if (visible.Count == 0) return;
+
                 // Make alpha color
                 Color4 alphacolor = new Color4(alpha, 1.0f, 1.0f, 1.0f);
 
@@ -1035,61 +1203,36 @@ namespace CodeImp.DoomBuilder.Rendering
                 // Determine things texture to use
                 if (General.Settings.QualityDisplay) thingtextureindex |= THING_SHINY;
                 if (General.Settings.SquareThings) thingtextureindex |= THING_SQUARE;
-                graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
-                graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
                 SetWorldTransformation(false);
                 graphics.Shaders.Things2D.SetSettings(alpha);
 
                 // Begin drawing
                 graphics.Shaders.Things2D.Begin();
+
+                FlatVertex[] verts = new FlatVertex[visible.Count * 6];
+
+                // First the boxes
+                graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
+                graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
                 graphics.Shaders.Things2D.BeginPass(0);
+                for (int i = 0; i < visible.Count; i++)
+                    CreateThingBoxVerts(visible[i], verts, i * 6);
+                DrawThingVerts(verts, visible.Count * 6);
+                graphics.Shaders.Things2D.EndPass();
 
-                // Determine next lock size
-                int locksize = (things.Count > THING_BUFFER_SIZE) ? THING_BUFFER_SIZE : things.Count;
-                FlatVertex[] verts = new FlatVertex[THING_BUFFER_SIZE * 12];
+                // Then the sprites on top of the boxes
+                RenderThingSprites(visible);
 
-                // Go for all things
-                int buffercount = 0;
-                int totalcount = 0;
-                foreach (Thing t in things)
-                {
-                    // Create vertices
-                    tc = fixedcolor ? c : DetermineThingColor(t);
-                    if (CreateThingVerts(t, ref verts, buffercount * 12, tc))
-                        buffercount++;
-
-                    totalcount++;
-
-                    // Buffer filled?
-                    if (buffercount == locksize)
-                    {
-                        // Write to buffer
-                        stream = thingsvertices.Lock(0, locksize * 12 * FlatVertex.Stride, LockFlags.Discard);
-                        stream.WriteRange(verts, 0, buffercount * 12);
-                        thingsvertices.Unlock();
-                        stream.Dispose();
-
-                        // Draw!
-                        graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, 0, buffercount * 4);
-                        buffercount = 0;
-
-                        // Determine next lock size
-                        locksize = ((things.Count - totalcount) > THING_BUFFER_SIZE) ? THING_BUFFER_SIZE : (things.Count - totalcount);
-                    }
-                }
-
-                // Write to buffer
-                stream = thingsvertices.Lock(0, locksize * 12 * FlatVertex.Stride, LockFlags.Discard);
-                if (buffercount > 0) stream.WriteRange(verts, 0, buffercount * 12);
-                thingsvertices.Unlock();
-                stream.Dispose();
-
-                // Draw what's still remaining
-                if (buffercount > 0)
-                    graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, 0, buffercount * 4);
+                // And the arrows on top of the sprites
+                graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
+                graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
+                graphics.Shaders.Things2D.BeginPass(0);
+                for (int i = 0; i < visible.Count; i++)
+                    CreateThingArrowVerts(visible[i], verts, i * 6);
+                DrawThingVerts(verts, visible.Count * 6);
+                graphics.Shaders.Things2D.EndPass();
 
                 // Done
-                graphics.Shaders.Things2D.EndPass();
                 graphics.Shaders.Things2D.End();
             }
         }

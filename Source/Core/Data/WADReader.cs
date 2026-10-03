@@ -888,6 +888,22 @@ namespace CodeImp.DoomBuilder.Data
 			return null;
 		}
 		
+		// This returns the names of all lumps in the sprite ranges
+		public override IEnumerable<string> GetSpriteNames()
+		{
+			// Error when suspended
+			if(issuspended) throw new Exception("Data reader is suspended");
+
+			List<string> names = new List<string>();
+			foreach(LumpRange range in spriteranges)
+			{
+				for(int i = range.start + 1; i < range.end; i++)
+					names.Add(file.Lumps[i].Name);
+			}
+
+			return names;
+		}
+
 		// This checks if the given sprite exists
 		public override bool GetSpriteExists(string pname)
 		{

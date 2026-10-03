@@ -51,14 +51,15 @@ namespace CodeImp.DoomBuilder.VisualModes
 		// Thing
 		private Thing thing;
 		
-		// Texture
-		private ImageData texture;
+		// Textures (one for each sprite rotation; a single one when the sprite has no rotations)
+		private ImageData[] textures;
 		
-		// Geometry
-		private WorldVertex[] vertices;
-		private VertexBuffer geobuffer;
+		// Geometry (one set for each sprite rotation)
+		private WorldVertex[][] vertices;
+		private VertexBuffer[] geobuffers;
 		private bool updategeo;
-		private int triangles;
+		private int[] triangles;
+		private int spriteframe;	// Sprite rotation currently shown
 		
 		// Rendering
 		private int renderpass;
@@ -80,9 +81,9 @@ namespace CodeImp.DoomBuilder.VisualModes
 		
 		#region ================== Properties
 		
-		internal VertexBuffer GeometryBuffer { get { return geobuffer; } }
+		internal VertexBuffer GeometryBuffer { get { return ((geobuffers != null) && (spriteframe < geobuffers.Length)) ? geobuffers[spriteframe] : null; } }
 		internal bool NeedsUpdateGeo { get { return updategeo; } }
-		internal int Triangles { get { return triangles; } }
+		internal int Triangles { get { return ((triangles != null) && (spriteframe < triangles.Length)) ? triangles[spriteframe] : 0; } }
 		internal int RenderPassInt { get { return renderpass; } }
 		internal Matrix Orientation { get { return orientation; } }
 		internal Matrix Position { get { return position; } }
@@ -108,7 +109,11 @@ namespace CodeImp.DoomBuilder.VisualModes
 		/// <summary>
 		/// Image to use as texture on the geometry.
 		/// </summary>
-		public ImageData Texture { get { return texture; } set { texture = value; } }
+		public ImageData Texture
+		{
+			get { return ((textures != null) && (spriteframe < textures.Length)) ? textures[spriteframe] : null; }
+			set { textures = new ImageData[] { value }; spriteframe = 0; }
+		}
 
 		/// <summary>
 		/// Disposed or not?
@@ -146,8 +151,7 @@ namespace CodeImp.DoomBuilder.VisualModes
 			if(!isdisposed)
 			{
 				// Clean up
-				if(geobuffer != null) geobuffer.Dispose();
-				geobuffer = null;
+				DisposeBuffers();
 
 				// Unregister resource
 				General.Map.Graphics.UnregisterResource(this);
@@ -171,10 +175,20 @@ namespace CodeImp.DoomBuilder.VisualModes
 		// (when resized or display adapter was changed)
 		public void UnloadResource()
 		{
-			// Trash geometry buffer
-			if(geobuffer != null) geobuffer.Dispose();
-			geobuffer = null;
+			// Trash geometry buffers
+			DisposeBuffers();
 			updategeo = true;
+		}
+
+		// This disposes all geometry buffers
+		private void DisposeBuffers()
+		{
+			if(geobuffers != null)
+			{
+				foreach(VertexBuffer buffer in geobuffers)
+					if(buffer != null) buffer.Dispose();
+			}
+			geobuffers = null;
 		}
 		
 		// This is called resets when the device is reset
@@ -222,10 +236,55 @@ namespace CodeImp.DoomBuilder.VisualModes
 		protected void SetVertices(ICollection<WorldVertex> verts)
 		{
 			// Copy vertices
-			vertices = new WorldVertex[verts.Count];
-			verts.CopyTo(vertices, 0);
-			triangles = vertices.Length / 3;
+			WorldVertex[] copy = new WorldVertex[verts.Count];
+			verts.CopyTo(copy, 0);
+			SetFrameVertices(new WorldVertex[][] { copy });
+		}
+
+		/// <summary>
+		/// This sets the vertices for each rotation of the thing sprite. This must be used together with
+		/// SetFrameTextures and both must have the same number of items (either 1 or 8).
+		/// </summary>
+		protected void SetFrameVertices(WorldVertex[][] framevertices)
+		{
+			// Copy vertices
+			vertices = new WorldVertex[framevertices.Length][];
+			triangles = new int[framevertices.Length];
+			for(int i = 0; i < framevertices.Length; i++)
+			{
+				vertices[i] = new WorldVertex[framevertices[i].Length];
+				framevertices[i].CopyTo(vertices[i], 0);
+				triangles[i] = vertices[i].Length / 3;
+			}
+
+			spriteframe = 0;
 			updategeo = true;
+		}
+
+		/// <summary>
+		/// This sets the texture for each rotation of the thing sprite.
+		/// </summary>
+		protected void SetFrameTextures(ImageData[] frametextures)
+		{
+			textures = new ImageData[frametextures.Length];
+			frametextures.CopyTo(textures, 0);
+			spriteframe = 0;
+		}
+
+		// This selects the sprite rotation to show, based on where the camera is
+		// in relation to the direction the thing is facing.
+		internal void UpdateSpriteFrame()
+		{
+			if((textures == null) || (vertices == null) || (textures.Length != 8) || (vertices.Length != 8))
+			{
+				spriteframe = 0;
+			}
+			else
+			{
+				// Convert to [0..7] range; 292 == 270 + 45/2
+				Vector3D camdelta = General.Map.VisualCamera.Position - thing.Position;
+				spriteframe = General.ClampAngle((int)Angle2D.RadToDeg(camdelta.GetAngleXY()) - thing.AngleDoom + 292) / 45;
+			}
 		}
 		
 		// This updates the visual thing
@@ -234,22 +293,28 @@ namespace CodeImp.DoomBuilder.VisualModes
 			// Do we need to update the geometry buffer?
 			if(updategeo)
 			{
-				// Trash geometry buffer
-				if(geobuffer != null) geobuffer.Dispose();
-				geobuffer = null;
+				// Trash geometry buffers
+				DisposeBuffers();
 
-				// Any vertics?
-				if(vertices.Length > 0)
+				// Any vertices?
+				if(vertices != null)
 				{
-					// Make a new buffer
-					geobuffer = new VertexBuffer(General.Map.Graphics.Device, WorldVertex.Stride * vertices.Length,
-												 Usage.WriteOnly | Usage.Dynamic, VertexFormat.None, Pool.Default);
+					geobuffers = new VertexBuffer[vertices.Length];
+					for(int i = 0; i < vertices.Length; i++)
+					{
+						if(vertices[i].Length > 0)
+						{
+							// Make a new buffer
+							geobuffers[i] = new VertexBuffer(General.Map.Graphics.Device, WorldVertex.Stride * vertices[i].Length,
+															 Usage.WriteOnly | Usage.Dynamic, VertexFormat.None, Pool.Default);
 
-					// Fill the buffer
-					DataStream bufferstream = geobuffer.Lock(0, WorldVertex.Stride * vertices.Length, LockFlags.Discard);
-					bufferstream.WriteRange<WorldVertex>(vertices);
-					geobuffer.Unlock();
-					bufferstream.Dispose();
+							// Fill the buffer
+							DataStream bufferstream = geobuffers[i].Lock(0, WorldVertex.Stride * vertices[i].Length, LockFlags.Discard);
+							bufferstream.WriteRange<WorldVertex>(vertices[i]);
+							geobuffers[i].Unlock();
+							bufferstream.Dispose();
+						}
+					}
 				}
 
 				// Done

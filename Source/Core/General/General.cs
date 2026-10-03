@@ -1433,6 +1433,14 @@ namespace CodeImp.DoomBuilder
 			return r;
 		}
 		
+		// This wraps an angle (in degrees) into the [0..359] range
+		public static int ClampAngle(int angle)
+		{
+			angle %= 360;
+			if(angle < 0) angle += 360;
+			return angle;
+		}
+
 		// This clamps a value
 		public static float Clamp(float value, float min, float max)
 		{

@@ -63,6 +63,7 @@ namespace CodeImp.DoomBuilder.Data
 
 		#region ================== Methods
 
+		private static readonly object lumpreadlock = new object();
 		private static uint[] crctable;
 
 		// CRC32 as used by PNG chunks
@@ -147,10 +148,15 @@ namespace CodeImp.DoomBuilder.Data
 				lumpdata = General.Map.Data.GetSpriteData(Name);
 				if(lumpdata != null)
 				{
-					// Copy lump data to memory
-					lumpdata.Seek(0, SeekOrigin.Begin);
-					membytes = new byte[(int)lumpdata.Length];
-					lumpdata.Read(membytes, 0, (int)lumpdata.Length);
+					// Copy lump data to memory. Different sprite images (such as palette variants)
+					// can share the same lump stream and may be loaded by different threads at the
+					// same time, so only one of them can read from a lump stream at a time.
+					lock(lumpreadlock)
+					{
+						lumpdata.Seek(0, SeekOrigin.Begin);
+						membytes = new byte[(int)lumpdata.Length];
+						lumpdata.Read(membytes, 0, (int)lumpdata.Length);
+					}
 					// Doom 64 palette swap (Nightmare Imp, Spectre, Player 2-4, etc.):
 					// sprites are indexed PNGs, so swap in the alternate palette lump
 					// directly. This is exact, unlike guessing indexes from RGB values.

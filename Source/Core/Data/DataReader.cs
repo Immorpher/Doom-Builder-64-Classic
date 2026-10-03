@@ -151,6 +151,10 @@ namespace CodeImp.DoomBuilder.Data
 
 		// When implemented, this checks if the given sprite lump exists
 		public virtual bool GetSpriteExists(string pname) { return false; }
+
+		// When implemented, this returns the (upper case) names of all sprites in this resource.
+		// This is used to find the rotation frames of a sprite.
+		public virtual IEnumerable<string> GetSpriteNames() { return null; }
 		
 		#endregion
 

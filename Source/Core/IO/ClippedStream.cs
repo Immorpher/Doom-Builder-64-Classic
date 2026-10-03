@@ -114,13 +114,18 @@ namespace CodeImp.DoomBuilder.IO
 			// Anything to read?
 			if(count > 0)
 			{
-				// Seek if needed
-				if(basestream.Position != (this.offset + this.position))
-					basestream.Seek(this.offset + this.position, SeekOrigin.Begin);
+				// Many clipped streams share one base stream, which is also used by the background
+				// loader thread, so seeking and reading must not be interrupted by another thread.
+				lock(basestream)
+				{
+					// Seek if needed
+					if(basestream.Position != (this.offset + this.position))
+						basestream.Seek(this.offset + this.position, SeekOrigin.Begin);
 
-				// Read from base stream
-				position += count;
-				return basestream.Read(buffer, offset, count);
+					// Read from base stream
+					position += count;
+					return basestream.Read(buffer, offset, count);
+				}
 			}
 			else
 			{
@@ -135,13 +140,16 @@ namespace CodeImp.DoomBuilder.IO
 			if((this.position + count) > (this.length + 1))
 				throw new ArgumentException("Attempted to write outside the range of the stream.");
 
-			// Seek if needed
-			if(basestream.Position != (this.offset + this.position))
-				basestream.Seek(this.offset + this.position, SeekOrigin.Begin);
+			lock(basestream)
+			{
+				// Seek if needed
+				if(basestream.Position != (this.offset + this.position))
+					basestream.Seek(this.offset + this.position, SeekOrigin.Begin);
 
-			// Read from base stream
-			position += count;
-			basestream.Write(buffer, offset, count);
+				// Write to base stream
+				position += count;
+				basestream.Write(buffer, offset, count);
+			}
 		}
 		
 		// Seek within clipped buffer
@@ -155,7 +163,7 @@ namespace CodeImp.DoomBuilder.IO
 					throw new ArgumentException("Attempted to seek outside the range of the stream.");
 				
 				// Seek
-				position = basestream.Seek(this.offset + offset, SeekOrigin.Begin) - this.offset;
+				lock(basestream) { position = basestream.Seek(this.offset + offset, SeekOrigin.Begin) - this.offset; }
 			}
 			// Seeking from current position
 			else if(origin == SeekOrigin.Current)
@@ -165,7 +173,7 @@ namespace CodeImp.DoomBuilder.IO
 					throw new ArgumentException("Attempted to seek outside the range of the stream.");
 
 				// Seek
-				position = basestream.Seek(this.offset + this.position + offset, SeekOrigin.Begin) - this.offset;
+				lock(basestream) { position = basestream.Seek(this.offset + this.position + offset, SeekOrigin.Begin) - this.offset; }
 			}
 			// Seeking from end
 			else
@@ -175,7 +183,7 @@ namespace CodeImp.DoomBuilder.IO
 					throw new ArgumentException("Attempted to seek outside the range of the stream.");
 
 				// Seek
-				position = basestream.Seek(this.offset + this.length + offset, SeekOrigin.Begin) - this.offset;
+				lock(basestream) { position = basestream.Seek(this.offset + this.length + offset, SeekOrigin.Begin) - this.offset; }
 			}
 
 			// Return new position

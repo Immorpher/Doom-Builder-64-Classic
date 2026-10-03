@@ -75,6 +75,7 @@ namespace CodeImp.DoomBuilder.Map
 		public Vector3D Position { get { return pos; } }
 		public float Angle { get { return angle; } }
 		public int AngleDeg { get { return (int)Angle2D.RadToDeg(angle); } }
+		public int AngleDoom { get { return Angle2D.RealToDoom(angle); } }
 		internal Dictionary<string, bool> Flags { get { return flags; } }
 		public int Action { get { return action; } set { BeforePropsChange(); action = value; } }
 		public int[] Args { get { return args; } }

@@ -939,6 +939,9 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This collects a visual sector's geometry for rendering
 		public void AddThingGeometry(VisualThing t)
 		{
+			// Select the sprite rotation that faces the camera
+			t.UpdateSpriteFrame();
+
 			// Make sure the distance to camera is calculated
 			t.CalculateCameraDistance(cameraposition);
 			thingsbydistance.Add(t);

@@ -34,6 +34,14 @@ using System.Drawing;
 
 namespace CodeImp.DoomBuilder.Config
 {
+	// One rotation of a thing sprite
+	public struct SpriteFrameInfo
+	{
+		public string Sprite;
+		public long SpriteLongName;
+		public bool Mirror;		// True when the sprite lump must be flipped horizontally for this rotation
+	}
+
     public class ThingTypeInfo : INumberedTitle, IComparable<ThingTypeInfo>
     {
 		#region ================== Constants
@@ -69,6 +77,7 @@ namespace CodeImp.DoomBuilder.Config
 		private bool absolutez;
 		private SizeF spritescale;
         private int palindex;   // villsa
+		private SpriteFrameInfo[] spriteframe;	// All rotations of the sprite (either 1 or 8 frames)
 		
 		#endregion
 
@@ -94,6 +103,25 @@ namespace CodeImp.DoomBuilder.Config
 		public bool AbsoluteZ { get { return absolutez; } }
 		public SizeF SpriteScale { get { return spritescale; } }
         public int PalIndex { get { return palindex; } }    // villsa
+
+		/// <summary>
+		/// All rotations of the thing sprite. Contains either 1 frame (no rotations)
+		/// or 8 frames, where the frame index is the sprite rotation minus 1.
+		/// </summary>
+		public SpriteFrameInfo[] SpriteFrame
+		{
+			get
+			{
+				if(spriteframe == null)
+				{
+					spriteframe = new SpriteFrameInfo[1];
+					spriteframe[0].Sprite = sprite;
+					spriteframe[0].SpriteLongName = spritelongname;
+				}
+
+				return spriteframe;
+			}
+		}
 		
 		#endregion
 
@@ -307,6 +335,73 @@ namespace CodeImp.DoomBuilder.Config
 			hangs = actor.GetFlagValue("spawnceiling", hangs);
 			int blockvalue = (blocking > 0) ? blocking : 2;
 			blocking = actor.GetFlagValue("solid", (blocking != 0)) ? blockvalue : 0;
+		}
+
+		// This finds all rotations of the thing sprite. Doom stores rotations as lumps named
+		// NAMEFR (frame F, rotation R: 0 = no rotations, 1..8) and uses 8 character lumps
+		// NAMEF1F2R2 to share one image between two rotations, where the second one is mirrored
+		// (for example POSSA2A8: rotation 2 as is and rotation 8 mirrored). When not all 8 rotations
+		// are available, the sprite is left as a single frame.
+		internal void SetupSpriteFrame(ICollection<string> allspritenames)
+		{
+			spriteframe = null;
+
+			// Internal and invalid sprites don't have rotations
+			if(string.IsNullOrEmpty(sprite) || sprite.ToLowerInvariant().StartsWith(DataManager.INTERNAL_PREFIX)
+				|| ((sprite.Length != 6) && (sprite.Length != 8))) return;
+
+			string sourcename = sprite.Substring(0, 4).ToUpperInvariant();
+			char sourceframe = char.ToUpperInvariant(sprite[4]);
+
+			string[] frames = new string[8];
+			bool[] mirror = new bool[8];
+			int foundcount = 0;
+
+			foreach(string s in allspritenames)
+			{
+				if(((s.Length != 6) && (s.Length != 8)) || !s.StartsWith(sourcename, StringComparison.Ordinal)) continue;
+
+				// First frame block
+				if(s[4] == sourceframe)
+				{
+					int angle = s[5] - '0';
+
+					// Not rotated? Then there is nothing to do
+					if(angle == 0) return;
+
+					if((angle >= 1) && (angle <= 8) && (frames[angle - 1] == null))
+					{
+						frames[angle - 1] = s;
+						foundcount++;
+					}
+				}
+
+				// Second frame block (this is the mirrored one)
+				if((s.Length == 8) && (s[6] == sourceframe))
+				{
+					int angle = s[7] - '0';
+
+					if(angle == 0) return;
+
+					if((angle >= 1) && (angle <= 8) && (frames[angle - 1] == null))
+					{
+						frames[angle - 1] = s;
+						mirror[angle - 1] = true;
+						foundcount++;
+					}
+				}
+			}
+
+			// Need all of them
+			if(foundcount != 8) return;
+
+			spriteframe = new SpriteFrameInfo[8];
+			for(int i = 0; i < 8; i++)
+			{
+				spriteframe[i].Sprite = frames[i];
+				spriteframe[i].SpriteLongName = Lump.MakeLongName(frames[i]);
+				spriteframe[i].Mirror = mirror[i];
+			}
 		}
 
 		// This is used for sorting

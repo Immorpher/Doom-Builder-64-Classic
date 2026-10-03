@@ -1096,48 +1096,76 @@ namespace CodeImp.DoomBuilder.Data
         // This loads the sprites that we really need for things
         private int LoadThingSprites()
         {
+            // Gather the names of all sprites, so that the rotations of each thing sprite can be found
+            List<string> spritenames = new List<string>();
+            foreach(DataReader dr in containers)
+            {
+                IEnumerable<string> names = dr.GetSpriteNames();
+                if(names != null) spritenames.AddRange(names);
+            }
+
             // Go for all things
             foreach(ThingTypeInfo ti in General.Map.Data.ThingTypes)
             {
                 // Valid sprite name?
                 if((ti.Sprite.Length > 0) && (ti.Sprite.Length <= 8))
                 {
-                    ImageData image = null;
+                    // Find all rotations of the sprite
+                    ti.SetupSpriteFrame(spritenames);
 
-                    // styd: use the palette-aware lookup — thing types sharing the same sprite name
-                    // (e.g. Imp / Nightmare Imp both use "TROOA2A8") but a different PalIndex must
-                    // NOT share one cached ImageData instance, or only the first-loaded type's palette
-                    // ever gets applied.
-                    if (ti.PalIndex > 0)
-                    {
-                        image = General.Map.Data.GetSpriteImage(ti.Sprite, ti.PalIndex);
-                    }
-                    else if (!sprites.ContainsKey(ti.SpriteLongName))
-                    {
-                        // Find sprite data
-                        Stream spritedata = GetSpriteData(ti.Sprite);
-                        if(spritedata != null)
-                        {
-                            // Make new sprite image
-                            image = new SpriteImage(ti.Sprite);
-
-                            // Add to collection
-                            sprites.Add(ti.SpriteLongName, image);
-                        }
-                    }
-                    else
-                    {
-                        image = sprites[ti.SpriteLongName];
-                    }
+                    // The sprite used for previews
+                    ImageData image = LoadThingSpriteImage(ti.Sprite, ti.SpriteLongName, ti.PalIndex);
 
                     // Add to preview manager
                     if(image != null)
                         previews.AddImage(image);
+
+                    // Make images for all the rotations
+                    SpriteFrameInfo[] frames = ti.SpriteFrame;
+                    if(frames.Length > 1)
+                    {
+                        foreach(SpriteFrameInfo frame in frames)
+                            LoadThingSpriteImage(frame.Sprite, frame.SpriteLongName, ti.PalIndex);
+                    }
                 }
             }
 
             // Output info
             return sprites.Count;
+        }
+
+        // This makes (or finds) the image of a thing sprite
+        private ImageData LoadThingSpriteImage(string spritename, long spritelongname, int palindex)
+        {
+            ImageData image = null;
+
+            // styd: use the palette-aware lookup — thing types sharing the same sprite name
+            // (e.g. Imp / Nightmare Imp both use "TROOA2A8") but a different PalIndex must
+            // NOT share one cached ImageData instance, or only the first-loaded type's palette
+            // ever gets applied.
+            if (palindex > 0)
+            {
+                image = GetSpriteImage(spritename, palindex);
+            }
+            else if (!sprites.ContainsKey(spritelongname))
+            {
+                // Find sprite data
+                Stream spritedata = GetSpriteData(spritename);
+                if(spritedata != null)
+                {
+                    // Make new sprite image
+                    image = new SpriteImage(spritename);
+
+                    // Add to collection
+                    sprites.Add(spritelongname, image);
+                }
+            }
+            else
+            {
+                image = sprites[spritelongname];
+            }
+
+            return image;
         }
 
         // This returns a specific patch stream

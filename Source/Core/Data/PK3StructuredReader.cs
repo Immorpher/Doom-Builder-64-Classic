@@ -313,6 +313,31 @@ namespace CodeImp.DoomBuilder.Data
 
 		#region ================== Sprites
 
+		// This returns the names of all sprites (from wads and from the sprites directory)
+		public override IEnumerable<string> GetSpriteNames()
+		{
+			// Error when suspended
+			if(issuspended) throw new Exception("Data reader is suspended");
+
+			List<string> names = new List<string>();
+
+			// Names from wad files
+			for(int i = wads.Count - 1; i >= 0; i--)
+			{
+				IEnumerable<string> wadnames = wads[i].GetSpriteNames();
+				if(wadnames != null) names.AddRange(wadnames);
+			}
+
+			// Names from loose files in the sprites directory
+			foreach(string filename in GetAllFiles(SPRITES_DIR, true))
+			{
+				string name = Path.GetFileNameWithoutExtension(filename).ToUpperInvariant();
+				if((name.Length > 0) && (name.Length <= 8)) names.Add(name);
+			}
+
+			return names;
+		}
+
 		// This loads the textures
 		public override ICollection<ImageData> LoadSprites()
 		{
