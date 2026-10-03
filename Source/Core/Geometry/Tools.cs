@@ -79,6 +79,21 @@ namespace CodeImp.DoomBuilder.Geometry
 		
 		#endregion
 
+		#region ================== Variables
+
+		// When this is true, the walls (sidedefs) of newly created sectors are left
+		// untextured. This is controlled by an option in the editing preferences.
+		private static bool notexturesonnewsectors;
+
+		#endregion
+
+		#region ================== Properties
+
+		/// <summary>When set to true, the walls (sidedefs) of newly created sectors are left untextured.</summary>
+		public static bool NoTexturesOnNewSectors { get { return notexturesonnewsectors; } set { notexturesonnewsectors = value; } }
+
+		#endregion
+
 		#region ================== Polygons and Triangles
 
 		// Point inside the polygon?
@@ -574,7 +589,7 @@ namespace CodeImp.DoomBuilder.Geometry
 					if(ls.Line.Front == null) General.Map.Map.CreateSidedef(ls.Line, true, newsector);
 					if(ls.Line.Front == null) return null;
 					if(ls.Line.Front.Sector != newsector) ls.Line.Front.SetSector(newsector);
-					ApplyDefaultsToSidedef(ls.Line.Front, sourceside);
+					ApplyDefaultsToSidedef(ls.Line.Front, sourceside, notexturesonnewsectors);
 				}
 				else
 				{
@@ -582,7 +597,7 @@ namespace CodeImp.DoomBuilder.Geometry
 					if(ls.Line.Back == null) General.Map.Map.CreateSidedef(ls.Line, false, newsector);
 					if(ls.Line.Back == null) return null;
 					if(ls.Line.Back.Sector != newsector) ls.Line.Back.SetSector(newsector);
-					ApplyDefaultsToSidedef(ls.Line.Back, sourceside);
+					ApplyDefaultsToSidedef(ls.Line.Back, sourceside, notexturesonnewsectors);
 				}
 
 				// Update line
@@ -683,6 +698,16 @@ namespace CodeImp.DoomBuilder.Geometry
 		// This applies defaults to a sidedef
 		private static void ApplyDefaultsToSidedef(Sidedef sd, SidedefSettings defaults)
 		{
+			ApplyDefaultsToSidedef(sd, defaults, false);
+		}
+
+		// This applies defaults to a sidedef
+		// When notextures is true, the sidedef is left untextured
+		private static void ApplyDefaultsToSidedef(Sidedef sd, SidedefSettings defaults, bool notextures)
+		{
+			// Leave the walls untextured when the user wants it that way
+			if(notextures) return;
+
 			if(sd.HighRequired() && sd.HighTexture.StartsWith("-")) sd.SetTextureHigh(defaults.newtexhigh);
 			if(sd.MiddleRequired() && sd.MiddleTexture.StartsWith("-")) sd.SetTextureMid(defaults.newtexmid);
 			if(sd.LowRequired() && sd.LowTexture.StartsWith("-")) sd.SetTextureLow(defaults.newtexlow);

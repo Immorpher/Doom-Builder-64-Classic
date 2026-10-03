@@ -99,6 +99,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private float splitlinedefsrange;
 		private bool usehighlight;
 		private bool autodragonpaste;
+		private bool notexturesonnewsectors;
 
         // villsa
         private Lights[] sectorlights;
@@ -145,6 +146,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public float SplitLinedefsRange { get { return splitlinedefsrange; } }
 		public bool UseHighlight { get { return usehighlight; } set { usehighlight = value; } }
 		public bool AutoDragOnPaste { get { return autodragonpaste; } set { autodragonpaste = value; } }
+		public bool NoTexturesOnNewSectors { get { return notexturesonnewsectors; } set { notexturesonnewsectors = value; Tools.NoTexturesOnNewSectors = value; } }
         //villsa
         public Lights[] CopiedLights { get { return sectorlights; } set { sectorlights = value; } }
 		
@@ -230,6 +232,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			highlightthingsrange = (float)General.Settings.ReadPluginSetting("highlightthingsrange", 10);
 			splitlinedefsrange = (float)General.Settings.ReadPluginSetting("splitlinedefsrange", 10);
 			autodragonpaste = General.Settings.ReadPluginSetting("autodragonpaste", false);
+			notexturesonnewsectors = General.Settings.ReadPluginSetting("notexturesonnewsectors", false);
+
+			// Pass this option on to the core, which creates the sidedefs for new sectors
+			Tools.NoTexturesOnNewSectors = notexturesonnewsectors;
 		}
 
 		#endregion

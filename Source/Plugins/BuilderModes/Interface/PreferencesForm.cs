@@ -67,6 +67,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			autoclearselection.Checked = BuilderPlug.Me.AutoClearSelection;
 			visualmodeclearselection.Checked = BuilderPlug.Me.VisualModeClearSelection;
 			autodragonpaste.Checked = BuilderPlug.Me.AutoDragOnPaste;
+			notexturesonnewsectors.Checked = BuilderPlug.Me.NoTexturesOnNewSectors;
 			scripthidehints.Checked = General.Settings.ScriptHideHints;
 		}
 
@@ -89,6 +90,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			General.Settings.WritePluginSetting("autoclearselection", autoclearselection.Checked);
 			General.Settings.WritePluginSetting("visualmodeclearselection", visualmodeclearselection.Checked);
 			General.Settings.WritePluginSetting("autodragonpaste", autodragonpaste.Checked);
+			General.Settings.WritePluginSetting("notexturesonnewsectors", notexturesonnewsectors.Checked);
 			General.Settings.ScriptHideHints = scripthidehints.Checked;
 		}
 		

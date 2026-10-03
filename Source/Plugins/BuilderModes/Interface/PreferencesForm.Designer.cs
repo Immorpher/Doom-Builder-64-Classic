@@ -54,6 +54,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.heightbysidedef = new System.Windows.Forms.ComboBox();
 			this.autodragonpaste = new System.Windows.Forms.CheckBox();
 			this.scripthidehints = new System.Windows.Forms.CheckBox();
+			this.notexturesonnewsectors = new System.Windows.Forms.CheckBox();
 			this.tabs.SuspendLayout();
 			this.taboptions.SuspendLayout();
 			this.groupBox3.SuspendLayout();
@@ -90,6 +91,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// 
 			// groupBox3
 			// 
+			this.groupBox3.Controls.Add(this.notexturesonnewsectors);
 			this.groupBox3.Controls.Add(this.scripthidehints);
 			this.groupBox3.Controls.Add(this.autodragonpaste);
 			this.groupBox3.Controls.Add(this.visualmodeclearselection);
@@ -99,7 +101,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.groupBox3.Controls.Add(this.additiveselect);
 			this.groupBox3.Location = new System.Drawing.Point(308, 90);
 			this.groupBox3.Name = "groupBox3";
-			this.groupBox3.Size = new System.Drawing.Size(332, 226);
+			this.groupBox3.Size = new System.Drawing.Size(332, 252);
 			this.groupBox3.TabIndex = 18;
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = " Options ";
@@ -354,6 +356,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			this.scripthidehints.Text = "Hide scripting hints";
 			this.scripthidehints.UseVisualStyleBackColor = true;
 			// 
+			// notexturesonnewsectors
+			// 
+			this.notexturesonnewsectors.AutoSize = true;
+			this.notexturesonnewsectors.Location = new System.Drawing.Point(23, 215);
+			this.notexturesonnewsectors.Name = "notexturesonnewsectors";
+			this.notexturesonnewsectors.Size = new System.Drawing.Size(230, 18);
+			this.notexturesonnewsectors.TabIndex = 8;
+			this.notexturesonnewsectors.Text = "No textures on walls of new sectors";
+			this.notexturesonnewsectors.UseVisualStyleBackColor = true;
+			// 
 			// PreferencesForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -406,5 +418,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox highlightrange;
 		private System.Windows.Forms.CheckBox autodragonpaste;
 		private System.Windows.Forms.CheckBox scripthidehints;
+		private System.Windows.Forms.CheckBox notexturesonnewsectors;
 	}
 }
