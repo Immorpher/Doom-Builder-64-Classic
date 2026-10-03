@@ -1148,15 +1148,25 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				General.Map.Map.Update();
 				
 				// Make normal selection
+				// Note: stitching the geometry (and joining overlapping lines in particular) may have
+				// disposed some of the elements we kept references to, so we must skip those here.
+				// Selecting a disposed element throws a NullReferenceException or, worse, puts a dead
+				// element back in the map selection.
 				General.Map.Map.ClearAllSelected();
-				foreach(Vertex v in selectedvertices) v.Selected = true;
-				foreach(Linedef l in selectedlines) { l.Start.Selected = true; l.End.Selected = true; }
-				foreach(Thing t in selectedthings) t.Selected = true;
+				foreach(Vertex v in selectedvertices) if(!v.IsDisposed) v.Selected = true;
+				foreach(Linedef l in selectedlines)
+				{
+					if(l.IsDisposed) continue;
+					l.Start.Selected = true;
+					l.End.Selected = true;
+				}
+				foreach(Thing t in selectedthings) if(!t.IsDisposed) t.Selected = true;
 				General.Map.Map.SelectionType = SelectionType.Vertices | SelectionType.Things;
 				
 				// Done
 				selectedvertices = new List<Vertex>();
 				selectedthings = new List<Thing>();
+				selectedlines = new List<Linedef>();
 				Cursor.Current = Cursors.Default;
 				General.Map.IsChanged = true;
 			}
