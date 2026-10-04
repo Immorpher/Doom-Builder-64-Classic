@@ -46,6 +46,10 @@ namespace CodeImp.DoomBuilder.Config
 		private Dictionary<long, ImageData> flats;
 		private DataLocation location;
 
+		// Doom 64 texture hashes (hash -> name) of the textures and flats in this set
+		private Dictionary<uint, string> texturehashes;
+		private Dictionary<uint, string> flathashes;
+
 		#endregion
 
 		#region ================== Properties
@@ -65,6 +69,8 @@ namespace CodeImp.DoomBuilder.Config
 			this.location = location;
 			this.textures = new Dictionary<long, ImageData>();
 			this.flats = new Dictionary<long, ImageData>();
+			this.texturehashes = new Dictionary<uint, string>();
+			this.flathashes = new Dictionary<uint, string>();
 		}
 		
 		#endregion
@@ -74,17 +80,32 @@ namespace CodeImp.DoomBuilder.Config
 		// Add a texture
 		internal void AddTexture(ImageData image)
 		{
-			if(textures.ContainsKey(image.LongName))
-				General.ErrorLogger.Add(ErrorType.Warning, "Texture \"" + image.Name + "\" is double defined in resource \"" + this.Location.location + "\".");
+			CheckHashDuplicate(texturehashes, "Texture", image);
 			textures[image.LongName] = image;
 		}
 
 		// Add a flat
 		internal void AddFlat(ImageData image)
 		{
-			if(flats.ContainsKey(image.LongName))
-				General.ErrorLogger.Add(ErrorType.Warning, "Flat \"" + image.Name + "\" is double defined in resource \"" + this.Location.location + "\".");
+			CheckHashDuplicate(flathashes, "Flat", image);
 			flats[image.LongName] = image;
+		}
+
+		// Doom 64 maps reference textures by a 16 bit name hash, so two images are
+		// duplicates when their hashes match (which includes identical names, but also
+		// different names that collide). Warn when this image's hash is already taken.
+		private void CheckHashDuplicate(Dictionary<uint, string> hashes, string kind, ImageData image)
+		{
+			uint hash = WADReader.GetTextureNameHash(image.Name);
+			string existing;
+			if(hashes.TryGetValue(hash, out existing))
+			{
+				if(string.Equals(existing, image.Name, StringComparison.OrdinalIgnoreCase))
+					General.ErrorLogger.Add(ErrorType.Warning, kind + " \"" + image.Name + "\" is double defined (hash " + hash + ") in resource \"" + this.Location.location + "\".");
+				else
+					General.ErrorLogger.Add(ErrorType.Warning, kind + " \"" + image.Name + "\" has the same hash (" + hash + ") as " + kind.ToLower() + " \"" + existing + "\" in resource \"" + this.Location.location + "\". Maps cannot tell them apart.");
+			}
+			hashes[hash] = image.Name;
 		}
 
 		// Check if this set has a texture

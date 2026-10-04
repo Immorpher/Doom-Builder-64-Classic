@@ -42,17 +42,12 @@ namespace CodeImp.DoomBuilder.Data
 		private static readonly int[] GIF_SIGNATURE = new int[] { 71, 73, 70 };
 		private static readonly int[] BMP_SIGNATURE = new int[] { 66, 77 };
 
-		// This check image data and returns the appropriate image reader
-		public static IImageReader GetImageReader(Stream data, int guessformat, Playpal palette)
+		// This checks image data and returns the appropriate image reader. Doom 64 does not use
+		// a global palette, so only self-contained PNG, GIF and BMP data can be read.
+		public static IImageReader GetImageReader(Stream data)
 		{
 			BinaryReader bindata = new BinaryReader(data);
-			DoomPictureReader picreader;
-			DoomFlatReader flatreader;
-			DoomColormapReader colormapreader;
 			
-			// First check the formats that provide the means to 'ensure' that
-			// it actually is that format. Then guess the Doom image format.
-
 			// Data long enough to check for signatures?
 			if(data.Length > 10)
 			{
@@ -71,31 +66,6 @@ namespace CodeImp.DoomBuilder.Data
 					// Check if data size matches the size specified in the data
 					if(bindata.ReadUInt32() <= data.Length) return new FileImageReader();
 				}
-			}
-			
-			// Could it be a doom picture?
-			if(guessformat == DOOMPICTURE)
-			{
-				// Check if data is valid for a doom picture
-				data.Seek(0, SeekOrigin.Begin);
-				picreader = new DoomPictureReader(palette);
-				if(picreader.Validate(data)) return picreader;
-			}
-			// Could it be a doom flat?
-			else if(guessformat == DOOMFLAT)
-			{
-				// Check if data is valid for a doom flat
-				data.Seek(0, SeekOrigin.Begin);
-				flatreader = new DoomFlatReader(palette);
-				if(flatreader.Validate(data)) return flatreader;
-			}
-			// Could it be a doom colormap?
-			else if(guessformat == DOOMCOLORMAP)
-			{
-				// Check if data is valid for a doom colormap
-				data.Seek(0, SeekOrigin.Begin);
-				colormapreader = new DoomColormapReader(palette);
-				if(colormapreader.Validate(data)) return colormapreader;
 			}
 			
 			// Format not supported

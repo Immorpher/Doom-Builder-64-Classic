@@ -123,37 +123,6 @@ namespace CodeImp.DoomBuilder.Data
 		
 		#endregion
 		
-		#region ================== Palette
-
-		// This loads the PLAYPAL palette
-		public override Playpal LoadPalette()
-		{
-			// Error when suspended
-			if(issuspended) throw new Exception("Data reader is suspended");
-			
-			// Palette from wad(s)
-			Playpal palette = null;
-			foreach(WADReader wr in wads)
-			{
-				Playpal wadpalette = wr.LoadPalette();
-				if(wadpalette != null) return wadpalette;
-			}
-			
-			// Find in root directory
-			string foundfile = FindFirstFile("PLAYPAL", false);
-			if((foundfile != null) && FileExists(foundfile))
-			{
-				MemoryStream stream = LoadFile(foundfile);
-				palette = new Playpal(stream);
-				stream.Dispose();
-			}
-			
-			// Done
-			return palette;
-		}
-
-		#endregion
-		
 		#region ================== Textures
 
 		// This loads the textures

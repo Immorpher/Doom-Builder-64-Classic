@@ -116,7 +116,7 @@ namespace CodeImp.DoomBuilder.Data
 							mem.Seek(0, SeekOrigin.Begin);
 
 							// Get a reader for the data
-							reader = ImageDataFormat.GetImageReader(mem, ImageDataFormat.DOOMPICTURE, General.Map.Data.Palette);
+							reader = ImageDataFormat.GetImageReader(mem);
 							if(reader is UnknownImageReader)
 							{
 								// Data is in an unknown format!

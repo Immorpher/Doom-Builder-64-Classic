@@ -51,9 +51,6 @@ namespace CodeImp.DoomBuilder.Data
 		private List<DataReader> containers;
 		private DataReader currentreader;
 		
-		// Palette
-		private Playpal palette;
-
         // villsa - thing palettes
         private Dictionary<string, Playpal> thingpalettes;
 		
@@ -108,7 +105,6 @@ namespace CodeImp.DoomBuilder.Data
 
 		#region ================== Properties
 
-		public Playpal Palette { get { return palette; } }
         public IDictionary<string, Playpal> ThingPalette { get { return thingpalettes; } } // villsa
 		public PreviewManager Previews { get { return previews; } }
 		public ICollection<ImageData> Textures { get { return textures.Values; } }
@@ -316,7 +312,6 @@ namespace CodeImp.DoomBuilder.Data
 			}
 			
 			// Load stuff
-			LoadPalette();
 			texcount = LoadTextures(texturesonly);
 			flatcount = LoadFlats(flatsonly);
 			colormapcount = LoadColormaps(colormapsonly);
@@ -442,7 +437,6 @@ namespace CodeImp.DoomBuilder.Data
 			foreach(KeyValuePair<long, ImageData> i in flats) i.Value.Dispose();
 			foreach(KeyValuePair<long, ImageData> i in sprites) i.Value.Dispose();
 			foreach(KeyValuePair<string, ImageData> i in palettesprites) i.Value.Dispose();
-			palette = null;
 			
 			// Dispose containers
 			foreach(DataReader c in containers) c.Dispose();
@@ -713,26 +707,7 @@ namespace CodeImp.DoomBuilder.Data
 		
 		#endregion
 		
-		#region ================== Palette
-
-		// This loads the PLAYPAL palette
-		private void LoadPalette()
-		{
-			// Go for all opened containers
-			for(int i = containers.Count - 1; i >= 0; i--)
-			{
-				// Load palette
-				palette = containers[i].LoadPalette();
-				if(palette != null) break;
-			}
-
-			// Make empty palette when still no palette found
-			if(palette == null)
-			{
-				General.ErrorLogger.Add(ErrorType.Warning, "None of the loaded resources define a color palette. Did you forget to configure an IWAD for this game configuration?");
-				palette = new Playpal();
-			}
-		}
+		#region ================== Thing Palettes
 
         // villsa
         private void LoadThingPalette(string name)

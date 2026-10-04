@@ -175,28 +175,6 @@ namespace CodeImp.DoomBuilder.Data
 
 		#region ================== Palette
 
-		// This loads the PLAYPAL palette
-		public override Playpal LoadPalette()
-		{
-			Lump lump;
-			
-			// Error when suspended
-			if(issuspended) throw new Exception("Data reader is suspended");
-			
-			// Look for a lump named PLAYPAL
-			lump = file.FindLump("PLAYPAL");
-			if(lump != null)
-			{
-				// Read the PLAYPAL from stream
-				return new Playpal(lump.Stream);
-			}
-			else
-			{
-				// No palette
-				return null;
-			}
-		}
-
         // villsa
         public override Playpal LoadThingPalette(string palname)
         {
@@ -325,6 +303,12 @@ namespace CodeImp.DoomBuilder.Data
 
         // villsa
         private uint HashTextureName(string name)
+        {
+            return GetTextureNameHash(name);
+        }
+
+        // Doom 64 texture name hash (16 bit). Maps only store this hash, not the name.
+        internal static uint GetTextureNameHash(string name)
         {
             uint hash = 1315423911;
             int j = 0;

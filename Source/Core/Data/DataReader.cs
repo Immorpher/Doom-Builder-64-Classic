@@ -97,9 +97,6 @@ namespace CodeImp.DoomBuilder.Data
 
 		#region ================== Palette
 
-		// When implemented, this should find and load a PLAYPAL palette
-		public virtual Playpal LoadPalette() { return null; }
-
         // villsa
         public virtual Playpal LoadThingPalette(string palname) { return null; }
 		

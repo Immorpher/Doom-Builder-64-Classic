@@ -36,7 +36,6 @@ namespace CodeImp.DoomBuilder.Data
 
 		private PK3Reader datareader;
 		private string filepathname;
-		private int probableformat;
 		
 		#endregion
 
@@ -52,13 +51,11 @@ namespace CodeImp.DoomBuilder.Data
 
 			if(asflat)
 			{
-				probableformat = ImageDataFormat.DOOMFLAT;
 				this.scale.x = General.Map.Config.DefaultFlatScale;
 				this.scale.y = General.Map.Config.DefaultFlatScale;
 			}
 			else
 			{
-				probableformat = ImageDataFormat.DOOMPICTURE;
 				this.scale.x = General.Map.Config.DefaultTextureScale;
 				this.scale.y = General.Map.Config.DefaultTextureScale;
 			}
@@ -84,7 +81,7 @@ namespace CodeImp.DoomBuilder.Data
 				MemoryStream filedata = datareader.ExtractFile(filepathname);
 
 				// Get a reader for the data
-				IImageReader reader = ImageDataFormat.GetImageReader(filedata, probableformat, General.Map.Data.Palette);
+				IImageReader reader = ImageDataFormat.GetImageReader(filedata);
 				if(!(reader is UnknownImageReader))
 				{
 					// Load the image
