@@ -2077,6 +2077,7 @@ namespace CodeImp.DoomBuilder.Windows
 			itemsnaptogrid.Enabled = (General.Map != null);
 			itemautomerge.Enabled = (General.Map != null);
 			itemfullbrightness.Enabled = (General.Map != null);
+			itemtoggleeventlines.Checked = General.Settings.GZShowEventLines;
 			itemgridsetup.Enabled = (General.Map != null);
 			itemgridinc.Enabled = (General.Map != null);
 			itemgriddec.Enabled = (General.Map != null);
@@ -2103,6 +2104,8 @@ namespace CodeImp.DoomBuilder.Windows
 			buttonautomerge.Enabled = (General.Map != null);
 			buttonfullbrightness.Enabled = (General.Map != null);
 			buttonfullbrightness.Checked = Renderer.FullBrightness;
+			buttontoggleeventlines.Enabled = true;
+			buttontoggleeventlines.Checked = General.Settings.GZShowEventLines;
 			buttoncut.Enabled = itemcut.Enabled;
 			buttoncopy.Enabled = itemcopy.Enabled;
 			buttonpaste.Enabled = itempaste.Enabled;
@@ -2128,6 +2131,19 @@ namespace CodeImp.DoomBuilder.Windows
 			DisplayStatus(StatusType.Action, "Snap to geometry is now " + onoff + " by default.");
 		}
 
+		// Action to toggle the event lines (arrows to map elements sharing a tag)
+		[BeginAction("gztoggleeventlines")]
+		internal void ToggleEventLines()
+		{
+			General.Settings.GZShowEventLines = !General.Settings.GZShowEventLines;
+			
+			itemtoggleeventlines.Checked = General.Settings.GZShowEventLines;
+			buttontoggleeventlines.Checked = General.Settings.GZShowEventLines;
+			
+			DisplayStatus(StatusType.Action, "Event lines are " + (General.Settings.GZShowEventLines ? "ENABLED" : "DISABLED") + ".");
+			RedrawDisplay();
+		}
+		
 		// Action to toggle full brightness (real colored sector lighting vs. plain
 		// full-bright), applied to both the 2D view and the 3D view.
 		[BeginAction("togglefullbrightness")]

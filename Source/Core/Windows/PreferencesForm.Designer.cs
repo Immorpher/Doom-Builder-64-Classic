@@ -49,6 +49,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.keyusedlabel = new System.Windows.Forms.Label();
             this.colorsgroup1 = new System.Windows.Forms.GroupBox();
             this.colorNoBlockmap = new CodeImp.DoomBuilder.Controls.ColorControl();
+            this.colorInfo = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorTagonly = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorSecret = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorMblock = new CodeImp.DoomBuilder.Controls.ColorControl();
@@ -369,6 +370,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.colorsgroup1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)));
+            this.colorsgroup1.Controls.Add(this.colorInfo);
             this.colorsgroup1.Controls.Add(this.colorNoBlockmap);
             this.colorsgroup1.Controls.Add(this.colorTagonly);
             this.colorsgroup1.Controls.Add(this.colorSecret);
@@ -391,6 +393,18 @@ namespace CodeImp.DoomBuilder.Windows
             this.colorsgroup1.TabStop = false;
             this.colorsgroup1.Text = " Display ";
             this.colorsgroup1.Visible = false;
+            // 
+            // colorInfo
+            // 
+            this.colorInfo.BackColor = System.Drawing.Color.Transparent;
+            this.colorInfo.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.colorInfo.Label = "Event lines:";
+            this.colorInfo.Location = new System.Drawing.Point(15, 432);
+            this.colorInfo.MaximumSize = new System.Drawing.Size(10000, 23);
+            this.colorInfo.MinimumSize = new System.Drawing.Size(100, 23);
+            this.colorInfo.Name = "colorInfo";
+            this.colorInfo.Size = new System.Drawing.Size(168, 23);
+            this.colorInfo.TabIndex = 19;
             // 
             // colorNoBlockmap
             // 
@@ -1695,6 +1709,7 @@ namespace CodeImp.DoomBuilder.Windows
         private CodeImp.DoomBuilder.Controls.ColorControl colorTagonly;
         private CodeImp.DoomBuilder.Controls.ColorControl colorSecret;
         private CodeImp.DoomBuilder.Controls.ColorControl colorNoBlockmap;
+        private CodeImp.DoomBuilder.Controls.ColorControl colorInfo;
         private CodeImp.DoomBuilder.Controls.ColorControl colorMblock;
         private CodeImp.DoomBuilder.Controls.ColorControl coloinvisiblelinedef;
 	}

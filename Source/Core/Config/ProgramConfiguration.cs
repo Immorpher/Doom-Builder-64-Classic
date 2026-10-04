@@ -79,6 +79,7 @@ namespace CodeImp.DoomBuilder.Config
 		private int autoscrollspeed;
 		private int zoomfactor;
 		private bool showerrorswindow;
+		private bool gzShowEventLines;
 		private bool animatevisualselection;
 		private int previousversion;
 		private PasteOptions pasteoptions;
@@ -139,6 +140,7 @@ namespace CodeImp.DoomBuilder.Config
 		public int AutoScrollSpeed { get { return autoscrollspeed; } internal set { autoscrollspeed = value; } }
 		public int ZoomFactor { get { return zoomfactor; } internal set { zoomfactor = value; } }
 		public bool ShowErrorsWindow { get { return showerrorswindow; } internal set { showerrorswindow = value; } }
+		public bool GZShowEventLines { get { return gzShowEventLines; } internal set { gzShowEventLines = value; } }
 		public bool AnimateVisualSelection { get { return animatevisualselection; } internal set { animatevisualselection = value; } }
 		public int ScriptTabWidth { get { return scripttabwidth; } internal set { scripttabwidth = value; } }
 		public bool ScriptAutoIndent { get { return scriptautoindent; } internal set { scriptautoindent = value; } }
@@ -222,6 +224,7 @@ namespace CodeImp.DoomBuilder.Config
 				autoscrollspeed = cfg.ReadSetting("autoscrollspeed", 0);
 				zoomfactor = cfg.ReadSetting("zoomfactor", 3);
 				showerrorswindow = cfg.ReadSetting("showerrorswindow", true);
+				gzShowEventLines = cfg.ReadSetting("gzshoweventlines", true);
 				animatevisualselection = cfg.ReadSetting("animatevisualselection", true);
 				previousversion = cfg.ReadSetting("currentversion", 0);
 				dockersposition = cfg.ReadSetting("dockersposition", 1);
@@ -284,6 +287,7 @@ namespace CodeImp.DoomBuilder.Config
 			cfg.WriteSetting("autoscrollspeed", autoscrollspeed);
 			cfg.WriteSetting("zoomfactor", zoomfactor);
 			cfg.WriteSetting("showerrorswindow", showerrorswindow);
+			cfg.WriteSetting("gzshoweventlines", gzShowEventLines);
 			cfg.WriteSetting("animatevisualselection", animatevisualselection);
 			cfg.WriteSetting("currentversion", v.Major * 1000000 + v.Revision);
 			cfg.WriteSetting("dockersposition", dockersposition);

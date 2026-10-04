@@ -144,6 +144,7 @@ namespace CodeImp.DoomBuilder.Windows
             colorSecret.Color = General.Colors.Secret;  // villsa
             colorTagonly.Color = General.Colors.Tagonly;  // villsa
             colorNoBlockmap.Color = General.Colors.NoBlockmap;
+			colorInfo.Color = General.Colors.InfoLine;
 			colorsoundlinedefs.Color = General.Colors.Sounds;
 			colorhighlight.Color = General.Colors.Highlight;
 			colorselection.Color = General.Colors.Selection;
@@ -244,6 +245,7 @@ namespace CodeImp.DoomBuilder.Windows
             General.Colors.Secret = colorSecret.Color;  // villsa
             General.Colors.Tagonly = colorTagonly.Color;  // villsa
             General.Colors.NoBlockmap = colorNoBlockmap.Color;
+			General.Colors.InfoLine = colorInfo.Color;
 			General.Colors.Highlight = colorhighlight.Color;
 			General.Colors.Selection = colorselection.Color;
 			General.Colors.Indication = colorindication.Color;

@@ -30,6 +30,7 @@ using CodeImp.DoomBuilder.Map;
 using SlimDX.Direct3D9;
 using SlimDX;
 using CodeImp.DoomBuilder.Geometry;
+using CodeImp.DoomBuilder.GZBuilder.Geometry;
 using System.Drawing.Imaging;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.Editing;
@@ -69,6 +70,7 @@ namespace CodeImp.DoomBuilder.Rendering
 
 		// Drawing methods
 		void PlotLine(Vector2D start, Vector2D end, PixelColor c);
+		void PlotArrow(Line3D line, PixelColor c);
 		void PlotLinedef(Linedef l, PixelColor c);
 		void PlotLinedefSet(ICollection<Linedef> linedefs);
 		void PlotSector(Sector s);
@@ -82,6 +84,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		void RenderRectangleFilled(RectangleF rect, PixelColor c, bool transformrect);
 		void RenderRectangleFilled(RectangleF rect, PixelColor c, bool transformrect, ImageData texture);
 		void RenderLine(Vector2D start, Vector2D end, float thickness, PixelColor c, bool transformcoords);
+		void RenderArrow(Line3D line, PixelColor c);
 		void RenderText(TextLabel text);
 		void RenderGeometry(FlatVertex[] vertices, ImageData texture, bool transformcoords);
 		void RedrawSurface();

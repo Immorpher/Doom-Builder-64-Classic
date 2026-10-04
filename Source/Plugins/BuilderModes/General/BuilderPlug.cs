@@ -30,6 +30,7 @@ using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Geometry;
+using CodeImp.DoomBuilder.GZBuilder.Geometry;
 using System.Drawing;
 using CodeImp.DoomBuilder.Editing;
 using CodeImp.DoomBuilder.Plugins;
@@ -403,24 +404,56 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			return found.ToArray();
 		}
 		
+		// This adds an arrow (event line) to the list, unless it would have no length
+		private static void AddEventLine(List<Line3D> lines, Vector2D start, Vector2D end)
+		{
+			if(Vector2D.DistanceSq(start, end) < 0.0001f) return;
+			lines.Add(new Line3D(start, end));
+		}
+		
+		// This returns the point where arrows to/from a sector should end/start
+		private static Vector2D GetSectorCenter(Sector s)
+		{
+			if(s.Labels.Count > 0) return s.Labels[0].position;
+			return new Vector2D(s.BBox.X + s.BBox.Width / 2, s.BBox.Y + s.BBox.Height / 2);
+		}
+		
 		// This renders the associated sectors/linedefs with the indication color
 		public void PlotAssociations(IRenderer2D renderer, Association asso)
 		{
 			// Tag must be above zero
 			if(asso.tag <= 0) return;
 			
+			List<Line3D> lines = new List<Line3D>();
+			
 			// Sectors?
 			if(asso.type == UniversalType.SectorTag)
 			{
 				foreach(Sector s in General.Map.Map.Sectors)
-					if(s.Tag == asso.tag) renderer.PlotSector(s, General.Colors.Indication);
+				{
+					if(s.Tag == asso.tag)
+					{
+						renderer.PlotSector(s, General.Colors.Indication);
+						AddEventLine(lines, asso.Center, GetSectorCenter(s));
+					}
+				}
 			}
 			// Linedefs?
 			else if(asso.type == UniversalType.LinedefTag)
 			{
 				foreach(Linedef l in General.Map.Map.Linedefs)
-					if(l.Tag == asso.tag) renderer.PlotLinedef(l, General.Colors.Indication);
+				{
+					if(l.Tag == asso.tag)
+					{
+						renderer.PlotLinedef(l, General.Colors.Indication);
+						AddEventLine(lines, asso.Center, l.GetCenterPoint());
+					}
+				}
 			}
+			
+			// Draw the event lines
+			if(General.Settings.GZShowEventLines)
+				foreach(Line3D line in lines) renderer.PlotArrow(line, General.Colors.InfoLine);
 		}
 		
 
@@ -433,8 +466,20 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Things?
 			if(asso.type == UniversalType.ThingTag)
 			{
+				List<Line3D> lines = new List<Line3D>();
+				
 				foreach(Thing t in General.Map.Map.Things)
-					if(t.Tag == asso.tag) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
+				{
+					if(t.Tag == asso.tag)
+					{
+						renderer.RenderThing(t, General.Colors.Indication, 1.0f);
+						AddEventLine(lines, asso.Center, t.Position);
+					}
+				}
+				
+				// Draw the event lines
+				if(General.Settings.GZShowEventLines)
+					foreach(Line3D line in lines) renderer.RenderArrow(line, General.Colors.InfoLine);
 			}
 		}
 		
@@ -445,6 +490,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Tag must be above zero
 			if(asso.tag <= 0) return;
 			
+			List<Line3D> lines = new List<Line3D>();
+			
 			// Doom style referencing to sectors?
 			if(General.Map.Config.LineTagIndicatesSectors && (asso.type == UniversalType.SectorTag))
 			{
@@ -454,7 +501,11 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					// Any action on this line?
 					if(l.Action > 0)
 					{
-						if(l.Tag == asso.tag) renderer.PlotLinedef(l, General.Colors.Indication);
+						if(l.Tag == asso.tag)
+						{
+							renderer.PlotLinedef(l, General.Colors.Indication);
+							AddEventLine(lines, l.GetCenterPoint(), asso.Center);
+						}
 					}
 				}
 			}
@@ -467,14 +518,22 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					if((l.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(l.Action))
 					{
 						LinedefActionInfo action = General.Map.Config.LinedefActions[l.Action];
-						if((action.Args[0].Type == (int)asso.type) && (l.Args[0] == asso.tag)) renderer.PlotLinedef(l, General.Colors.Indication);
-						if((action.Args[1].Type == (int)asso.type) && (l.Args[1] == asso.tag)) renderer.PlotLinedef(l, General.Colors.Indication);
-						if((action.Args[2].Type == (int)asso.type) && (l.Args[2] == asso.tag)) renderer.PlotLinedef(l, General.Colors.Indication);
-						if((action.Args[3].Type == (int)asso.type) && (l.Args[3] == asso.tag)) renderer.PlotLinedef(l, General.Colors.Indication);
-						if((action.Args[4].Type == (int)asso.type) && (l.Args[4] == asso.tag)) renderer.PlotLinedef(l, General.Colors.Indication);
+						bool match = false;
+						for(int i = 0; i < Linedef.NUM_ARGS; i++)
+							if((action.Args[i].Type == (int)asso.type) && (l.Args[i] == asso.tag)) match = true;
+						
+						if(match)
+						{
+							renderer.PlotLinedef(l, General.Colors.Indication);
+							AddEventLine(lines, l.GetCenterPoint(), asso.Center);
+						}
 					}
 				}
 			}
+			
+			// Draw the event lines
+			if(General.Settings.GZShowEventLines)
+				foreach(Line3D line in lines) renderer.PlotArrow(line, General.Colors.InfoLine);
 		}
 		
 
@@ -484,6 +543,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Tag must be above zero
 			if(asso.tag <= 0) return;
 
+			List<Line3D> lines = new List<Line3D>();
+			
 			// Things
 			foreach(Thing t in General.Map.Map.Things)
 			{
@@ -491,13 +552,21 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				if((t.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(t.Action))
 				{
 					LinedefActionInfo action = General.Map.Config.LinedefActions[t.Action];
-					if((action.Args[0].Type == (int)asso.type) && (t.Args[0] == asso.tag)) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
-					if((action.Args[1].Type == (int)asso.type) && (t.Args[1] == asso.tag)) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
-					if((action.Args[2].Type == (int)asso.type) && (t.Args[2] == asso.tag)) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
-					if((action.Args[3].Type == (int)asso.type) && (t.Args[3] == asso.tag)) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
-					if((action.Args[4].Type == (int)asso.type) && (t.Args[4] == asso.tag)) renderer.RenderThing(t, General.Colors.Indication, 1.0f);
+					bool match = false;
+					for(int i = 0; i < Thing.NUM_ARGS; i++)
+						if((action.Args[i].Type == (int)asso.type) && (t.Args[i] == asso.tag)) match = true;
+					
+					if(match)
+					{
+						renderer.RenderThing(t, General.Colors.Indication, 1.0f);
+						AddEventLine(lines, t.Position, asso.Center);
+					}
 				}
 			}
+			
+			// Draw the event lines
+			if(General.Settings.GZShowEventLines)
+				foreach(Line3D line in lines) renderer.RenderArrow(line, General.Colors.InfoLine);
 		}
 
 		#endregion

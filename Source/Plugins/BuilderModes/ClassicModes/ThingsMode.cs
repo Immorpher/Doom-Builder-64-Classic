@@ -193,9 +193,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			
 			// Set highlight association
 			if(t != null)
-				highlightasso.Set(t.Tag, UniversalType.ThingTag);
+				highlightasso.Set(t.Position, t.Tag, UniversalType.ThingTag);
 			else
-				highlightasso.Set(0, 0);
+				highlightasso.Set(new Vector2D(), 0, 0);
 
 			// New association highlights something?
 			if((t != null) && (t.Tag > 0)) completeredraw = true;
@@ -207,6 +207,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					action = General.Map.Config.LinedefActions[t.Action];
 			}
 			
+			// In Doom 64 the tag of a linedef refers to things, so a tagged thing
+			// is associated with the linedefs that have the same tag
+			bool linetagmode = (t != null) && (t.Tag > 0) &&
+							   General.Map.Config.LineTagIndicatesSectors &&
+							   General.Map.FormatInterface.InDoom64Mode;
+			
 			// Determine linedef associations
 			for(int i = 0; i < Thing.NUM_ARGS; i++)
 			{
@@ -216,10 +222,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				   (association[i].type == UniversalType.ThingTag)) completeredraw = true;
 				
 				// Make new association
-				if(action != null)
-					association[i].Set(t.Args[i], action.Args[i].Type);
+				if(linetagmode && (i == 0))
+					association[i].Set(t.Position, t.Tag, UniversalType.LinedefTag);
+				else if(action != null)
+					association[i].Set(t.Position, t.Args[i], action.Args[i].Type);
 				else
-					association[i].Set(0, 0);
+					association[i].Set(new Vector2D(), 0, 0);
 				
 				// New association highlights something?
 				if((association[i].type == UniversalType.SectorTag) ||

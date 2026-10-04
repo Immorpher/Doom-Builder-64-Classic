@@ -31,6 +31,7 @@ using CodeImp.DoomBuilder.Map;
 using SlimDX.Direct3D9;
 using SlimDX;
 using CodeImp.DoomBuilder.Geometry;
+using CodeImp.DoomBuilder.GZBuilder.Geometry;
 using System.Drawing.Imaging;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.Config;
@@ -1528,6 +1529,30 @@ namespace CodeImp.DoomBuilder.Rendering
 			graphics.Shaders.Display2D.End();
 		}
 
+		// This renders an arrow (line with arrowhead at the end) with given color
+		public void RenderArrow(Line3D line, PixelColor c)
+		{
+			float scaler = 20f / scale;
+			RenderLine(line.v1, line.v2, 0.8f, c, true);
+			float angle = line.GetAngle();
+			
+			// Arrowhead
+			RenderLine(line.v2, new Vector2D(line.v2.x - scaler * (float)Math.Sin(angle - 0.46f), line.v2.y + scaler * (float)Math.Cos(angle - 0.46f)), 0.8f, c, true);
+			RenderLine(line.v2, new Vector2D(line.v2.x - scaler * (float)Math.Sin(angle + 0.46f), line.v2.y + scaler * (float)Math.Cos(angle + 0.46f)), 0.8f, c, true);
+		}
+		
+		// This plots an arrow (line with arrowhead at the end) with given color
+		public void PlotArrow(Line3D line, PixelColor c)
+		{
+			float scaler = 16f / scale;
+			PlotLine(line.v1, line.v2, c);
+			float angle = line.GetAngle();
+			
+			// Arrowhead
+			PlotLine(line.v2, new Vector2D(line.v2.x - scaler * (float)Math.Sin(angle - 0.46f), line.v2.y + scaler * (float)Math.Cos(angle - 0.46f)), c);
+			PlotLine(line.v2, new Vector2D(line.v2.x - scaler * (float)Math.Sin(angle + 0.46f), line.v2.y + scaler * (float)Math.Cos(angle + 0.46f)), c);
+		}
+		
 		// This renders a line with given color
 		public void RenderLine(Vector2D start, Vector2D end, float thickness, PixelColor c, bool transformcoords)
 		{

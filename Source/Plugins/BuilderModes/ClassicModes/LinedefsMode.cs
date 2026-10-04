@@ -91,9 +91,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			
 			// Set highlight association
 			if(l != null)
-				highlightasso.Set(l.Tag, UniversalType.LinedefTag);
+				highlightasso.Set(l.GetCenterPoint(), l.Tag, UniversalType.LinedefTag);
 			else
-				highlightasso.Set(0, 0);
+				highlightasso.Set(new Vector2D(), 0, 0);
 
 			// New association highlights something?
 			if((l != null) && (l.Tag > 0)) completeredraw = true;
@@ -103,14 +103,14 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			{
                 if (l != null)
                 {
-                    association[0].Set(l.Tag, UniversalType.SectorTag);
+                    association[0].Set(l.GetCenterPoint(), l.Tag, UniversalType.SectorTag);
                     if(General.Map.FormatInterface.InDoom64Mode)    // villsa
-                        association[1].Set(l.Tag, UniversalType.ThingTag);
+                        association[1].Set(l.GetCenterPoint(), l.Tag, UniversalType.ThingTag);
                 }
                 else
                 {
-                    association[0].Set(0, 0);
-                    association[1].Set(0, 0); // styd - reset thing tag association
+                    association[0].Set(new Vector2D(), 0, 0);
+                    association[1].Set(new Vector2D(), 0, 0); // styd - reset thing tag association
                 }
             }
 			else
@@ -132,9 +132,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 					// Make new association
 					if(action != null)
-						association[i].Set(l.Args[i], action.Args[i].Type);
+						association[i].Set(l.GetCenterPoint(), l.Args[i], action.Args[i].Type);
 					else
-						association[i].Set(0, 0);
+						association[i].Set(new Vector2D(), 0, 0);
 
 					// New association highlights something?
 					if((association[i].type == UniversalType.SectorTag) ||

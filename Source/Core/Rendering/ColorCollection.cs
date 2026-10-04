@@ -44,7 +44,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float DARK_ADDITION = -0.2f;
 
 		// Palette size
-		private const int NUM_COLORS = 45;  // Changed to 45 for Doom 64 features
+		private const int NUM_COLORS = 46;  // Changed to 45 for Doom 64 features, 46 for event lines
 		public const int NUM_THING_COLORS = 20;
 		public const int THING_COLORS_OFFSET = 20;
 
@@ -94,6 +94,7 @@ namespace CodeImp.DoomBuilder.Rendering
         public const int SECRET = 42; //villsa
         public const int TAGONLY = 43; //villsa
         public const int NOBLOCKMAP = 44; // No Blockmap (BSP64 En.)
+        public const int INFOLINECOLOR = 45; // Event lines (tag arrows)
 		
 		#endregion
 
@@ -130,6 +131,7 @@ namespace CodeImp.DoomBuilder.Rendering
         public PixelColor Secret { get { return colors[SECRET]; } internal set { colors[SECRET] = value; } }   // villsa
         public PixelColor Tagonly { get { return colors[TAGONLY]; } internal set { colors[TAGONLY] = value; } }   // villsa
         public PixelColor NoBlockmap { get { return colors[NOBLOCKMAP]; } internal set { colors[NOBLOCKMAP] = value; } }
+        public PixelColor InfoLine { get { return colors[INFOLINECOLOR]; } internal set { colors[INFOLINECOLOR] = value; } }
 		
 		public PixelColor Crosshair3D { get { return colors[CROSSHAIR3D]; } internal set { colors[CROSSHAIR3D] = value; } }
 		public PixelColor Highlight3D { get { return colors[HIGHLIGHT3D]; } internal set { colors[HIGHLIGHT3D] = value; } }
@@ -184,6 +186,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(colors[THINGCOLOR18].ToInt() == 0) colors[THINGCOLOR18] = PixelColor.FromColor(Color.DarkKhaki);
 			if(colors[THINGCOLOR19].ToInt() == 0) colors[THINGCOLOR19] = PixelColor.FromColor(Color.Goldenrod);
 			if(colors[NOBLOCKMAP].ToInt() == 0) colors[NOBLOCKMAP] = PixelColor.FromColor(Color.FromArgb(255, 96, 32, 64)); // No Blockmap default color (BSP64 En.)
+			if(colors[INFOLINECOLOR].ToInt() == 0) colors[INFOLINECOLOR] = PixelColor.FromColor(Color.FromArgb(255, 0, 255, 64)); // Event lines default color (light green)
 			
 			// Create assist colors
 			CreateAssistColors();
