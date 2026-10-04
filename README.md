@@ -1,5 +1,8 @@
-# Doom Builder 64 Classic Enhanced
-While Styd is busy incrementally updating Doom Builder 64 Classic until it reaches Ultimate Doom Builder features commit by commit, this fork adds cherry picks some of the the more modern features early. This serves as an early preview of the Doom Builder 64 Classic features while making it convenient for current mappers.
+# Doom Builder 64 Classic
+This is a continuation of the classic Doom Builder 64 by Samuel Villarreal (Kaiser) which was based on Pascal van der Heiden's (CodeImp) Doom Builder 2. This contains updates from Styd's Doom Builder 64 Enhanced, Kovic's Doom Builder 64, and iori's Doom Builder 64. It also implements a few updates from boris' GZDoom Builder. AI was used in comparing code bases and debugging. Alongside Styd's modern Doom Builder 64 II, this is one of only two fully featured Doom 64 map editors.
 
-## Coding
-This requires Microsoft Visual Studio to compile. Claude AI has been used to narrow down bugs and to compare different code bases.
+## Installation
+On the releases page, this is released as a standalone build.
+
+## Compiling
+This is built using the Microsoft Visual Studio 2026.
