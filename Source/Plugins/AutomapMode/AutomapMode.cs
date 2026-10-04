@@ -5,7 +5,7 @@
  * Copyright (c) 2016 Boris Iwanski https://github.com/biwa/automapmode
  * Additions by MaxED (GZDoom Builder)
  * Doom 64 support by the Doom Builder 64 Enhanced authors
- * Ported to Doom Builder 64 II
+ * Ported to Doom Builder 64 Classic
  *
  * This program is released under GNU General Public License
  *

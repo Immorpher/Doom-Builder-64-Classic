@@ -3,7 +3,7 @@
 
 /*
  * Copyright (c) 2016 Boris Iwanski https://github.com/biwa/automapmode
- * Ported to Doom Builder 64 II
+ * Ported to Doom Builder 64 Classic
  *
  * This program is released under GNU General Public License
  *
@@ -48,7 +48,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		public float HighlightRange { get { return highlightrange; } }
 
 		// Linedef flag that makes a two-sided line render as one-sided on the automap.
-		// Doom 64 II's game configurations define this as "secretflag" (32 for Doom 64).
+		// Doom 64 Classic's game configurations define this as "secretflag" (32 for Doom 64).
 		public string SecretFlag
 		{
 			get
@@ -60,7 +60,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		}
 
 		// Linedef flag that hides a line from the automap entirely.
-		// Doom 64 II's game configurations define this as "invisibleflag" (128 for Doom 64).
+		// Doom 64 Classic's game configurations define this as "invisibleflag" (128 for Doom 64).
 		public string HiddenFlag
 		{
 			get
