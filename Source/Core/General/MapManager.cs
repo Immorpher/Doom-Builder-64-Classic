@@ -1342,6 +1342,47 @@ namespace CodeImp.DoomBuilder
 			Cursor.Current = Cursors.Default;
 		}
 		
+		// Some maps have compiled macros (MACROS lump) but lack the source script (SCRIPTS lump).
+		// When the given script lump is missing or empty, and the script configuration compiles
+		// into a lump that contains macros, this decompiles those macros into script source.
+		// Returns null when there is nothing to decompile or when decompiling failed.
+		internal byte[] DecompileMissingScript(string scriptlumpname)
+		{
+			MapLumpInfo lumpinfo;
+			if(!config.MapLumps.TryGetValue(scriptlumpname, out lumpinfo)) return null;
+			
+			// Only for script types that are compiled by BLAM into a result lump
+			ScriptConfiguration scriptconfig = lumpinfo.script;
+			if((scriptconfig == null) || (scriptconfig.Compiler == null)) return null;
+			if(scriptconfig.Compiler.ProgramInterface != "BlamCompiler") return null;
+			if(string.IsNullOrEmpty(scriptconfig.ResultLump)) return null;
+			
+			// Is the source script really missing?
+			MemoryStream scriptdata = GetLumpData(scriptlumpname);
+			if((scriptdata != null) && (scriptdata.Length > 0)) return null;
+			
+			// Are there any macros to decompile?
+			MemoryStream macrodata = GetLumpData(scriptconfig.ResultLump);
+			if((macrodata == null) || !BlamCompiler.HasMacroActions(macrodata.ToArray())) return null;
+			
+			BlamCompiler compiler = null;
+			try
+			{
+				compiler = scriptconfig.Compiler.Create() as BlamCompiler;
+				if(compiler == null) return null;
+				return compiler.Decompile(macrodata.ToArray());
+			}
+			catch(Exception e)
+			{
+				General.ErrorLogger.Add(ErrorType.Warning, "Unable to decompile the " + scriptconfig.ResultLump + " lump into the " + scriptlumpname + " script. " + e.GetType().Name + ": " + e.Message);
+				return null;
+			}
+			finally
+			{
+				if(compiler != null) compiler.Dispose();
+			}
+		}
+		
 		// This asks the user to save changes in script files
 		// Returns false when cancelled by the user
 		internal bool AskSaveScriptChanges()

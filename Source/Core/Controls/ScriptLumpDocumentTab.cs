@@ -86,6 +86,20 @@ namespace CodeImp.DoomBuilder.Controls
 				editor.ClearUndoRedo();
 			}
 			
+			// The source script may be missing while the compiled macros exist.
+			// In that case decompile the macros into the script.
+			if(!ismapheader && ((stream == null) || (stream.Length == 0)))
+			{
+				byte[] decompiled = General.Map.DecompileMissingScript(this.lumpname);
+				if(decompiled != null)
+				{
+					editor.SetText(decompiled);
+					editor.ClearUndoRedo();
+					editor.IsChanged = true;
+					General.WriteLogLine("Decompiled the macros into the missing " + this.lumpname + " script.");
+				}
+			}
+			
 			// Done
 			if(ismapheader)
 				SetTitle(General.Map.Options.CurrentName);
