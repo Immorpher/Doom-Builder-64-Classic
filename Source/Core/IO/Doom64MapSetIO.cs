@@ -27,6 +27,7 @@ using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Config;   // villsa
+using CodeImp.DoomBuilder.Data;
 
 #endregion
 
@@ -238,6 +239,69 @@ namespace CodeImp.DoomBuilder.IO
 
         #endregion
 
+        // Rounds to the nearest integer (halves away from zero) and clamps to the Int16 range
+        private static int RoundToShort(float value)
+        {
+            double r = Math.Round((double)value, MidpointRounding.AwayFromZero);
+            if (r < short.MinValue) return short.MinValue;
+            if (r > short.MaxValue) return short.MaxValue;
+            return (int)r;
+        }
+
+        #region ================== Texture Hash Functions
+
+        private Dictionary<string, uint> texturehashlookup;
+        private HashSet<uint> knowntexturehashes;
+        private HashSet<string> warnedtextures;
+
+        // Builds fast lookups from the texture hash table (first entry of a name wins)
+        private void BuildTextureHashLookups()
+        {
+            texturehashlookup = new Dictionary<string, uint>(StringComparer.OrdinalIgnoreCase);
+            knowntexturehashes = new HashSet<uint>();
+            warnedtextures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
+            {
+                if (!texturehashlookup.ContainsKey(General.Map.TextureHashName[i]))
+                    texturehashlookup.Add(General.Map.TextureHashName[i], General.Map.TextureHashKey[i]);
+
+                knowntexturehashes.Add(General.Map.TextureHashKey[i]);
+            }
+        }
+
+        // Returns the hash to write for a texture name. originalhash is the hash that was read
+        // from the map file; it is only used to keep references to textures that could not be
+        // resolved to a name when the map was loaded (they would otherwise be lost on save).
+        private uint GetTextureHashToWrite(string name, uint originalhash)
+        {
+            uint hash;
+
+            if (string.IsNullOrEmpty(name) || name == "-" || name == "?")
+            {
+                // Unresolved reference from the loaded file? Keep it as it was.
+                if (originalhash != 0 && !knowntexturehashes.Contains(originalhash))
+                    return originalhash;
+
+                // "None" is stored as the hash of the "?" texture
+                if (texturehashlookup.TryGetValue("?", out hash))
+                    return hash;
+
+                return 0;
+            }
+
+            if (texturehashlookup.TryGetValue(name, out hash))
+                return hash;
+
+            // Not in the texture table: compute the hash instead of silently writing 0
+            if (warnedtextures.Add(name))
+                General.ErrorLogger.Add(ErrorType.Warning, "Texture \"" + name + "\" was not found in the loaded textures. Its hash was computed from the name.");
+
+            return WADReader.GetTextureNameHash(name);
+        }
+
+        #endregion
+
             #region ================== Reading
 
             // This reads a map from the file and returns a MapSet
@@ -402,8 +466,8 @@ namespace CodeImp.DoomBuilder.IO
 			for(i = 0; i < num; i++)
 			{
 				// Read properties from stream
-				x = reader.ReadInt32() / 65536;
-				y = reader.ReadInt32() / 65536;
+				x = (int)Math.Round(reader.ReadInt32() / 65536.0, MidpointRounding.AwayFromZero);
+				y = (int)Math.Round(reader.ReadInt32() / 65536.0, MidpointRounding.AwayFromZero);
 
 				// Create new item
 				v = map.CreateVertex(new Vector2D((float)x, (float)y));
@@ -601,7 +665,7 @@ namespace CodeImp.DoomBuilder.IO
 					if(Vector2D.ManhattanDistance(vertexlink[v1].Position, vertexlink[v2].Position) > 0.0001f)
 					{
 						l = map.CreateLinedef(vertexlink[v1], vertexlink[v2]);
-                        l.Update(stringflags, action, tag, action & 511, switchmask, new int[Linedef.NUM_ARGS]);
+                        l.Update(stringflags, action & ~511, tag, action & 511, switchmask, new int[Linedef.NUM_ARGS]);
 						l.UpdateCache();
 
 						// Line has a front side?
@@ -849,6 +913,8 @@ namespace CodeImp.DoomBuilder.IO
 			Dictionary<Sidedef, int> sidedefids = new Dictionary<Sidedef,int>();
 			Dictionary<Sector, int> sectorids = new Dictionary<Sector,int>();
 
+			BuildTextureHashLookups();
+
             //WriteMapInfo(map, mapname);   // DON'T USE
 
 			// First index everything
@@ -932,10 +998,10 @@ namespace CodeImp.DoomBuilder.IO
 
 				// Write properties to stream
 				// Write properties to stream
-				writer.Write((Int16)t.Position.x);
-				writer.Write((Int16)t.Position.y);
-				writer.Write((Int16)t.Position.z);
-				writer.Write((Int16)Angle2D.RealToDoom(t.Angle));
+				writer.Write((Int16)RoundToShort(t.Position.x));
+				writer.Write((Int16)RoundToShort(t.Position.y));
+				writer.Write((Int16)RoundToShort(t.Position.z));
+				writer.Write((Int16)(((Angle2D.RealToDoom(t.Angle) % 360) + 360) % 360));
 				writer.Write((UInt16)t.Type);
 				writer.Write((UInt16)flags);
                 writer.Write((short)t.Tag);
@@ -968,8 +1034,8 @@ namespace CodeImp.DoomBuilder.IO
 			foreach(Vertex v in map.Vertices)
 			{
 				// Write properties to stream
-				writer.Write((Int32)((int)Math.Round(v.Position.x) * 65536));
-				writer.Write((Int32)((int)Math.Round(v.Position.y) * 65536));
+				writer.Write((Int32)(RoundToShort(v.Position.x) * 65536));
+				writer.Write((Int32)(RoundToShort(v.Position.y) * 65536));
 			}
 
 			// Find insert position and remove old lump
@@ -1012,7 +1078,7 @@ namespace CodeImp.DoomBuilder.IO
 				writer.Write((UInt16)vertexids[l.Start]);
 				writer.Write((UInt16)vertexids[l.End]);
 				writer.Write((UInt32)(flags | l.SwitchMask));
-                writer.Write((UInt16)(l.Action | l.Activate));
+                writer.Write((UInt16)((l.Action & 511) | (l.Activate & ~511)));
                 writer.Write((UInt16)l.Tag);
 
 				// Front sidedef
@@ -1053,57 +1119,13 @@ namespace CodeImp.DoomBuilder.IO
 			// Go for all sidedefs
 			foreach(Sidedef sd in map.Sidedefs)
 			{
-                string ht;
-                string lt;
-                string mt;
-
 				// Write properties to stream
 				writer.Write((Int16)sd.OffsetX);
 				writer.Write((Int16)sd.OffsetY);
 
-                low = 0;
-                mid = 0;
-                top = 0;
-
-                ht = sd.HighTexture;
-                lt = sd.LowTexture;
-                mt = sd.MiddleTexture;
-
-                if (ht == "-")
-                    ht = "?";
-
-                if (lt == "-")
-                    lt = "?";
-
-                if (mt == "-")
-                    mt = "?";
-
-                for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
-                {
-                    if (ht == General.Map.TextureHashName[i])
-                    {
-                        top = (int)General.Map.TextureHashKey[i];
-                        break;
-                    }
-                }
-
-                for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
-                {
-                    if (lt == General.Map.TextureHashName[i])
-                    {
-                        low = (int)General.Map.TextureHashKey[i];
-                        break;
-                    }
-                }
-
-                for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
-                {
-                    if (mt == General.Map.TextureHashName[i])
-                    {
-                        mid = (int)General.Map.TextureHashKey[i];
-                        break;
-                    }
-                }
+                top = (int)GetTextureHashToWrite(sd.HighTexture, sd.HashTexHigh);
+                low = (int)GetTextureHashToWrite(sd.LowTexture, sd.HashTexLow);
+                mid = (int)GetTextureHashToWrite(sd.MiddleTexture, sd.HashTexMid);
 
                 /*foreach (TextureIndexInfo tp in General.Map.Config.D64TextureIndex)
                 {
@@ -1242,42 +1264,12 @@ namespace CodeImp.DoomBuilder.IO
 			// Go for all sectors
 			foreach(Sector s in map.Sectors)
 			{
-                string ft;
-                string ct;
-
 				// Write properties to stream
 				writer.Write((Int16)s.FloorHeight);
 				writer.Write((Int16)s.CeilHeight);
 
-                flr = 0;
-                ceil = 0;
-
-                ft = s.FloorTexture;
-                ct = s.CeilTexture;
-
-                if (ft == "-")
-                    ft = "?";
-
-                if (ct == "-")
-                    ct = "?";
-
-                for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
-                {
-                    if (ft == General.Map.TextureHashName[i])
-                    {
-                        flr = (int)General.Map.TextureHashKey[i];
-                        break;
-                    }
-                }
-
-                for (int i = 0; i < General.Map.TextureHashKey.Count; i++)
-                {
-                    if (ct == General.Map.TextureHashName[i])
-                    {
-                        ceil = (int)General.Map.TextureHashKey[i];
-                        break;
-                    }
-                }
+                flr = (int)GetTextureHashToWrite(s.FloorTexture, s.HashFloor);
+                ceil = (int)GetTextureHashToWrite(s.CeilTexture, s.HashCeiling);
 
                 /*foreach (TextureIndexInfo tp in General.Map.Config.D64TextureIndex)
                 {
