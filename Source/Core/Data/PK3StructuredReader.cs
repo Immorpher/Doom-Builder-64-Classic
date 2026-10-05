@@ -375,43 +375,6 @@ namespace CodeImp.DoomBuilder.Data
 
 		#endregion
 
-		#region ================== Decorate
-
-		// This finds and returns a sprite stream
-		public override List<Stream> GetDecorateData(string pname)
-		{
-			List<Stream> streams = new List<Stream>();
-			string[] allfilenames;
-			
-			// Error when suspended
-			if(issuspended) throw new Exception("Data reader is suspended");
-			
-			// Find in root directory
-			string filename = Path.GetFileName(pname);
-			string pathname = Path.GetDirectoryName(pname);
-			
-			if(filename.IndexOf('.') > -1)
-			{
-				allfilenames = new string[1];
-				allfilenames[0] = Path.Combine(pathname, filename);
-			}
-			else
-				allfilenames = GetAllFilesWithTitle(pathname, filename, false);
-
-			foreach(string foundfile in allfilenames)
-			{
-				streams.Add(LoadFile(foundfile));
-			}
-			
-			// Find in any of the wad files
-			for(int i = wads.Count - 1; i >= 0; i--)
-				streams.AddRange(wads[i].GetDecorateData(pname));
-			
-			return streams;
-		}
-
-		#endregion
-		
 		#region ================== Methods
 		
 		// This loads the images in this directory

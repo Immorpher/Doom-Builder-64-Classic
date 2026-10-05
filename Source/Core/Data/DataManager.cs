@@ -31,7 +31,6 @@ using CodeImp.DoomBuilder.Config;
 using System.Threading;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Windows;
-using CodeImp.DoomBuilder.ZDoom;
 
 #endregion
 
@@ -49,7 +48,6 @@ namespace CodeImp.DoomBuilder.Data
 		
 		// Data containers
 		private List<DataReader> containers;
-		private DataReader currentreader;
 		
         // villsa - thing palettes
         private Dictionary<string, Playpal> thingpalettes;
@@ -89,8 +87,6 @@ namespace CodeImp.DoomBuilder.Data
 		// Used images
 		private Dictionary<long, long> usedimages;
 		
-		// Things combined with things created from Decorate
-		private DecorateParser decorate;
 		private List<ThingCategory> thingcategories;
 		private Dictionary<int, ThingTypeInfo> thingtypes;
 		
@@ -123,7 +119,6 @@ namespace CodeImp.DoomBuilder.Data
 		public ImageData WhiteTexture { get { return whitetexture; } }
 		public List<ThingCategory> ThingCategories { get { return thingcategories; } }
 		public ICollection<ThingTypeInfo> ThingTypes { get { return thingtypes.Values; } }
-		public DecorateParser Decorate { get { return decorate; } }
 		internal ICollection<MatchingTextureSet> TextureSets { get { return texturesets; } }
 		internal ICollection<ResourceTextureSet> ResourceTextureSets { get { return resourcetextures; } }
 		internal AllTextureSet AllTextureSet { get { return alltextures; } }
@@ -230,7 +225,7 @@ namespace CodeImp.DoomBuilder.Data
 		// This loads all data resources
 		internal void Load(DataLocationList locations)
 		{
-			int texcount, flatcount, spritecount, thingcount, colormapcount;
+			int texcount, flatcount, spritecount, colormapcount;
 			Dictionary<long, ImageData> texturesonly = new Dictionary<long, ImageData>();
 			Dictionary<long, ImageData> colormapsonly = new Dictionary<long, ImageData>();
 			Dictionary<long, ImageData> flatsonly = new Dictionary<long, ImageData>();
@@ -322,7 +317,6 @@ namespace CodeImp.DoomBuilder.Data
             }
 
             LoadSprites();
-            thingcount = LoadDecorateThings();
             spritecount = LoadThingSprites();
             LoadInternalSprites();
 			
@@ -416,7 +410,7 @@ namespace CodeImp.DoomBuilder.Data
 			StartBackgroundLoader();
 			
 			// Output info
-			General.WriteLogLine("Loaded " + texcount + " textures, " + flatcount + " flats, " + colormapcount + " colormaps, " + spritecount + " sprites, " + thingcount + " decorate things");
+			General.WriteLogLine("Loaded " + texcount + " textures, " + flatcount + " flats, " + colormapcount + " colormaps, " + spritecount + " sprites");
 		}
 		
 		// This unloads all data
@@ -429,9 +423,6 @@ namespace CodeImp.DoomBuilder.Data
 			previews.Dispose();
 			previews = null;
 
-            // Dispose decorate
-            decorate.Dispose();
-
             // Dispose resources
             foreach(KeyValuePair<long, ImageData> i in textures) i.Value.Dispose();
 			foreach(KeyValuePair<long, ImageData> i in flats) i.Value.Dispose();
@@ -443,7 +434,6 @@ namespace CodeImp.DoomBuilder.Data
 			containers.Clear();
 
             // Trash collections
-            decorate = null;
             containers = null;
 			textures = null;
             thingpalettes = null;   // villsa
@@ -1327,116 +1317,6 @@ namespace CodeImp.DoomBuilder.Data
 
         #region ================== Things
 
-        // This loads the things from Decorate
-        private int LoadDecorateThings()
-		{
-			int counter = 0;
-			
-			// Create new parser
-			decorate = new DecorateParser();
-			decorate.OnInclude = LoadDecorateFromLocation;
-			
-			// Only load these when the game configuration supports the use of decorate
-			if(!string.IsNullOrEmpty(General.Map.Config.DecorateGames))
-			{
-				// Go for all opened containers
-				foreach(DataReader dr in containers)
-				{
-					// Load Decorate info cumulatively (the last Decorate is added to the previous)
-					// I'm not sure if this is the right thing to do though.
-					currentreader = dr;
-					List<Stream> decostreams = dr.GetDecorateData("DECORATE");
-					foreach(Stream decodata in decostreams)
-					{
-						// Parse the data
-						decodata.Seek(0, SeekOrigin.Begin);
-						decorate.Parse(decodata, "DECORATE");
-						
-						// Check for errors
-						if(decorate.HasError)
-						{
-							General.ErrorLogger.Add(ErrorType.Error, "Unable to parse DECORATE data from location " +
-								dr.Location.location + ". " + decorate.ErrorDescription + " on line " + decorate.ErrorLine +
-								" in '" + decorate.ErrorSource + "'");
-							break;
-						}
-					}
-				}
-				
-				currentreader = null;
-				
-				if(!decorate.HasError)
-				{
-					// Go for all actors in the decorate to make things or update things
-					foreach(ActorStructure actor in decorate.Actors)
-					{
-						// Check if we want to add this actor
-						if(actor.DoomEdNum > 0)
-						{
-							string catname = actor.GetPropertyAllValues("$category").ToLowerInvariant();
-							if(string.IsNullOrEmpty(catname.Trim())) catname = "decorate";
-							
-							// Check if we can find this thing in our existing collection
-							if(thingtypes.ContainsKey(actor.DoomEdNum))
-							{
-								// Update the thing
-								thingtypes[actor.DoomEdNum].ModifyByDecorateActor(actor);
-							}
-							else
-							{
-								// Find the category to put the actor in
-								// First search by Title, then search by Name
-								ThingCategory cat = null;
-								foreach(ThingCategory c in thingcategories)
-								{
-									if(c.Title.ToLowerInvariant() == catname) cat = c;
-								}
-								if(cat == null)
-								{
-									foreach(ThingCategory c in thingcategories)
-									{
-										if(c.Name.ToLowerInvariant() == catname) cat = c;
-									}
-								}
-								
-								// Make the category if needed
-								if(cat == null)
-								{
-									string catfullname = actor.GetPropertyAllValues("$category");
-									if(string.IsNullOrEmpty(catfullname.Trim())) catfullname = "Decorate";
-									cat = new ThingCategory(catname, catfullname);
-									thingcategories.Add(cat);
-								}
-								
-								// Add new thing
-								ThingTypeInfo t = new ThingTypeInfo(cat, actor);
-								cat.AddThing(t);
-								thingtypes.Add(t.Index, t);
-							}
-							
-							// Count
-							counter++;
-						}
-					}
-				}
-			}
-			
-			// Output info
-			return counter;
-		}
-		
-		// This loads Decorate data from a specific file or lump name
-		private void LoadDecorateFromLocation(DecorateParser parser, string location)
-		{
-			//General.WriteLogLine("Including DECORATE resource '" + location + "'...");
-			List<Stream> decostreams = currentreader.GetDecorateData(location);
-			foreach(Stream decodata in decostreams)
-			{
-				// Parse this data
-				parser.Parse(decodata, location);
-			}
-		}
-		
 		// This gets thing information by index
 		public ThingTypeInfo GetThingInfo(int thingtype)
 		{

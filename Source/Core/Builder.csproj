@@ -446,8 +446,6 @@
     <Compile Include="IO\Configuration.cs" />
     <Compile Include="General\General.cs" />
     <Compile Include="IO\ClippedStream.cs" />
-    <Compile Include="IO\HexenMapSetIO.cs" />
-    <Compile Include="IO\DoomMapSetIO.cs" />
     <Compile Include="IO\FileImageReader.cs" />
     <Compile Include="IO\IImageReader.cs" />
     <Compile Include="IO\IMapSetIO.cs" />
@@ -455,7 +453,6 @@
     <Compile Include="IO\Lump.cs" />
     <Compile Include="IO\NestedWad.cs" />
     <Compile Include="IO\MapSetIO.cs" />
-    <Compile Include="IO\UniversalMapSetIO.cs" />
     <Compile Include="IO\UnknownImageReader.cs" />
     <Compile Include="IO\WAD.cs" />
     <Compile Include="Windows\MainForm.cs">
@@ -732,7 +729,6 @@
 	<Compile Include="Rendering\SurfaceEntryCollection.cs" />
     <Compile Include="Rendering\SurfaceManager.cs" />
 	<Compile Include="Rendering\SurfaceUpdate.cs" />
-    <Compile Include="Types\ThingClassHandler.cs" />
     <Compile Include="Types\ThingTypeHandler.cs" />
     <Compile Include="Windows\DelayedForm.cs">
       <SubType>Form</SubType>
@@ -773,14 +769,10 @@
     <Compile Include="Windows\VertexEditForm.Designer.cs">
       <DependentUpon>VertexEditForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ZDoom\ActorStructure.cs" />
     <Compile Include="ZDoom\PatchStructure.cs" />
-    <Compile Include="ZDoom\StateGoto.cs" />
     <Compile Include="ZDoom\TexturesParser.cs" />
     <Compile Include="ZDoom\TextureStructure.cs" />
     <Compile Include="ZDoom\ZDTextParser.cs" />
-    <Compile Include="ZDoom\DecorateParser.cs" />
-    <Compile Include="ZDoom\StateStructure.cs" />
     <Compile Include="Editing\EditingManager.cs" />
     <EmbeddedResource Include="Controls\DockersControl.resx">
       <DependentUpon>DockersControl.cs</DependentUpon>

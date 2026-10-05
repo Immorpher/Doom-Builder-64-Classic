@@ -77,7 +77,6 @@ namespace CodeImp.DoomBuilder.Config
 		private int makedooraction;
 		private int[] makedoorargs;
 		private bool linetagindicatesectors;
-		private string decorategames;
         private string skyflatname;
 		private int maxtexturenamelength;
 		private int leftboundary;
@@ -183,7 +182,6 @@ namespace CodeImp.DoomBuilder.Config
 		public int MakeDoorAction { get { return makedooraction; } }
 		public int[] MakeDoorArgs { get { return makedoorargs; } }
 		public bool LineTagIndicatesSectors { get { return linetagindicatesectors ; } }
-		public string DecorateGames { get { return decorategames; } }
         public string SkyFlatName { get { return skyflatname; } }
 		public int MaxTextureNamelength { get { return maxtexturenamelength; } }
 		public int LeftBoundary { get { return leftboundary; } }
@@ -309,7 +307,6 @@ namespace CodeImp.DoomBuilder.Config
 			makedoortrack = cfg.ReadSetting("makedoortrack", "-");
 			makedooraction = cfg.ReadSetting("makedooraction", 0);
 			linetagindicatesectors = cfg.ReadSetting("linetagindicatesectors", false);
-			decorategames = cfg.ReadSetting("decorategames", "");
             skyflatname = cfg.ReadSetting("skyflatname", "F_SKY1");
 			maxtexturenamelength = cfg.ReadSetting("maxtexturenamelength", 8);
 			leftboundary = cfg.ReadSetting("leftboundary", -32768);

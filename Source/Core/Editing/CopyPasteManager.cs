@@ -111,7 +111,7 @@ namespace CodeImp.DoomBuilder.Editing
 					MapSet copyset = General.Map.Map.CloneMarked();
 					
 					// Convert flags and activations to UDMF fields, if needed
-					if(!(General.Map.FormatInterface is UniversalMapSetIO)) copyset.TranslateToUDMF();
+					copyset.TranslateToUDMF();
 
 					// Write data to stream
 					MemoryStream memstream = new MemoryStream();
@@ -189,7 +189,7 @@ namespace CodeImp.DoomBuilder.Editing
 			General.Map.Map.InvertAllMarks();
 			
 			// Convert UDMF fields back to flags and activations, if needed
-			if(!(General.Map.FormatInterface is UniversalMapSetIO)) General.Map.Map.TranslateFromUDMF();
+			General.Map.Map.TranslateFromUDMF();
 
 			// Modify tags and actions if preferred
 			if(options.ChangeTags == PasteOptions.TAGS_REMOVE) Tools.RemoveMarkedTags();
@@ -222,7 +222,7 @@ namespace CodeImp.DoomBuilder.Editing
 					MapSet copyset = General.Map.Map.CloneMarked();
 					
 					// Convert flags and activations to UDMF fields, if needed
-					if(!(General.Map.FormatInterface is UniversalMapSetIO)) copyset.TranslateToUDMF();
+					copyset.TranslateToUDMF();
 					
 					// Write data to stream
 					MemoryStream memstream = new MemoryStream();
@@ -282,7 +282,7 @@ namespace CodeImp.DoomBuilder.Editing
 						General.Map.Map.InvertAllMarks();
 
 						// Convert UDMF fields back to flags and activations, if needed
-						if(!(General.Map.FormatInterface is UniversalMapSetIO)) General.Map.Map.TranslateFromUDMF();
+						General.Map.Map.TranslateFromUDMF();
 						
 						// Modify tags and actions if preferred
 						if(options.ChangeTags == PasteOptions.TAGS_REMOVE) Tools.RemoveMarkedTags();
