@@ -110,10 +110,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
                         sectorcolor = Thing.Sector.ThingColor.GetColor();
 				}
 
-                // styd: Add a feature when things have the nightmare flag, their sprites change color to green.
-                if (Thing.IsFlagSet("4096"))
+                // Things with the nightmare flag are shaded green (#00FF00), keeping the sector light level.
+                if (Thing.IsFlagSet("4096") && (Thing.Type != 0) && (Thing.Type != 89))
                 {
-                    sectorcolor = new PixelColor(255, 64, 255, 0).ToInt();
+                    sectorcolor = (sectorcolor & 0x0000FF00) | unchecked((int)0xFF000000);
                 }
 
                 // villsa 9/11/11 (builder64) render camera/trigger icon

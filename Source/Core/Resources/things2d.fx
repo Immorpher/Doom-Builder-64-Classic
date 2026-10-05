@@ -98,6 +98,13 @@ float4 ps_sprite(PixelData pd) : COLOR
 	return float4(c.rgb, c.a * rendersettings.w);
 }
 
+// Pixel shader for sprite drawing, multiplied by the vertex color (used for Nightmare things)
+float4 ps_sprite_tint(PixelData pd) : COLOR
+{
+	float4 c = tex2D(texture1sprite, pd.uv);
+	return float4(c.rgb * pd.color.rgb, c.a * rendersettings.w);
+}
+
 // Technique for shader model 2.0
 technique SM20
 {
@@ -111,5 +118,11 @@ technique SM20
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
 	    PixelShader = compile ps_2_0 ps_sprite();
+	}
+
+	pass p2
+	{
+	    VertexShader = compile vs_2_0 vs_transform();
+	    PixelShader = compile ps_2_0 ps_sprite_tint();
 	}
 }

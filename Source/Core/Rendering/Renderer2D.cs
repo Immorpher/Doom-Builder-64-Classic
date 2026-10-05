@@ -1089,6 +1089,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		{
 			int selectioncolor = General.Colors.Selection.ToInt();
 			Dictionary<ImageData, List<FlatVertex>> spriteverts = new Dictionary<ImageData, List<FlatVertex>>();
+			Dictionary<ImageData, List<FlatVertex>> nightmareverts = new Dictionary<ImageData, List<FlatVertex>>();
+			int nightmarecolor = unchecked((int)0xFF00FF00);
 
 			foreach(ThingDrawInfo info in visible)
 			{
@@ -1139,17 +1141,21 @@ namespace CodeImp.DoomBuilder.Rendering
 				// Don't draw tiny little sprites, the box and arrow are enough then
 				if(Math.Max(spritewidth, spriteheight) < MINIMUM_SPRITE_RADIUS) continue;
 				
+				// Things with the Nightmare flag are shaded green (unless selected, then the selection color is shown)
+				bool nightmare = !t.Selected && t.IsFlagSet("4096");
+				Dictionary<ImageData, List<FlatVertex>> target = nightmare ? nightmareverts : spriteverts;
+				
 				List<FlatVertex> list;
-				if(!spriteverts.TryGetValue(sprite, out list))
+				if(!target.TryGetValue(sprite, out list))
 				{
 					list = new List<FlatVertex>();
-					spriteverts.Add(sprite, list);
+					target.Add(sprite, list);
 				}
 				
-				AddThingSpriteVerts(list, info.screenpos, spritewidth, spriteheight, (t.Selected ? selectioncolor : 0xFFFFFF), frames[frameindex].Mirror);
+				AddThingSpriteVerts(list, info.screenpos, spritewidth, spriteheight, (nightmare ? nightmarecolor : (t.Selected ? selectioncolor : 0xFFFFFF)), frames[frameindex].Mirror);
 			}
 			
-			if(spriteverts.Count == 0) return;
+			if((spriteverts.Count == 0) && (nightmareverts.Count == 0)) return;
 			
 			// Draw the sprites, one texture at a time
 			graphics.Shaders.Things2D.BeginPass(1);
@@ -1166,6 +1172,25 @@ namespace CodeImp.DoomBuilder.Rendering
 				DrawThingVerts(group.Value.ToArray(), group.Value.Count);
 			}
 			graphics.Shaders.Things2D.EndPass();
+			
+			// Draw the Nightmare sprites, multiplied by green
+			if(nightmareverts.Count > 0)
+			{
+				graphics.Shaders.Things2D.BeginPass(2);
+				foreach(KeyValuePair<ImageData, List<FlatVertex>> group in nightmareverts)
+				{
+					ImageData sprite = group.Key;
+					if((sprite.Texture == null) || sprite.Texture.Disposed) sprite.CreateTexture();
+					if(sprite.Texture == null) continue;
+					
+					graphics.Device.SetTexture(0, sprite.Texture);
+					graphics.Shaders.Things2D.Texture1 = sprite.Texture;
+					graphics.Shaders.Things2D.ApplySettings();
+					
+					DrawThingVerts(group.Value.ToArray(), group.Value.Count);
+				}
+				graphics.Shaders.Things2D.EndPass();
+			}
 		}
 
         // This draws a set of things
