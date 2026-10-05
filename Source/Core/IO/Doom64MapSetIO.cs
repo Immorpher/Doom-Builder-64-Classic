@@ -743,12 +743,12 @@ namespace CodeImp.DoomBuilder.IO
 								}
 								else
 								{
-									General.ErrorLogger.Add(ErrorType.Warning, "Sidedef " + s1 + " references invalid sector " + sc + ". Sidedef has been removed.");
+									General.ErrorLogger.Add(ErrorType.Warning, "Sidedef " + s1 + " references invalid sector " + sc + ". Sidedef has been removed and will be permanently lost when the map is saved.");
 								}
 							}
 							else
 							{
-								General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references invalid sidedef " + s1 + ". Sidedef has been removed.");
+								General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references invalid sidedef " + s1 + ". Sidedef has been removed and will be permanently lost when the map is saved.");
 							}
 						}
 
@@ -827,23 +827,23 @@ namespace CodeImp.DoomBuilder.IO
 								}
 								else
 								{
-									General.ErrorLogger.Add(ErrorType.Warning, "Sidedef " + s2 + " references invalid sector " + sc + ". Sidedef has been removed.");
+									General.ErrorLogger.Add(ErrorType.Warning, "Sidedef " + s2 + " references invalid sector " + sc + ". Sidedef has been removed and will be permanently lost when the map is saved.");
 								}
 							}
 							else
 							{
-								General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references invalid sidedef " + s2 + ". Sidedef has been removed.");
+								General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references invalid sidedef " + s2 + ". Sidedef has been removed and will be permanently lost when the map is saved.");
 							}
 						}
 					}
 					else
 					{
-						General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " is zero-length. Linedef has been removed.");
+						General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " is zero-length. Linedef has been removed and will be permanently lost when the map is saved.");
 					}
 				}
 				else
 				{
-					General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references one or more invalid vertices. Linedef has been removed.");
+					General.ErrorLogger.Add(ErrorType.Warning, "Linedef " + i + " references one or more invalid vertices. Linedef has been removed and will be permanently lost when the map is saved.");
 				}
 			}
 

@@ -593,8 +593,20 @@ namespace CodeImp.DoomBuilder.Map
             if (cindex >= 256)
             {
                 cindex -= 256;
-                color = light[cindex];
-                color.isDirect = false;   // styd: true LIGHTS input, to be preserved as such
+
+                if ((light != null) && (cindex < light.Length))
+                {
+                    color = light[cindex];
+                    color.isDirect = false;   // styd: true LIGHTS input, to be preserved as such
+                }
+                else
+                {
+                    // The LIGHTS lump is missing this entry (corrupt or truncated map). Don't fail
+                    // to load the whole map; fall back to full brightness and report it.
+                    General.ErrorLogger.Add(ErrorType.Warning, "A sector references LIGHTS entry " + cindex + ", which does not exist. Full brightness is used instead.");
+                    color = new Lights(255, 255, 255, 0);
+                    color.isDirect = true;
+                }
             }
             else
             {

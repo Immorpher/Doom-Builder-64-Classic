@@ -402,7 +402,6 @@ namespace CodeImp.DoomBuilder.Windows
                     if (l.Activate > 0)
                     {
                         // 20120219 villsa
-                        l.Activate -= (l.Activate & 511);
                         PreSetActivationFlag(activationtypered, l.Activate, 512);
                         PreSetActivationFlag(activationtypeblue, l.Activate, 1024);
                         PreSetActivationFlag(activationtypeyellow, l.Activate, 2048);
@@ -513,7 +512,6 @@ namespace CodeImp.DoomBuilder.Windows
             foreach (Linedef l in lines)
             {
                 // 20120219 villsa
-                l.Activate -= (l.Activate & 511);
                 CheckActivationState(activationtypered, l.Activate, 512);
                 CheckActivationState(activationtypeblue, l.Activate, 1024);
                 CheckActivationState(activationtypeyellow, l.Activate, 2048);
