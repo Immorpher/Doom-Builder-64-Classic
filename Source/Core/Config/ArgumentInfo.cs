@@ -66,7 +66,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.type = cfg.ReadSetting(argspath + ".arg" + istr + ".type", 0);
 
 			// Determine enum type
-			EnumList enumlist = null;
 			IDictionary argdic = cfg.ReadSetting(argspath + ".arg" + istr, new Hashtable());
 			if(argdic.Contains("enum"))
 			{

@@ -115,7 +115,7 @@ namespace CodeImp.DoomBuilder.Map
 				case UniversalType.Float:
 				{
 					float v = 0.0f;
-					try { v = (float)value; } catch(NullReferenceException e) { }
+					try { v = (float)value; } catch(NullReferenceException) { }
 					s.rwFloat(ref v);
 					value = v;
 					break;
@@ -133,7 +133,7 @@ namespace CodeImp.DoomBuilder.Map
 				case UniversalType.ThingTag:
 				{
 					int v = 0;
-					try { v = (int)value; } catch(NullReferenceException e) { }
+					try { v = (int)value; } catch(NullReferenceException) { }
 					s.rwInt(ref v);
 					value = v;
 					break;
@@ -142,7 +142,7 @@ namespace CodeImp.DoomBuilder.Map
 				case UniversalType.Boolean:
 				{
 					bool v = false;
-					try { v = (bool)value; } catch(NullReferenceException e) { }
+					try { v = (bool)value; } catch(NullReferenceException) { }
 					s.rwBool(ref v);
 					value = v;
 					break;

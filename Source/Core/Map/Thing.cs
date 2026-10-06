@@ -145,7 +145,7 @@ namespace CodeImp.DoomBuilder.Map
 		}
 		
 		// Serialize / deserialize
-		internal void ReadWrite(IReadWriteStream s)
+		internal new void ReadWrite(IReadWriteStream s)
 		{
 			if(!s.IsWriting) BeforePropsChange();
 			
@@ -232,7 +232,6 @@ namespace CodeImp.DoomBuilder.Map
 		// This determines which sector the thing is in and links it
 		public void DetermineSector(VisualBlockMap blockmap)
 		{
-			Linedef nl;
 
 			// Find nearest sectors using the blockmap
 			List<Sector> possiblesectors = blockmap.GetBlock(blockmap.GetBlockCoordinates(pos)).Sectors;

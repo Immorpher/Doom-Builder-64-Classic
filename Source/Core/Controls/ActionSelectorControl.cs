@@ -67,7 +67,7 @@ namespace CodeImp.DoomBuilder.Controls
 				{
 					val = Convert.ToInt32(number.Text);
 				}
-				catch(Exception e) { }
+				catch(Exception) { }
 			}
 			
 			return val;

@@ -175,6 +175,18 @@ namespace CodeImp.DoomBuilder.Geometry
 		{
 			return (a.x != b.x) || (a.y != b.y);
 		}
+
+		// This compares for equality
+		public override bool Equals(object obj)
+		{
+			return (obj is Vector2D) && (this == (Vector2D)obj);
+		}
+
+		// This returns a hash code that matches the equality comparison
+		public override int GetHashCode()
+		{
+			return x.GetHashCode() ^ (y.GetHashCode() << 1);
+		}
 		
 		// This reflects the vector v over mirror m
 		// Note that mirror m must be normalized!

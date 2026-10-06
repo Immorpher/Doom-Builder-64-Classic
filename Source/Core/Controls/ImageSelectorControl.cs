@@ -45,7 +45,9 @@ namespace CodeImp.DoomBuilder.Controls
 		#region ================== Variables
 
 		private Bitmap bmp;
+		#pragma warning disable 0414 // Assigned for future use
 		private bool ispressed;
+		#pragma warning restore 0414
 		private bool ismouseinside;
 		private MouseButtons button;
 		protected bool allowclear;

@@ -112,6 +112,19 @@ namespace CodeImp.DoomBuilder.Geometry
 			return (a.line != b.line) || (a.front != b.front);
 		}
 
+		// This compares for equality
+		public override bool Equals(object obj)
+		{
+			LinedefSide other = obj as LinedefSide;
+			return !object.ReferenceEquals(other, null) && (line == other.line) && (front == other.front);
+		}
+
+		// This returns a hash code that matches the equality comparison
+		public override int GetHashCode()
+		{
+			return ((line != null) ? line.GetHashCode() : 0) ^ (front ? 1 : 0);
+		}
+
 		#endregion
 	}
 }

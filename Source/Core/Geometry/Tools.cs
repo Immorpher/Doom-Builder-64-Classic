@@ -368,11 +368,11 @@ namespace CodeImp.DoomBuilder.Geometry
 			while(true);
 		}
 
-		/// <summary>
-		/// This finds the closest path from one vertex to another.
-		/// When turnatends is true, the algorithm will continue at the other side of the
-		/// line when a dead end has been reached. Returns null when no path could be found.
-		/// </summary>
+		// <summary>
+		// This finds the closest path from one vertex to another.
+		// When turnatends is true, the algorithm will continue at the other side of the
+		// line when a dead end has been reached. Returns null when no path could be found.
+		// </summary>
 		//public static List<LinedefSide> FindClosestPath(Vertex start, float startangle, Vertex end, bool turnatends)
 		//{
 

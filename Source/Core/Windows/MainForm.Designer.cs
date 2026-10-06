@@ -1885,7 +1885,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.ToolStripMenuItem itemthingsfilter;
         private System.Windows.Forms.ToolStripSeparator seperatorviewthings;
         private System.Windows.Forms.ToolStripMenuItem itemviewnormal;
-		private System.Windows.Forms.ToolStripMenuItem itemviewbrightness;
 		private System.Windows.Forms.ToolStripMenuItem itemviewfloors;
 		private System.Windows.Forms.ToolStripMenuItem itemviewceilings;
         private System.Windows.Forms.ToolStripSeparator seperatorviewzoom;

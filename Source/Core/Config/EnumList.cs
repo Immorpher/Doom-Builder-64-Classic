@@ -55,7 +55,6 @@ namespace CodeImp.DoomBuilder.Config
 		// Constructor to load from dictionary
 		internal EnumList(IDictionary dic)
 		{
-			int index;
 
 			// Read the dictionary
 			foreach(DictionaryEntry de in dic)
@@ -69,7 +68,6 @@ namespace CodeImp.DoomBuilder.Config
 		// Constructor to load from configuration
 		internal EnumList(string name, Configuration cfg)
 		{
-			int index;
 			
 			// Read the list from configuration
 			IDictionary dic = cfg.ReadSetting("enums." + name, new Hashtable());

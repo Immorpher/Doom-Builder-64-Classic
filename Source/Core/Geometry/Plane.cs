@@ -112,8 +112,8 @@ namespace CodeImp.DoomBuilder.Geometry
 		
 		/// <summary>
 		/// This returns the smallest distance to the plane and the side on which the point lies.
-		/// > 0 means the point lies on the front of the plane
-		/// < 0 means the point lies behind the plane
+		/// &gt; 0 means the point lies on the front of the plane
+		/// &lt; 0 means the point lies behind the plane
 		/// </summary>
 		public float Distance(Vector3D p)
 		{

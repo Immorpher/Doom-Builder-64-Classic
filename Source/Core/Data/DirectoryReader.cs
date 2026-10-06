@@ -263,7 +263,6 @@ namespace CodeImp.DoomBuilder.Data
 
 				default:
 					throw new ArgumentException("Invalid image format specified!");
-					return null;
 			}
 		}
 

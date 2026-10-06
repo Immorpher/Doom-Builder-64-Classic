@@ -558,7 +558,6 @@ namespace CodeImp.DoomBuilder.Windows
 			string undodesc = "linedef";
 			Sector s;
 			int index;
-            int activationflag; // villsa
 			
 			// Verify the tag
 			if(General.Map.FormatInterface.HasLinedefTag && ((tag.GetResult(0) < General.Map.FormatInterface.MinTag) || (tag.GetResult(0) > General.Map.FormatInterface.MaxTag)))

@@ -91,5 +91,17 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			return (a.tag != b.tag) || (a.type != b.type);
 		}
+
+		// This compares for equality
+		public override bool Equals(object obj)
+		{
+			return (obj is Association) && (this == (Association)obj);
+		}
+
+		// This returns a hash code that matches the equality comparison
+		public override int GetHashCode()
+		{
+			return tag.GetHashCode() ^ (type.GetHashCode() << 1);
+		}
 	}
 }

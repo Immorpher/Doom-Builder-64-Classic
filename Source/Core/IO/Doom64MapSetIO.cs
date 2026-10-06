@@ -1077,7 +1077,7 @@ namespace CodeImp.DoomBuilder.IO
 				// Write properties to stream
 				writer.Write((UInt16)vertexids[l.Start]);
 				writer.Write((UInt16)vertexids[l.End]);
-				writer.Write((UInt32)(flags | l.SwitchMask));
+				writer.Write((UInt32)(flags | unchecked((uint)l.SwitchMask)));
                 writer.Write((UInt16)((l.Action & 511) | (l.Activate & ~511)));
                 writer.Write((UInt16)l.Tag);
 

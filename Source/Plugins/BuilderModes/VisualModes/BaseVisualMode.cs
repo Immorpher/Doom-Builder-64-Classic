@@ -120,7 +120,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			}
 		}
 
-		public IRenderer3D Renderer { get { return renderer; } }
+		public new IRenderer3D Renderer { get { return renderer; } }
 		
 		public bool IsSingleSelection { get { return singleselection; } }
 		public bool SelectionChanged { get { return selectionchanged; } set { selectionchanged |= value; } }

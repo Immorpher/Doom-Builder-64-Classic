@@ -131,6 +131,18 @@ namespace CodeImp.DoomBuilder.Geometry
 			return (a.x != b.x) || (a.y != b.y) || (a.z != b.z);
 		}
 
+		// This compares for equality
+		public override bool Equals(object obj)
+		{
+			return (obj is Vector3D) && (this == (Vector3D)obj);
+		}
+
+		// This returns a hash code that matches the equality comparison
+		public override int GetHashCode()
+		{
+			return x.GetHashCode() ^ (y.GetHashCode() << 1) ^ (z.GetHashCode() << 2);
+		}
+
 		// This calculates the cross product
 		public static Vector3D CrossProduct(Vector3D a, Vector3D b)
 		{

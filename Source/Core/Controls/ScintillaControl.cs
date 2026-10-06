@@ -108,8 +108,10 @@ namespace CodeImp.DoomBuilder.Controls
 		public event MarginClickHandler MarginClick;
 		public event NeedShownHandler NeedShown;
 		public event PaintedHandler Painted;
+		#pragma warning disable 0067 // Raising these events is currently commented out
 		public event UserListSelectionHandler UserListSelection;
 		public event URIDroppedHandler URIDropped;
+		#pragma warning restore 0067
 		public event DwellStartHandler DwellStart;
 		public event DwellEndHandler DwellEnd;
 		public event ZoomHandler Zoom;
@@ -1847,7 +1849,7 @@ namespace CodeImp.DoomBuilder.Controls
 
 		/// <summary>
 		/// Change the way control characters are displayed:
-		/// If symbol is < 32, keep the drawn way, else, use the given character.
+		/// If symbol is &lt; 32, keep the drawn way, else, use the given character.
 		/// Get the way control characters are displayed.
 		/// 
 		/// </summary>
@@ -2532,7 +2534,7 @@ namespace CodeImp.DoomBuilder.Controls
                                 {
                                     textstr = System.Runtime.InteropServices.Marshal.PtrToStringAuto(scn.text);
                                 }
-                                catch (IndexOutOfRangeException e)
+                                catch (IndexOutOfRangeException)
                                 {
                                     // I don't know why this is happening, but I don't need the text here anyways
                                 }

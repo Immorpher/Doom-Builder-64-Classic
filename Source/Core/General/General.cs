@@ -290,7 +290,7 @@ namespace CodeImp.DoomBuilder
 		{
 			Configuration cfg;
 			string[] filenames;
-			string name, fullfilename;
+			string fullfilename;
 			
 			// Display status
 			mainwindow.DisplayStatus(StatusType.Busy, "Loading game configurations...");

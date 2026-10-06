@@ -168,7 +168,7 @@ namespace CodeImp.DoomBuilder.Windows
 		public bool ShiftState { get { return shift; } }
 		public bool CtrlState { get { return ctrl; } }
 		public bool AltState { get { return alt; } }
-		public MouseButtons MouseButtons { get { return mousebuttons; } }
+		public new MouseButtons MouseButtons { get { return mousebuttons; } }
 		public bool MouseInDisplay { get { return mouseinside; } }
 		public RenderTargetControl Display { get { return display; } }
 		public bool SnapToGrid { get { return buttonsnaptogrid.Checked; } }
@@ -378,7 +378,6 @@ namespace CodeImp.DoomBuilder.Windows
 		// Generic event that invokes the tagged action
 		public void InvokeTaggedAction(object sender, EventArgs e)
 		{
-			string asmname;
 			
 			this.Update();
 			

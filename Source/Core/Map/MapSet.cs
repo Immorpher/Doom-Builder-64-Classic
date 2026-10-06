@@ -1173,7 +1173,6 @@ namespace CodeImp.DoomBuilder.Map
 					
 				default:
 					throw new ArgumentException("Unsupported selection target conversion");
-					break;
 			}
 			
 			// New selection type
@@ -1927,7 +1926,6 @@ namespace CodeImp.DoomBuilder.Map
 			ICollection<Vertex> movingverts;
 			ICollection<Vertex> fixedverts;
 			RectangleF editarea;
-			int stitchundo;
 
 			// Find vertices
 			movingverts = General.Map.Map.GetMarkedVertices(true);

@@ -52,7 +52,6 @@ namespace CodeImp.DoomBuilder.Controls
 
 		#region ================== Variables
 
-		private ICollection<Thing> things;
 		private List<TreeNode> nodes;
 		private ThingTypeInfo thinginfo;
 		private bool doupdatenode;

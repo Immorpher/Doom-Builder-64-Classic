@@ -204,7 +204,7 @@ namespace CodeImp.DoomBuilder.Map
 		}
 		
 		// Serialize / deserialize (passive: doesn't record)
-		internal void ReadWrite(IReadWriteStream s)
+		internal new void ReadWrite(IReadWriteStream s)
 		{
 			if(!s.IsWriting)
 			{

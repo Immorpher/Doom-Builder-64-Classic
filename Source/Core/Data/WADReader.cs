@@ -326,7 +326,6 @@ namespace CodeImp.DoomBuilder.Data
 		public override ICollection<ImageData> LoadTextures(PatchNames pnames)
 		{
 			List<ImageData> images = new List<ImageData>();
-			string rangestart, rangeend;
 			int lumpindex;
 			Lump lump;
 
@@ -811,7 +810,6 @@ namespace CodeImp.DoomBuilder.Data
 		public override ICollection<ImageData> LoadSprites()
 		{
 			List<ImageData> images = new List<ImageData>();
-			string rangestart, rangeend;
 			int lumpindex;
 			
 			// Error when suspended

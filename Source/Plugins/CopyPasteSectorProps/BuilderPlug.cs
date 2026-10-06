@@ -74,7 +74,6 @@ namespace CodeImp.DoomBuilder.CopyPasteSectorProps
         private Lights thingColor;   // villsa
         private Lights upperColor;   // villsa
         private Lights lowerColor;   // villsa
-		private UniFields fields;
 		
         // This is set to true to know that we copied sector properties.
 		// If this is false, the variables above are uninitialized.

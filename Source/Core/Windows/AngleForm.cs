@@ -38,7 +38,9 @@ namespace CodeImp.DoomBuilder.Windows
 	{
 		#region ================== Variables
 
+		#pragma warning disable 0414 // Assigned for future use
 		private bool setup;
+		#pragma warning restore 0414
 		private int value;
 
 		#endregion
