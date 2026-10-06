@@ -105,6 +105,12 @@ float4 ps_sprite_tint(PixelData pd) : COLOR
 	return float4(c.rgb * pd.color.rgb, c.a * rendersettings.w);
 }
 
+// Pixel shader for solid colored shapes (used for the direction arrows)
+float4 ps_solid(PixelData pd) : COLOR
+{
+	return float4(pd.color.rgb, pd.color.a * rendersettings.w);
+}
+
 // Technique for shader model 2.0
 technique SM20
 {
@@ -124,5 +130,11 @@ technique SM20
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
 	    PixelShader = compile ps_2_0 ps_sprite_tint();
+	}
+
+	pass p3
+	{
+	    VertexShader = compile vs_2_0 vs_transform();
+	    PixelShader = compile ps_2_0 ps_solid();
 	}
 }

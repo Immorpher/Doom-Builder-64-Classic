@@ -54,6 +54,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float FSAA_FACTOR = 0.6f;
 		private const float THING_ARROW_SIZE = 1.5f;
 		private const float THING_ARROW_SHRINK = 2f;
+		private const float THING_ARROW_LENGTH = 0.8f;
+		private const float THING_ARROWHEAD_ANGLE = 0.46f;
 		private const float THING_CIRCLE_SIZE = 1f;
 		private const float THING_CIRCLE_SHRINK = 0f;
 		private const float THING_SPRITE_SHRINK = 2f;
@@ -987,41 +989,47 @@ namespace CodeImp.DoomBuilder.Rendering
 			verts[offset].v = 1f - 1f / 128f;
 		}
 
-		// This makes the vertices (6) for the direction arrow of a thing
-		private static void CreateThingArrowVerts(ThingDrawInfo info, FlatVertex[] verts, int offset)
+		// This adds the vertices for the direction arrow of a thing: a thin line with an open
+		// arrowhead, in the same style as the event line arrows. It fits within the thing box.
+		private static void AddThingArrowVerts(List<FlatVertex> verts, ThingDrawInfo info, int color)
 		{
 			Thing t = info.thing;
-			Vector2D screenpos = info.screenpos;
-			float arrowsize = info.arrowsize;
-			
-			// Setup rotated rect for arrow
-			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
-			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.25f) * arrowsize;
-			verts[offset].c = -1;
-			verts[offset].u = 0.50f + t.IconOffset;
-			verts[offset].v = 0f;
-			offset++;
-			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
-			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.25f) * arrowsize;
-			verts[offset].c = -1;
-			verts[offset].u = 0.75f + t.IconOffset;
-			verts[offset].v = 0f;
-			offset++;
-			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
-			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle - Angle2D.PI * 0.75f) * arrowsize;
-			verts[offset].c = -1;
-			verts[offset].u = 0.50f + t.IconOffset;
-			verts[offset].v = 1f;
-			offset++;
-			verts[offset] = verts[offset - 2];
-			offset++;
-			verts[offset] = verts[offset - 2];
-			offset++;
-			verts[offset].x = screenpos.x + (float)Math.Sin(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
-			verts[offset].y = screenpos.y + (float)Math.Cos(t.Angle + Angle2D.PI * 0.75f) * arrowsize;
-			verts[offset].c = -1;
-			verts[offset].u = 0.75f + t.IconOffset;
-			verts[offset].v = 1f;
+			Vector2D pos = info.screenpos;
+
+			// Forward direction on screen (same orientation as the old arrow)
+			float angle = t.Angle;
+			float r = info.circlesize * THING_ARROW_LENGTH;
+			if(r < 3f) return;
+			float headlen = r * 0.6f;
+			float halfwidth = 0.8f;
+
+			Vector2D tail = new Vector2D(pos.x - (float)Math.Sin(angle) * r, pos.y - (float)Math.Cos(angle) * r);
+			Vector2D tip = new Vector2D(pos.x + (float)Math.Sin(angle) * r, pos.y + (float)Math.Cos(angle) * r);
+
+			// Shaft
+			AddThingArrowLine(verts, tail, tip, halfwidth, color);
+
+			// Arrowhead (two lines swept back from the tip, like the event line arrows)
+			AddThingArrowLine(verts, tip, new Vector2D(tip.x - headlen * (float)Math.Sin(angle - THING_ARROWHEAD_ANGLE), tip.y - headlen * (float)Math.Cos(angle - THING_ARROWHEAD_ANGLE)), halfwidth, color);
+			AddThingArrowLine(verts, tip, new Vector2D(tip.x - headlen * (float)Math.Sin(angle + THING_ARROWHEAD_ANGLE), tip.y - headlen * (float)Math.Cos(angle + THING_ARROWHEAD_ANGLE)), halfwidth, color);
+		}
+
+		// This adds a line as a solid quad (2 triangles), extended by half its width at both ends
+		private static void AddThingArrowLine(List<FlatVertex> verts, Vector2D start, Vector2D end, float halfwidth, int color)
+		{
+			Vector2D dn = (end - start).GetNormal() * halfwidth;
+
+			FlatVertex v0 = new FlatVertex();
+			v0.x = start.x - dn.x + dn.y; v0.y = start.y - dn.y - dn.x; v0.c = color;
+			FlatVertex v1 = new FlatVertex();
+			v1.x = start.x - dn.x - dn.y; v1.y = start.y - dn.y + dn.x; v1.c = color;
+			FlatVertex v2 = new FlatVertex();
+			v2.x = end.x + dn.x + dn.y; v2.y = end.y + dn.y - dn.x; v2.c = color;
+			FlatVertex v3 = new FlatVertex();
+			v3.x = end.x + dn.x - dn.y; v3.y = end.y + dn.y + dn.x; v3.c = color;
+
+			verts.Add(v0); verts.Add(v1); verts.Add(v2);
+			verts.Add(v2); verts.Add(v1); verts.Add(v3);
 		}
 
 		// This adds the vertices (6) for the sprite of a thing. Width and height are half sizes.
@@ -1249,14 +1257,20 @@ namespace CodeImp.DoomBuilder.Rendering
                 // Then the sprites on top of the boxes
                 RenderThingSprites(visible);
 
-                // And the arrows on top of the sprites
-                graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
-                graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
-                graphics.Shaders.Things2D.BeginPass(0);
+                // And the vector arrows on top of the sprites (only for things that have a direction)
+                List<FlatVertex> arrowverts = new List<FlatVertex>();
+                int arrowcolor = unchecked((int)0xFF000000);
                 for (int i = 0; i < visible.Count; i++)
-                    CreateThingArrowVerts(visible[i], verts, i * 6);
-                DrawThingVerts(verts, visible.Count * 6);
-                graphics.Shaders.Things2D.EndPass();
+                {
+                    if (visible[i].thing.IconOffset == 0f)
+                        AddThingArrowVerts(arrowverts, visible[i], arrowcolor);
+                }
+                if (arrowverts.Count > 0)
+                {
+                    graphics.Shaders.Things2D.BeginPass(3);
+                    DrawThingVerts(arrowverts.ToArray(), arrowverts.Count);
+                    graphics.Shaders.Things2D.EndPass();
+                }
 
                 // Done
                 graphics.Shaders.Things2D.End();
