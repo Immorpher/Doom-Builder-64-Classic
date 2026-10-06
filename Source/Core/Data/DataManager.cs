@@ -49,6 +49,10 @@ namespace CodeImp.DoomBuilder.Data
 		// Data containers
 		private List<DataReader> containers;
 		
+		// Resource files as they were when the resources were loaded (to detect outside changes)
+		private List<DataLocation> resourcelocations = new List<DataLocation>();
+		private Dictionary<string, string> resourcestamps = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+		
         // villsa - thing palettes
         private Dictionary<string, Playpal> thingpalettes;
 		
@@ -230,6 +234,10 @@ namespace CodeImp.DoomBuilder.Data
 			Dictionary<long, ImageData> colormapsonly = new Dictionary<long, ImageData>();
 			Dictionary<long, ImageData> flatsonly = new Dictionary<long, ImageData>();
 			DataReader c;
+			
+			// Remember the state of the resource files as they are right now
+			resourcelocations = new List<DataLocation>(locations);
+			UpdateResourceStamps();
 			
 			// Create collections
 			containers = new List<DataReader>();
@@ -450,6 +458,52 @@ namespace CodeImp.DoomBuilder.Data
 		
 		#region ================== Suspend / Resume
 
+		// This creates a stamp (last write time and size) that identifies the current state of a resource
+		private static string GetResourceStamp(DataLocation dl)
+		{
+			try
+			{
+				if(dl.type == DataLocation.RESOURCE_DIRECTORY)
+				{
+					if(!Directory.Exists(dl.location)) return "missing";
+					return "dir " + Directory.GetLastWriteTimeUtc(dl.location).Ticks.ToString(CultureInfo.InvariantCulture);
+				}
+				else
+				{
+					FileInfo fi = new FileInfo(dl.location);
+					if(!fi.Exists) return "missing";
+					return "file " + fi.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture) + " " + fi.Length.ToString(CultureInfo.InvariantCulture);
+				}
+			}
+			catch(Exception)
+			{
+				return "unknown";
+			}
+		}
+		
+		// This remembers the current state of all resource files, so that
+		// only changes made from now on are reported by GetChangedResources
+		internal void UpdateResourceStamps()
+		{
+			resourcestamps.Clear();
+			foreach(DataLocation dl in resourcelocations)
+				resourcestamps[dl.location] = GetResourceStamp(dl);
+		}
+		
+		// This returns the names of the resources that were changed (or removed) since they were loaded.
+		// This only looks at the file information, so it is very cheap to call.
+		internal List<string> GetChangedResources()
+		{
+			List<string> changed = new List<string>();
+			foreach(DataLocation dl in resourcelocations)
+			{
+				string oldstamp;
+				if(resourcestamps.TryGetValue(dl.location, out oldstamp) && (oldstamp != GetResourceStamp(dl)))
+					changed.Add(Path.GetFileName(dl.location.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)));
+			}
+			return changed;
+		}
+		
 		// This suspends data resources
 		internal void Suspend()
 		{

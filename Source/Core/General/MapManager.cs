@@ -61,6 +61,7 @@ namespace CodeImp.DoomBuilder
 		// Map information
 		private string filetitle;
 		private string filepathname;
+		private bool checkingresources;
 		private string temppath;
 
 		// Nested map information: set when the map was loaded from a WAD file within the
@@ -767,6 +768,9 @@ namespace CodeImp.DoomBuilder
 			// Not saved for testing purpose?
 			if(purpose != SavePurpose.Testing)
 			{
+				// We just wrote the file ourselves, so this is not an outside change
+				data.UpdateResourceStamps();
+
 				// Saved in a different file?
 				if(newfilepathname != filepathname)
 				{
@@ -1658,6 +1662,40 @@ namespace CodeImp.DoomBuilder
 			// Let the plugin and editing mode know
 			General.Plugins.OnMapSetChangeEnd();
 			if(General.Editing.Mode != null) General.Editing.Mode.OnMapSetChangeEnd();
+		}
+		
+		// This checks if any of the resource files were changed outside of the editor and asks
+		// if the resources should be reloaded. The map itself is never reloaded or changed by this.
+		// This is called when the editor window is activated again (after switching back from another
+		// application), so the files are only checked when it is actually useful.
+		internal void CheckResourcesChanged()
+		{
+			// Already busy with this?
+			if(checkingresources || (data == null)) return;
+			
+			List<string> changed = data.GetChangedResources();
+			if(changed.Count == 0) return;
+			
+			checkingresources = true;
+			try
+			{
+				// Remember the current state, so we only ask again when the files change again
+				data.UpdateResourceStamps();
+				
+				// Make the list of files to show
+				string filelist = "";
+				for(int i = 0; (i < changed.Count) && (i < 5); i++) filelist += "\n  " + changed[i];
+				if(changed.Count > 5) filelist += "\n  (and " + (changed.Count - 5) + " more)";
+				
+				DialogResult result = General.ShowWarningMessage("The following resources were changed outside of Doom Builder 64 Classic:" + filelist +
+					"\n\nDo you want to reload the resources? (Your map will not be reloaded or changed.)", MessageBoxButtons.YesNo);
+				
+				if(result == DialogResult.Yes) DoReloadResource();
+			}
+			finally
+			{
+				checkingresources = false;
+			}
 		}
 		
 		// This reloads resources

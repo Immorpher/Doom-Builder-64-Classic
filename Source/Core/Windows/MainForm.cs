@@ -513,6 +513,17 @@ namespace CodeImp.DoomBuilder.Windows
 			ResumeExclusiveMouseInput();
 			ReleaseAllKeys();
 			FocusDisplay();
+			
+			// The window was activated again, perhaps after working in another application.
+			// Check if resource files were changed in the meantime (this is done after the
+			// activation is completely handled, because it may show a message).
+			if(General.Map != null) this.BeginInvoke(new MethodInvoker(CheckResourcesChanged));
+		}
+		
+		// This checks if resource files were changed outside of the editor
+		private void CheckResourcesChanged()
+		{
+			if((General.Map != null) && windowactive) General.Map.CheckResourcesChanged();
 		}
 		
 		// Window loses focus
