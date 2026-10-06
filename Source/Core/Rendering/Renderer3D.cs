@@ -573,6 +573,9 @@ namespace CodeImp.DoomBuilder.Rendering
             graphics.Shaders.World3D.BeginPass(shaderpass);
             foreach (VisualThing t in thingsbydistance)
             {
+                // Things that have no direction don't get an arrow
+                if (t.Thing.IconOffset != 0f) continue;
+
                 // Determine the shader pass we want to use for this object
                 int wantedshaderpass = (((t == highlighted) && showhighlight) || (t.Selected && showselection)) ? highshaderpass : shaderpass;
 
@@ -684,6 +687,25 @@ namespace CodeImp.DoomBuilder.Rendering
 			
 			// Get geometry for this pass
 			Dictionary<ImageData, BinaryHeap<VisualGeometry>> geopass = geometry[pass];
+			
+			// Texture mirroring is only used by Doom 64 maps. The sampler state is only changed when
+			// it actually differs from what is currently set, instead of for every single draw call.
+			bool doom64mode = General.Map.FormatInterface.InDoom64Mode;
+			bool mirroru = false;
+			bool mirrorv = false;
+			Linedef lastflagsline = null;
+			bool lastlinemirroru = false;
+			bool lastlinemirrorv = false;
+			if(doom64mode)
+			{
+				graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
+				graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
+			}
+			
+			// The effect settings only need to be committed when something changed since the last draw
+			bool settingsdirty = true;
+			int lasthighlightcolor = 0;
+			bool havehighlightcolor = false;
 
 			// Begin rendering with this shader
 			graphics.Shaders.World3D.BeginPass(shaderpass);
@@ -705,6 +727,9 @@ namespace CodeImp.DoomBuilder.Rendering
 				if((curtexture.Texture == null) || curtexture.Texture.Disposed)
 					curtexture.CreateTexture();
 
+				// Texture changed, so the effect settings must be committed again
+				settingsdirty = true;
+				
 				// Apply texture
                 if (showlightonly)  // villsa
                 {
@@ -753,26 +778,31 @@ namespace CodeImp.DoomBuilder.Rendering
 							graphics.Shaders.World3D.EndPass();
 							graphics.Shaders.World3D.BeginPass(wantedshaderpass);
 							currentshaderpass = wantedshaderpass;
+							settingsdirty = true;
 						}
 
                         // villsa - mirror UVs if special flags are set
-                        if (General.Map.FormatInterface.InDoom64Mode)
+                        if (doom64mode)
                         {
-                            if (g.Sidedef != null)
+                            // Find out what is wanted for this line (the flags are only looked up when the line changes)
+                            Linedef gline = (g.Sidedef != null) ? g.Sidedef.Line : null;
+                            if (!object.ReferenceEquals(gline, lastflagsline))
                             {
-                                // villsa - fixed 9/25/11
-                                if (g.Sidedef.Line != null)
-                                {
-                                    if (g.Sidedef.Line.IsFlagSet("1073741824"))
-                                        graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Mirror);
-                                    else
-                                        graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
+                                lastflagsline = gline;
+                                lastlinemirroru = (gline != null) && gline.IsFlagSet("1073741824");
+                                lastlinemirrorv = (gline != null) && gline.IsFlagSet("2147483648");
+                            }
 
-                                    if (g.Sidedef.Line.IsFlagSet("2147483648"))
-                                        graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Mirror);
-                                    else
-                                        graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
-                                }
+                            // Only change the sampler state when it differs from the current state
+                            if (lastlinemirroru != mirroru)
+                            {
+                                mirroru = lastlinemirroru;
+                                graphics.Device.SetSamplerState(0, SamplerState.AddressU, mirroru ? TextureAddress.Mirror : TextureAddress.Wrap);
+                            }
+                            if (lastlinemirrorv != mirrorv)
+                            {
+                                mirrorv = lastlinemirrorv;
+                                graphics.Device.SetSamplerState(0, SamplerState.AddressV, mirrorv ? TextureAddress.Mirror : TextureAddress.Wrap);
                             }
                         }
 						
@@ -784,21 +814,35 @@ namespace CodeImp.DoomBuilder.Rendering
 						}
 						else
 						{
-							graphics.Shaders.World3D.SetHighlightColor(CalculateHighlightColor((g == highlighted) && showhighlight, (g.Selected && showselection)).ToArgb());
-							graphics.Shaders.World3D.ApplySettings();
+							// Only update the highlight color when it differs from the previous draw
+							int highlightargb = CalculateHighlightColor((g == highlighted) && showhighlight, (g.Selected && showselection)).ToArgb();
+							if(!havehighlightcolor || (highlightargb != lasthighlightcolor))
+							{
+								graphics.Shaders.World3D.SetHighlightColor(highlightargb);
+								lasthighlightcolor = highlightargb;
+								havehighlightcolor = true;
+								settingsdirty = true;
+							}
+							
+							// Commit the effect settings, but only when something changed
+							if(settingsdirty)
+							{
+								graphics.Shaders.World3D.ApplySettings();
+								settingsdirty = false;
+							}
 						}
 						
 						// Render!
 						graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, g.VertexOffset, g.Triangles);
-
-                        // villsa - reset samplers to default wrappings
-                        if (General.Map.FormatInterface.InDoom64Mode)
-                        {
-                            graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
-                            graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
-                        }
 					}
 				}
+			}
+			
+			// villsa - reset samplers to default wrappings
+			if(doom64mode && (mirroru || mirrorv))
+			{
+				graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
+				graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
 			}
 
 			// Get things for this pass

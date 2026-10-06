@@ -550,10 +550,8 @@ namespace CodeImp.DoomBuilder.Map
 		// This checks and returns a flag without creating it
 		public bool IsFlagSet(string flagname)
 		{
-			if(flags.ContainsKey(flagname))
-				return flags[flagname];
-			else
-				return false;
+			bool value;
+			return flags.TryGetValue(flagname, out value) && value;
 		}
 
 		// This sets a flag
