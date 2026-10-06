@@ -170,17 +170,12 @@ namespace CodeImp.DoomBuilder.VisualModes
 		{
 			base.OnEngage();
 
-			// Prefer spawning the camera under the mouse cursor position else at the player start
-			bool positioned = false;
-
+			// Spawn the camera under the mouse cursor position
 			if(capturedmousevalid)
-				positioned = PositionCameraAtMapPosition(capturedmousemappos);
+				PositionCameraAtMapPosition(capturedmousemappos);
 
 			// fresh classic-mode cursor position doesn't silently reuse a stale one.
 			capturedmousevalid = false;
-
-			if(!positioned)
-				General.Map.VisualCamera.PositionAtThing();
 			
 			// Update the used textures
 			General.Map.Data.UpdateUsedTextures();
@@ -237,9 +232,6 @@ namespace CodeImp.DoomBuilder.VisualModes
 			// Dispose
 			foreach(KeyValuePair<Thing, VisualThing> vt in allthings)
 				vt.Value.Dispose();	
-			
-			// Apply camera position to thing
-			General.Map.VisualCamera.ApplyToThing();
 			
 			// Do not leave the sector on the camera
 			General.Map.VisualCamera.Sector = null;

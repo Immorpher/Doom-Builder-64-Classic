@@ -69,7 +69,6 @@ namespace CodeImp.DoomBuilder.Config
 		private bool mixtexturesflats;
 		private bool generalizedactions;
 		private bool generalizedeffects;
-		private int start3dmodethingtype;
 		private int linedefactivationsfilter;
 		private string testparameters;
 		private bool testshortpaths;
@@ -174,7 +173,6 @@ namespace CodeImp.DoomBuilder.Config
 		public bool MixTexturesFlats { get { return mixtexturesflats; } }
 		public bool GeneralizedActions { get { return generalizedactions; } }
 		public bool GeneralizedEffects { get { return generalizedeffects; } }
-		public int Start3DModeThingType { get { return start3dmodethingtype; } }
 		public int LinedefActivationsFilter { get { return linedefactivationsfilter; } }
 		public string TestParameters { get { return testparameters; } }
 		public bool TestShortPaths { get { return testshortpaths; } }
@@ -300,7 +298,6 @@ namespace CodeImp.DoomBuilder.Config
 			mixtexturesflats = cfg.ReadSetting("mixtexturesflats", false);
 			generalizedactions = cfg.ReadSetting("generalizedlinedefs", false);
 			generalizedeffects = cfg.ReadSetting("generalizedsectors", false);
-			start3dmodethingtype = cfg.ReadSetting("start3dmode", 0);
 			linedefactivationsfilter = cfg.ReadSetting("linedefactivationsfilter", 0);
 			testparameters = cfg.ReadSetting("testparameters", "");
 			testshortpaths = cfg.ReadSetting("testshortpaths", false);

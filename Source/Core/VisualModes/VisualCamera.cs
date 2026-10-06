@@ -58,8 +58,6 @@ namespace CodeImp.DoomBuilder.VisualModes
 			this.anglexy = 0.0f;
 			this.anglez = Angle2D.PI;
 			this.sector = null;
-			
-			PositionAtThing();
 		}
 		
 		#endregion
@@ -98,73 +96,6 @@ namespace CodeImp.DoomBuilder.VisualModes
 			target = position + camvec;
 		}
 
-		// This applies the position and angle from the 3D Camera Thing
-		// Returns false when it couldn't find a 3D Camera Thing
-		public virtual bool PositionAtThing()
-		{
-			Thing modething = null;
-			Vector3D delta;
-			
-			// Find a 3D Mode thing
-			foreach(Thing t in General.Map.Map.Things)
-				if(t.Type == General.Map.Config.Start3DModeThingType) modething = t;
-
-			// Found one?
-			if(modething != null)
-			{
-				modething.DetermineSector();
-				float z = modething.Position.z;
-				if(modething.Sector != null)
-					z = modething.Position.z + (float)modething.Sector.FloorHeight;
-				
-				// Position camera here
-				Vector3D wantedposition = new Vector3D(modething.Position.x, modething.Position.y, z + THING_Z_OFFSET);
-				delta = position - wantedposition;
-				if(delta.GetLength() > 1.0f) position = wantedposition;
-				
-				// Change angle
-				float wantedanglexy = modething.Angle + Angle2D.PI;
-				if(anglexy != wantedanglexy)
-				{
-					anglexy = wantedanglexy;
-					anglez = Angle2D.PI;
-				}
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		
-		// This applies the camera position and angle to the 3D Camera Thing
-		// Returns false when it couldn't find a 3D Camera Thing
-		public virtual bool ApplyToThing()
-		{
-			Thing modething = null;
-			
-			// Find a 3D Mode thing
-			foreach(Thing t in General.Map.Map.Things)
-				if(t.Type == General.Map.Config.Start3DModeThingType) modething = t;
-
-			// Found one?
-			if(modething != null)
-			{
-				int z = 0;
-				if(sector != null)
-					z = (int)position.z - sector.FloorHeight;
-
-				// Position the thing to match camera
-				modething.Move((int)position.x, (int)position.y, z - THING_Z_OFFSET);
-				modething.Rotate(anglexy - Angle2D.PI);
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		
 		#endregion
 	}
 }
