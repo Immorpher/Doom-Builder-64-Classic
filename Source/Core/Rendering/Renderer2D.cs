@@ -55,7 +55,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float THING_ARROW_SIZE = 1.5f;
 		private const float THING_ARROW_SHRINK = 2f;
 		private const float THING_ARROW_LENGTH = 0.8f;
-		private const float THING_ARROWHEAD_ANGLE = 0.46f;
+		private const float THING_ARROWHEAD_ANGLE = 0.7f;
 		private const float THING_CIRCLE_SIZE = 1f;
 		private const float THING_CIRCLE_SHRINK = 0f;
 		private const float THING_SPRITE_SHRINK = 2f;
@@ -982,7 +982,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			float angle = t.Angle;
 			float r = info.circlesize * THING_ARROW_LENGTH;
 			if(r < 3f) return;
-			float headlen = r * 0.6f;
+			float headlen = r * 0.8f;
 			float halfwidth = 0.8f;
 
 			Vector2D tail = new Vector2D(pos.x - (float)Math.Sin(angle) * r, pos.y - (float)Math.Cos(angle) * r);
