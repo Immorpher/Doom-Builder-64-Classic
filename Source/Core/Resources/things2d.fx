@@ -31,18 +31,6 @@ texture texture1
     string ResourceType = "2D";
 >;
 
-// Texture sampler settings
-sampler2D texture1samp = sampler_state
-{
-    Texture = <texture1>;
-    MagFilter = Linear;
-    MinFilter = Linear;
-    MipFilter = Linear;
-	AddressU = Wrap;
-	AddressV = Wrap;
-	MipMapLodBias = -0.9f;
-};
-
 // Texture sampler settings for sprite rendering
 sampler2D texture1sprite = sampler_state
 {
@@ -63,23 +51,6 @@ PixelData vs_transform(VertexData vd)
 	pd.color = vd.color;
 	pd.uv = vd.uv;
 	return pd;
-}
-
-// Pixel shader for colored circle
-float4 ps_circle(PixelData pd) : COLOR
-{
-	// Texture pixel color
-	float4 c = tex2D(texture1samp, pd.uv);
-	
-	// Use shinyness?
-	if(pd.uv.x < 0.4f)
-	{
-		float4 s = tex2D(texture1samp, pd.uv + float2(0.25f, 0.0f));
-		c = float4(lerp(c.rgb * pd.color.rgb, s.rgb, s.a), c.a);
-	}
-	
-	c.a = c.a * pd.color.a * rendersettings.w;
-	return c;
 }
 
 // Pixel shader for sprite drawing
@@ -105,7 +76,7 @@ float4 ps_sprite_tint(PixelData pd) : COLOR
 	return float4(c.rgb * pd.color.rgb, c.a * rendersettings.w);
 }
 
-// Pixel shader for solid colored shapes (used for the direction arrows)
+// Pixel shader for solid colored shapes (used for the thing boxes and direction arrows)
 float4 ps_solid(PixelData pd) : COLOR
 {
 	return float4(pd.color.rgb, pd.color.a * rendersettings.w);
@@ -117,22 +88,16 @@ technique SM20
 	pass p0
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
-	    PixelShader = compile ps_2_0 ps_circle();
+	    PixelShader = compile ps_2_0 ps_sprite();
 	}
 
 	pass p1
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
-	    PixelShader = compile ps_2_0 ps_sprite();
-	}
-
-	pass p2
-	{
-	    VertexShader = compile vs_2_0 vs_transform();
 	    PixelShader = compile ps_2_0 ps_sprite_tint();
 	}
 
-	pass p3
+	pass p2
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
 	    PixelShader = compile ps_2_0 ps_solid();

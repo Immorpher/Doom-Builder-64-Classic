@@ -67,9 +67,6 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const int FONT_WIDTH = 0;
 		private const int FONT_HEIGHT = 0;
 
-		private const int THING_SHINY = 1;
-		private const int THING_SQUARE = 2;
-		private const int NUM_THING_TEXTURES = 4;
 		internal const int NUM_VIEW_MODES = 6;  // villsa
 		
 		#endregion
@@ -122,9 +119,6 @@ namespace CodeImp.DoomBuilder.Rendering
 		// Surfaces
 		private SurfaceManager surfaces;
 		
-		// Images
-		private ResourceImage[] thingtexture;
-		
 		// View settings (world coordinates)
 		private ViewMode viewmode;
 		private float scale;
@@ -164,16 +158,6 @@ namespace CodeImp.DoomBuilder.Rendering
 		// Constructor
 		internal Renderer2D(D3DDevice graphics) : base(graphics)
 		{
-			// Load thing textures
-			thingtexture = new ResourceImage[NUM_THING_TEXTURES];
-			for(int i = 0; i < NUM_THING_TEXTURES; i++)
-			{
-				thingtexture[i] = new ResourceImage("CodeImp.DoomBuilder.Resources.Thing2D_" + i.ToString(CultureInfo.InvariantCulture) + ".png");
-				thingtexture[i].UseColorCorrection = false;
-				thingtexture[i].LoadImage();
-				thingtexture[i].CreateTexture();
-			}
-
 			// Create surface manager
 			surfaces = new SurfaceManager();
 
@@ -192,7 +176,6 @@ namespace CodeImp.DoomBuilder.Rendering
 			{
 				// Destroy rendertargets
 				DestroyRendertargets();
-				foreach(ResourceImage i in thingtexture) i.Dispose();
 				
 				// Dispose surface manager
 				surfaces.Dispose();
@@ -960,7 +943,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				   ((info.screenpos.y + info.circlesize) > 0.0f) && ((info.screenpos.y - info.circlesize) < (float)windowsize.Height);
 		}
 
-		// This makes the vertices (6) for the box (circle or square) of a thing
+		// This makes the vertices (6) for the square box of a thing
 		private static void CreateThingBoxVerts(ThingDrawInfo info, FlatVertex[] verts, int offset)
 		{
 			float circlesize = info.circlesize;
@@ -970,20 +953,14 @@ namespace CodeImp.DoomBuilder.Rendering
 			verts[offset].x = screenpos.x - circlesize;
 			verts[offset].y = screenpos.y - circlesize;
 			verts[offset].c = color;
-			verts[offset].u = 1f / 512f;
-			verts[offset].v = 1f / 128f;
 			offset++;
 			verts[offset].x = screenpos.x + circlesize;
 			verts[offset].y = screenpos.y - circlesize;
 			verts[offset].c = color;
-			verts[offset].u = 0.25f - 1f / 512f;
-			verts[offset].v = 1f / 128f;
 			offset++;
 			verts[offset].x = screenpos.x - circlesize;
 			verts[offset].y = screenpos.y + circlesize;
 			verts[offset].c = color;
-			verts[offset].u = 1f / 512f;
-			verts[offset].v = 1f - 1f / 128f;
 			offset++;
 			verts[offset] = verts[offset - 2];
 			offset++;
@@ -992,8 +969,6 @@ namespace CodeImp.DoomBuilder.Rendering
 			verts[offset].x = screenpos.x + circlesize;
 			verts[offset].y = screenpos.y + circlesize;
 			verts[offset].c = color;
-			verts[offset].u = 0.25f - 1f / 512f;
-			verts[offset].v = 1f - 1f / 128f;
 		}
 
 		// This adds the vertices for the direction arrow of a thing: a thin line with an open
@@ -1202,7 +1177,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			if((spriteverts.Count == 0) && (nightmareverts.Count == 0)) return;
 			
 			// Draw the sprites, one texture at a time
-			graphics.Shaders.Things2D.BeginPass(1);
+			graphics.Shaders.Things2D.BeginPass(0);
 			foreach(KeyValuePair<ImageData, List<FlatVertex>> group in spriteverts)
 			{
 				ImageData sprite = group.Key;
@@ -1220,7 +1195,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			// Draw the Nightmare sprites, multiplied by green
 			if(nightmareverts.Count > 0)
 			{
-				graphics.Shaders.Things2D.BeginPass(2);
+				graphics.Shaders.Things2D.BeginPass(1);
 				foreach(KeyValuePair<ImageData, List<FlatVertex>> group in nightmareverts)
 				{
 					ImageData sprite = group.Key;
@@ -1244,8 +1219,6 @@ namespace CodeImp.DoomBuilder.Rendering
         // This draws a set of things
         private void RenderThingsBatch(ICollection<Thing> things, float alpha, bool fixedcolor, PixelColor c)
         {
-            int thingtextureindex = 0;
-
             // Anything to render?
             if (things.Count > 0)
             {
@@ -1274,9 +1247,6 @@ namespace CodeImp.DoomBuilder.Rendering
                 graphics.Device.SetRenderState(RenderState.TextureFactor, alphacolor.ToArgb());
                 graphics.Device.SetStreamSource(0, thingsvertices, 0, FlatVertex.Stride);
 
-                // Determine things texture to use (only used for the round boxes, the square boxes are vector shapes)
-                bool squarethings = General.Settings.SquareThings;
-                if (General.Settings.QualityDisplay) thingtextureindex |= THING_SHINY;
                 SetWorldTransformation(false);
                 graphics.Shaders.Things2D.SetSettings(alpha);
 
@@ -1289,18 +1259,8 @@ namespace CodeImp.DoomBuilder.Rendering
                 // First the boxes
                 for (int i = 0; i < visible.Count; i++)
                     CreateThingBoxVerts(visible[i], verts, i * 6);
-                if (squarethings)
-                {
-                    // Square boxes are drawn as solid colored vector shapes (no texture)
-                    graphics.Shaders.Things2D.BeginPass(3);
-                }
-                else
-                {
-                    // Round boxes use a texture
-                    graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
-                    graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
-                    graphics.Shaders.Things2D.BeginPass(0);
-                }
+                // The boxes are solid colored vector squares (no texture)
+                graphics.Shaders.Things2D.BeginPass(2);
                 DrawThingVerts(verts, visible.Count * 6);
                 graphics.Shaders.Things2D.EndPass();
 
@@ -1318,7 +1278,7 @@ namespace CodeImp.DoomBuilder.Rendering
                 }
                 if (arrowverts.Count > 0)
                 {
-                    graphics.Shaders.Things2D.BeginPass(3);
+                    graphics.Shaders.Things2D.BeginPass(2);
                     DrawThingVerts(arrowverts);
                     graphics.Shaders.Things2D.EndPass();
                 }

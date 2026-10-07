@@ -65,7 +65,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.colorhighlight = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.colorlinedefs = new CodeImp.DoomBuilder.Controls.ColorControl();
             this.label2 = new System.Windows.Forms.Label();
-            this.squarethings = new System.Windows.Forms.CheckBox();
             this.doublesidedalphalabel = new System.Windows.Forms.Label();
             this.qualitydisplay = new System.Windows.Forms.CheckBox();
             this.doublesidedalpha = new Dotnetrix.Controls.TrackBar();
@@ -595,16 +594,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.label2.TabIndex = 14;
             this.label2.Text = "Passable lines transparency:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // squarethings
-            // 
-            this.squarethings.AutoSize = true;
-            this.squarethings.Location = new System.Drawing.Point(236, 120);
-            this.squarethings.Name = "squarethings";
-            this.squarethings.Size = new System.Drawing.Size(93, 18);
-            this.squarethings.TabIndex = 8;
-            this.squarethings.Text = "Square things";
-            this.squarethings.UseVisualStyleBackColor = true;
             // 
             // doublesidedalphalabel
             // 
@@ -1201,7 +1190,6 @@ namespace CodeImp.DoomBuilder.Windows
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.appearancegroup1.Controls.Add(this.label2);
-            this.appearancegroup1.Controls.Add(this.squarethings);
             this.appearancegroup1.Controls.Add(this.animatevisualselection);
             this.appearancegroup1.Controls.Add(this.blackbrowsers);
             this.appearancegroup1.Controls.Add(this.visualbilinear);
@@ -1666,7 +1654,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private Dotnetrix.Controls.TrackBar previewsize;
 		private System.Windows.Forms.Label previewsizelabel;
 		private System.Windows.Forms.Label label12;
-		private System.Windows.Forms.CheckBox squarethings;
 		private Dotnetrix.Controls.TrackBar autoscrollspeed;
 		private System.Windows.Forms.Label autoscrollspeedlabel;
 		private System.Windows.Forms.Label label15;

@@ -66,7 +66,6 @@ namespace CodeImp.DoomBuilder.Windows
 			
 			// Interface
 			imagebrightness.Value = General.Settings.ImageBrightness;
-			squarethings.Checked = General.Settings.SquareThings;
 			doublesidedalpha.Value = (int)((1.0f - General.Settings.DoubleSidedAlpha) * 10.0f);
 			defaultviewmode.SelectedIndex = General.Settings.DefaultViewMode;
 			fieldofview.Value = General.Settings.VisualFOV / 10;
@@ -194,7 +193,6 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Apply interface
 			General.Settings.ImageBrightness = imagebrightness.Value;
-			General.Settings.SquareThings = squarethings.Checked;
 			General.Settings.DoubleSidedAlpha = 1.0f - (float)(doublesidedalpha.Value * 0.1f);
 			General.Settings.DefaultViewMode = defaultviewmode.SelectedIndex;
 			General.Settings.VisualFOV = fieldofview.Value * 10;
