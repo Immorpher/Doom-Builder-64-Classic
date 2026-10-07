@@ -106,6 +106,10 @@ namespace CodeImp.DoomBuilder.Rendering
 		// Things to be rendered, sorted by distance from camera
 		private BinaryHeap<VisualThing> thingsbydistance;
 
+		// Collections that are reused from frame to frame, to avoid creating new ones every frame
+		private Stack<BinaryHeap<VisualGeometry>> geometryheappool = new Stack<BinaryHeap<VisualGeometry>>();
+		private Stack<List<VisualThing>> thinglistpool = new Stack<List<VisualThing>>();
+
 		#endregion
 
 		#region ================== Properties
@@ -492,15 +496,45 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This begins rendering world geometry
 		public void StartGeometry()
 		{
-			// Make collection
-			geometry = new Dictionary<ImageData, BinaryHeap<VisualGeometry>>[RENDER_PASSES];
-			things = new Dictionary<ImageData, List<VisualThing>>[RENDER_PASSES];
-			thingsbydistance = new BinaryHeap<VisualThing>();
+			// Make collections (once, they are reused for every frame)
+			if(geometry == null)
+			{
+				geometry = new Dictionary<ImageData, BinaryHeap<VisualGeometry>>[RENDER_PASSES];
+				things = new Dictionary<ImageData, List<VisualThing>>[RENDER_PASSES];
+				thingsbydistance = new BinaryHeap<VisualThing>();
+				for(int i = 0; i < RENDER_PASSES; i++)
+				{
+					geometry[i] = new Dictionary<ImageData, BinaryHeap<VisualGeometry>>();
+					things[i] = new Dictionary<ImageData, List<VisualThing>>();
+				}
+			}
+			
+			// Make sure nothing is left over from a previous frame that was not finished
+			RecycleGeometry();
+		}
+
+		// This empties the collected geometry and things and keeps the collections for reuse
+		private void RecycleGeometry()
+		{
+			if(geometry == null) return;
+			
 			for(int i = 0; i < RENDER_PASSES; i++)
 			{
-				geometry[i] = new Dictionary<ImageData, BinaryHeap<VisualGeometry>>();
-				things[i] = new Dictionary<ImageData, List<VisualThing>>();
+				foreach(BinaryHeap<VisualGeometry> heap in geometry[i].Values)
+				{
+					heap.Clear();
+					geometryheappool.Push(heap);
+				}
+				geometry[i].Clear();
+
+				foreach(List<VisualThing> list in things[i].Values)
+				{
+					list.Clear();
+					thinglistpool.Push(list);
+				}
+				things[i].Clear();
 			}
+			thingsbydistance.Clear();
 		}
 
 		// This ends rendering world geometry
@@ -551,7 +585,9 @@ namespace CodeImp.DoomBuilder.Rendering
 			
 			// Done
 			graphics.Shaders.World3D.End();
-			geometry = null;
+			
+			// Release the references to the geometry, the collections are reused for the next frame
+			RecycleGeometry();
 		}
 
         // villsa 9/15/11
@@ -968,15 +1004,19 @@ namespace CodeImp.DoomBuilder.Rendering
 			// Must have a texture and vertices
 			if((g.Texture != null) && (g.Triangles > 0))
 			{
+				Dictionary<ImageData, BinaryHeap<VisualGeometry>> geopass = geometry[g.RenderPassInt];
+				BinaryHeap<VisualGeometry> group;
+				
 				// Texture group not yet collected?
-				if(!geometry[g.RenderPassInt].ContainsKey(g.Texture))
+				if(!geopass.TryGetValue(g.Texture, out group))
 				{
-					// Create texture group
-					geometry[g.RenderPassInt].Add(g.Texture, new BinaryHeap<VisualGeometry>());
+					// Create texture group (reuse an old one when possible)
+					group = (geometryheappool.Count > 0) ? geometryheappool.Pop() : new BinaryHeap<VisualGeometry>();
+					geopass.Add(g.Texture, group);
 				}
 				
 				// Add geometry to texture group
-				geometry[g.RenderPassInt][g.Texture].Add(g);
+				group.Add(g);
 			}
 		}
 
@@ -993,15 +1033,19 @@ namespace CodeImp.DoomBuilder.Rendering
 			// Must have a texture!
 			if(t.Texture != null)
 			{
+				Dictionary<ImageData, List<VisualThing>> thingspass = things[t.RenderPassInt];
+				List<VisualThing> group;
+				
 				// Texture group not yet collected?
-				if(!things[t.RenderPassInt].ContainsKey(t.Texture))
+				if(!thingspass.TryGetValue(t.Texture, out group))
 				{
-					// Create texture group
-					things[t.RenderPassInt].Add(t.Texture, new List<VisualThing>());
+					// Create texture group (reuse an old one when possible)
+					group = (thinglistpool.Count > 0) ? thinglistpool.Pop() : new List<VisualThing>();
+					thingspass.Add(t.Texture, group);
 				}
 
 				// Add geometry to texture group
-				things[t.RenderPassInt][t.Texture].Add(t);
+				group.Add(t);
 			}
 		}
 

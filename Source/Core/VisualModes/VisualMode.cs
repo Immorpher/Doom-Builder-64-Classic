@@ -84,6 +84,9 @@ namespace CodeImp.DoomBuilder.VisualModes
 		protected Dictionary<Sector, VisualSector> visiblesectors;
 		protected List<VisualGeometry> visiblegeometry;
 		
+		// Lines that were processed by the visibility culling (kept to reuse the collection)
+		private Dictionary<Linedef, Linedef> cullinglines = new Dictionary<Linedef, Linedef>(200);
+		
 		#endregion
 
 		#region ================== Properties
@@ -369,17 +372,18 @@ namespace CodeImp.DoomBuilder.VisualModes
 		// This preforms visibility culling
 		protected void DoCulling()
 		{
-			Dictionary<Linedef, Linedef> visiblelines = new Dictionary<Linedef, Linedef>(200);
+			Dictionary<Linedef, Linedef> visiblelines = cullinglines;
 			Vector2D campos2d = (Vector2D)General.Map.VisualCamera.Position;
 			float viewdist = General.Settings.ViewDistance;
 			
-			// Make collections
-			visiblesectors = new Dictionary<Sector, VisualSector>(visiblesectors.Count);
-			visiblegeometry = new List<VisualGeometry>(visiblegeometry.Capacity);
-			visiblethings = new List<VisualThing>(visiblethings.Capacity);
+			// Empty the collections (they are reused for every frame)
+			visiblelines.Clear();
+			visiblesectors.Clear();
+			visiblegeometry.Clear();
+			visiblethings.Clear();
 
 			// Get the blocks within view range
-			visibleblocks = blockmap.GetFrustumRange(renderer.Frustum2D);
+			visibleblocks = blockmap.GetFrustumRange(renderer.Frustum2D, visibleblocks);
 			
 			// Fill collections with geometry and things
 			foreach(VisualBlockEntry block in visibleblocks)

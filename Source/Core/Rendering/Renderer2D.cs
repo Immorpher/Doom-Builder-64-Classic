@@ -106,6 +106,14 @@ namespace CodeImp.DoomBuilder.Rendering
 		
 		// Batch buffer for things rendering
 		private VertexBuffer thingsvertices;
+
+		// Buffers for thing rendering that are reused from frame to frame
+		private FlatVertex[] thingvertsarray = new FlatVertex[0];
+		private FlatVertex[] thingchunkarray = new FlatVertex[THING_BUFFER_SIZE * 6];
+		private List<FlatVertex> thingarrowverts = new List<FlatVertex>();
+		private Dictionary<ImageData, List<FlatVertex>> thingspriteverts = new Dictionary<ImageData, List<FlatVertex>>();
+		private Dictionary<ImageData, List<FlatVertex>> thingnightmareverts = new Dictionary<ImageData, List<FlatVertex>>();
+		private Stack<List<FlatVertex>> thingvertlistpool = new Stack<List<FlatVertex>>();
 		
 		// Render settings
 		private int vertexsize;
@@ -1090,13 +1098,42 @@ namespace CodeImp.DoomBuilder.Rendering
 			}
 		}
 
+		// This draws triangles from a list of vertices (in chunks that fit the things buffer)
+		private void DrawThingVerts(List<FlatVertex> verts)
+		{
+			int chunk = thingchunkarray.Length;
+			for(int start = 0; start < verts.Count; start += chunk)
+			{
+				int count = Math.Min(chunk, verts.Count - start);
+				verts.CopyTo(start, thingchunkarray, 0, count);
+				DrawThingVerts(thingchunkarray, count);
+			}
+		}
+
+		// This takes a list for sprite vertices (reusing an old one when possible)
+		private List<FlatVertex> GetThingVertList()
+		{
+			return (thingvertlistpool.Count > 0) ? thingvertlistpool.Pop() : new List<FlatVertex>();
+		}
+
+		// This empties a sprite vertices collection and keeps the lists for reuse
+		private void RecycleThingVerts(Dictionary<ImageData, List<FlatVertex>> collection)
+		{
+			foreach(List<FlatVertex> list in collection.Values)
+			{
+				list.Clear();
+				thingvertlistpool.Push(list);
+			}
+			collection.Clear();
+		}
+
 		// This draws the sprites of things (on top of their boxes).
 		// A sprite that has rotations shows the rotation that matches the direction of the thing.
 		private void RenderThingSprites(List<ThingDrawInfo> visible)
 		{
 			int selectioncolor = General.Colors.Selection.ToInt();
-			Dictionary<ImageData, List<FlatVertex>> spriteverts = new Dictionary<ImageData, List<FlatVertex>>();
-			Dictionary<ImageData, List<FlatVertex>> nightmareverts = new Dictionary<ImageData, List<FlatVertex>>();
+			Dictionary<ImageData, List<FlatVertex>> spriteverts = thingspriteverts;
+			Dictionary<ImageData, List<FlatVertex>> nightmareverts = thingnightmareverts;
 			int nightmarecolor = unchecked((int)0xFF00FF00);
 
 			foreach(ThingDrawInfo info in visible)
@@ -1155,7 +1192,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				List<FlatVertex> list;
 				if(!target.TryGetValue(sprite, out list))
 				{
-					list = new List<FlatVertex>();
+					list = GetThingVertList();
 					target.Add(sprite, list);
 				}
 				
@@ -1176,7 +1213,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				graphics.Shaders.Things2D.Texture1 = sprite.Texture;
 				graphics.Shaders.Things2D.ApplySettings();
 				
-				DrawThingVerts(group.Value.ToArray(), group.Value.Count);
+				DrawThingVerts(group.Value);
 			}
 			graphics.Shaders.Things2D.EndPass();
 			
@@ -1194,10 +1231,14 @@ namespace CodeImp.DoomBuilder.Rendering
 					graphics.Shaders.Things2D.Texture1 = sprite.Texture;
 					graphics.Shaders.Things2D.ApplySettings();
 					
-					DrawThingVerts(group.Value.ToArray(), group.Value.Count);
+					DrawThingVerts(group.Value);
 				}
 				graphics.Shaders.Things2D.EndPass();
 			}
+			
+			// Keep the lists for the next frame
+			RecycleThingVerts(spriteverts);
+			RecycleThingVerts(nightmareverts);
 		}
 
         // This draws a set of things
@@ -1242,7 +1283,8 @@ namespace CodeImp.DoomBuilder.Rendering
                 // Begin drawing
                 graphics.Shaders.Things2D.Begin();
 
-                FlatVertex[] verts = new FlatVertex[visible.Count * 6];
+                if (thingvertsarray.Length < visible.Count * 6) thingvertsarray = new FlatVertex[visible.Count * 6];
+                FlatVertex[] verts = thingvertsarray;
 
                 // First the boxes
                 graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
@@ -1257,7 +1299,8 @@ namespace CodeImp.DoomBuilder.Rendering
                 RenderThingSprites(visible);
 
                 // And the vector arrows on top of the sprites (only for things that have a direction)
-                List<FlatVertex> arrowverts = new List<FlatVertex>();
+                List<FlatVertex> arrowverts = thingarrowverts;
+                arrowverts.Clear();
                 int arrowcolor = unchecked((int)0xFF000000);
                 for (int i = 0; i < visible.Count; i++)
                 {
@@ -1267,7 +1310,7 @@ namespace CodeImp.DoomBuilder.Rendering
                 if (arrowverts.Count > 0)
                 {
                     graphics.Shaders.Things2D.BeginPass(3);
-                    DrawThingVerts(arrowverts.ToArray(), arrowverts.Count);
+                    DrawThingVerts(arrowverts);
                     graphics.Shaders.Things2D.EndPass();
                 }
 

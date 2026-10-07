@@ -158,6 +158,14 @@ namespace CodeImp.DoomBuilder.VisualModes
 		// This returns a range of blocks in a frustum
 		public List<VisualBlockEntry> GetFrustumRange(ProjectedFrustum2D frustum)
 		{
+			return GetFrustumRange(frustum, new List<VisualBlockEntry>());
+		}
+
+		// This does the same, but fills the given list (which is cleared first) instead of creating a new one
+		public List<VisualBlockEntry> GetFrustumRange(ProjectedFrustum2D frustum, List<VisualBlockEntry> entries)
+		{
+			entries.Clear();
+			
 			// Make square range from frustum circle
 			// This will be the range in which we will test blocks
 			Point lt = GetBlockCoordinates(frustum.Center - frustum.Radius);
@@ -168,7 +176,7 @@ namespace CodeImp.DoomBuilder.VisualModes
 			
 			// Go through the range to make a list
 			int entriescount = (rb.X - lt.X) * (rb.Y - lt.Y);
-			List<VisualBlockEntry> entries = new List<VisualBlockEntry>(entriescount);
+			if(entries.Capacity < entriescount) entries.Capacity = entriescount;
 			for(int x = lt.X; x <= rb.X; x++)
 			{
 				for(int y = lt.Y; y <= rb.Y; y++)
