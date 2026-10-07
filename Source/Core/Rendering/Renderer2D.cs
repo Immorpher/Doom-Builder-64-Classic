@@ -1274,9 +1274,9 @@ namespace CodeImp.DoomBuilder.Rendering
                 graphics.Device.SetRenderState(RenderState.TextureFactor, alphacolor.ToArgb());
                 graphics.Device.SetStreamSource(0, thingsvertices, 0, FlatVertex.Stride);
 
-                // Determine things texture to use
+                // Determine things texture to use (only used for the round boxes, the square boxes are vector shapes)
+                bool squarethings = General.Settings.SquareThings;
                 if (General.Settings.QualityDisplay) thingtextureindex |= THING_SHINY;
-                if (General.Settings.SquareThings) thingtextureindex |= THING_SQUARE;
                 SetWorldTransformation(false);
                 graphics.Shaders.Things2D.SetSettings(alpha);
 
@@ -1287,11 +1287,20 @@ namespace CodeImp.DoomBuilder.Rendering
                 FlatVertex[] verts = thingvertsarray;
 
                 // First the boxes
-                graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
-                graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
-                graphics.Shaders.Things2D.BeginPass(0);
                 for (int i = 0; i < visible.Count; i++)
                     CreateThingBoxVerts(visible[i], verts, i * 6);
+                if (squarethings)
+                {
+                    // Square boxes are drawn as solid colored vector shapes (no texture)
+                    graphics.Shaders.Things2D.BeginPass(3);
+                }
+                else
+                {
+                    // Round boxes use a texture
+                    graphics.Device.SetTexture(0, thingtexture[thingtextureindex].Texture);
+                    graphics.Shaders.Things2D.Texture1 = thingtexture[thingtextureindex].Texture;
+                    graphics.Shaders.Things2D.BeginPass(0);
+                }
                 DrawThingVerts(verts, visible.Count * 6);
                 graphics.Shaders.Things2D.EndPass();
 
