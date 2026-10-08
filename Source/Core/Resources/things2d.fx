@@ -24,6 +24,9 @@ float4 rendersettings;
 // Transform settings
 float4x4 transformsettings;
 
+// Filter settings (point or linear, set from the program)
+dword filtersettings;
+
 // Texture1 input
 texture texture1
 <
@@ -35,9 +38,9 @@ texture texture1
 sampler2D texture1sprite = sampler_state
 {
 	Texture = <texture1>;
-	MagFilter = Point;
-	MinFilter = Point;
-	MipFilter = Point;
+	MagFilter = filtersettings;
+	MinFilter = filtersettings;
+	MipFilter = filtersettings;
 	AddressU = Clamp;
 	AddressV = Clamp;
 	MipMapLodBias = 0.0f;
