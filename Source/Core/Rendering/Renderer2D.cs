@@ -54,7 +54,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float FSAA_FACTOR = 0.6f;
 		private const float THING_ARROW_SIZE = 1.5f;
 		private const float THING_ARROW_SHRINK = 2f;
-		private const float THING_ARROW_LENGTH = 0.8f;
+		private const float THING_ARROW_LENGTH = 1.1f;
 		private const float THING_ARROWHEAD_ANGLE = 0.7f;
 		private const float THING_CIRCLE_SIZE = 1f;
 		private const float THING_CIRCLE_SHRINK = 0f;
@@ -983,13 +983,14 @@ namespace CodeImp.DoomBuilder.Rendering
 			float r = info.circlesize * THING_ARROW_LENGTH;
 			if(r < 3f) return;
 			float headlen = r * 0.8f;
-			float halfwidth = 0.8f;
+			float halfwidth = 1.0f;
 
-			Vector2D tail = new Vector2D(pos.x - (float)Math.Sin(angle) * r, pos.y - (float)Math.Cos(angle) * r);
-			Vector2D tip = new Vector2D(pos.x + (float)Math.Sin(angle) * r, pos.y + (float)Math.Cos(angle) * r);
-
-			// Shaft
-			AddThingArrowLine(verts, tail, tip, halfwidth, color);
+			// Keep the tip inside the thing box with some spacing from the edge: the box edge is closer along the axes than on the diagonals
+			float sinx = (float)Math.Sin(angle);
+			float cosy = (float)Math.Cos(angle);
+			float maxcomp = Math.Max(Math.Abs(sinx), Math.Abs(cosy));
+			float tiplen = Math.Min(r, (info.circlesize * 0.85f) / maxcomp - halfwidth);
+			Vector2D tip = new Vector2D(pos.x + sinx * tiplen, pos.y + cosy * tiplen);
 
 			// Arrowhead (two lines swept back from the tip, like the event line arrows)
 			AddThingArrowLine(verts, tip, new Vector2D(tip.x - headlen * (float)Math.Sin(angle - THING_ARROWHEAD_ANGLE), tip.y - headlen * (float)Math.Cos(angle - THING_ARROWHEAD_ANGLE)), halfwidth, color);
