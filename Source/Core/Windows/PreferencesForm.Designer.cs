@@ -611,7 +611,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.qualitydisplay.Name = "qualitydisplay";
             this.qualitydisplay.Size = new System.Drawing.Size(130, 18);
             this.qualitydisplay.TabIndex = 7;
-            this.qualitydisplay.Text = "High quality rendering";
+            this.qualitydisplay.Text = "Anti-aliasing";
             this.qualitydisplay.UseVisualStyleBackColor = true;
             // 
             // doublesidedalpha
