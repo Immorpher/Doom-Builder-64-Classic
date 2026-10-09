@@ -63,6 +63,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// If this is set to true, the thing will be rebuilt after the action is performed.
 		protected bool changed;
 
+		// Vertex alpha (0-255) for things that are spawned in by a special
+		private const int SPAWNED_THING_ALPHA = 0x80;
+
 		#endregion
 		
 		#region ================== Properties
@@ -114,6 +117,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
                 if (Thing.IsFlagSet("4096") && (Thing.Type != 0) && (Thing.Type != 89))
                 {
                     sectorcolor = (sectorcolor & 0x0000FF00) | unchecked((int)0xFF000000);
+                }
+
+                // Things that are spawned in by a special (flag 32) are drawn semi-transparent, so they
+                // can be told apart from things that are there from the start. Camera/trigger icons are
+                // rendered fullbright (the vertex color is ignored), so they are left alone.
+                RenderPass = RenderPass.Mask;
+                if (Thing.IsFlagSet("32") && (Thing.Type != 0) && (Thing.Type != 89))
+                {
+                    sectorcolor = (sectorcolor & 0x00FFFFFF) | (SPAWNED_THING_ALPHA << 24);
+                    RenderPass = RenderPass.Alpha;
                 }
 
                 // villsa 9/11/11 (builder64) render camera/trigger icon

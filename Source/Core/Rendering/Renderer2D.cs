@@ -59,6 +59,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		private const float THING_CIRCLE_SIZE = 1f;
 		private const float THING_CIRCLE_SHRINK = 0f;
 		private const float THING_SPRITE_SHRINK = 2f;
+		private const string THING_SPAWNED_BY_SPECIAL_FLAG = "32";	// "Spawner" flag in Doom64_misc.cfg
+		private const float THING_SPAWNED_BORDER_SIZE = 2f;		// Border thickness in screen pixels
 		private const float MINIMUM_SPRITE_RADIUS = 8.0f;
         private const int THING_BUFFER_SIZE = 100;
         private const float THINGS_BACK_ALPHA = 0.3f;
@@ -1257,7 +1259,28 @@ namespace CodeImp.DoomBuilder.Rendering
                 if (thingvertsarray.Length < visible.Count * 6) thingvertsarray = new FlatVertex[visible.Count * 6];
                 FlatVertex[] verts = thingvertsarray;
 
-                // First the boxes
+                // First a border (a slightly larger square, drawn underneath the box) around the
+                // things that are spawned in by a special (flag 32), so they stand out from the rest
+                int bordercount = 0;
+                FlatVertex[] borderverts = null;
+                for (int i = 0; i < visible.Count; i++)
+                {
+                    if (!visible[i].thing.IsFlagSet(THING_SPAWNED_BY_SPECIAL_FLAG)) continue;
+                    if (borderverts == null) borderverts = new FlatVertex[visible.Count * 6];
+                    ThingDrawInfo borderinfo = visible[i];
+                    borderinfo.circlesize += THING_SPAWNED_BORDER_SIZE;
+                    borderinfo.color = General.Colors.SpawnedThing;
+                    CreateThingBoxVerts(borderinfo, borderverts, bordercount * 6);
+                    bordercount++;
+                }
+                if (bordercount > 0)
+                {
+                    graphics.Shaders.Things2D.BeginPass(2);
+                    DrawThingVerts(borderverts, bordercount * 6);
+                    graphics.Shaders.Things2D.EndPass();
+                }
+
+                // Then the boxes
                 for (int i = 0; i < visible.Count; i++)
                     CreateThingBoxVerts(visible[i], verts, i * 6);
                 // The boxes are solid colored vector squares (no texture)
