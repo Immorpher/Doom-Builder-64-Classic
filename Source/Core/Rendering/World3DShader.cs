@@ -47,6 +47,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private EffectHandle magfiltersettings;
 		private EffectHandle modulatecolor;
 		private EffectHandle highlightcolor;
+		private EffectHandle glowlevel;
 		
 		#endregion
 
@@ -74,6 +75,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				magfiltersettings = effect.GetParameter(null, "magfiltersettings");
 				modulatecolor = effect.GetParameter(null, "modulatecolor");
 				highlightcolor = effect.GetParameter(null, "highlightcolor");
+				glowlevel = effect.GetParameter(null, "glowlevel");
 			}
 
 			// Initialize world vertex declaration
@@ -103,6 +105,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				if(magfiltersettings != null) magfiltersettings.Dispose();
 				if(modulatecolor != null) modulatecolor.Dispose();
 				if(highlightcolor != null) highlightcolor.Dispose();
+				if(glowlevel != null) glowlevel.Dispose();
 
 				// Done
 				base.Dispose();
@@ -137,6 +140,15 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(manager.Enabled)
 			{
 				effect.SetValue(modulatecolor, new Color4(modcolor));
+			}
+		}
+
+		// This sets the additive glow level (0 = none, 1 = full white), used by the Doom 64 glowing sector specials
+		public void SetGlowLevel(float level)
+		{
+			if(manager.Enabled)
+			{
+				effect.SetValue(glowlevel, level);
 			}
 		}
 

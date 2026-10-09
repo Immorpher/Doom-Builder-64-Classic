@@ -23,6 +23,9 @@ float4 modulatecolor;
 // Highlight color
 float4 highlightcolor;
 
+// Additive sector glow (Doom 64 light level / 255), added to the texture color before lighting
+float glowlevel;
+
 // Matrix for final transformation
 float4x4 worldviewproj;
 
@@ -61,6 +64,7 @@ PixelData vs_main(VertexData vd)
 float4 ps_main(PixelData pd) : COLOR
 {
 	float4 tcolor = tex2D(texturesamp, pd.uv);
+	tcolor.rgb = saturate(tcolor.rgb + glowlevel);
 	
 	// Blend texture color, vertex color and modulation color
     return tcolor * pd.color * modulatecolor;
@@ -79,6 +83,7 @@ float4 ps_fullbright(PixelData pd) : COLOR
 float4 ps_main_highlight(PixelData pd) : COLOR
 {
 	float4 tcolor = tex2D(texturesamp, pd.uv);
+	tcolor.rgb = saturate(tcolor.rgb + glowlevel);
 	
 	// Blend texture color, vertex color and modulation color
 	float4 ncolor = tcolor * pd.color * modulatecolor;

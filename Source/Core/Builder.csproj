@@ -718,6 +718,7 @@
     <Compile Include="General\SavePurpose.cs" />
     <Compile Include="IO\Doom64MapSetIO.cs" />
     <Compile Include="Map\Lights.cs" />
+    <Compile Include="Map\SectorGlow.cs" />
     <Compile Include="Map\Macro.cs" />
     <Compile Include="Map\MacroData.cs" />
     <Compile Include="Map\SelectionType.cs" />

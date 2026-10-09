@@ -453,6 +453,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				graphics.Device.SetRenderState(RenderState.TextureFactor, -1);
 				graphics.Shaders.World3D.SetModulateColor(-1);
 				graphics.Shaders.World3D.SetHighlightColor(0);
+				graphics.Shaders.World3D.SetGlowLevel(0.0f);
 
 				// Texture addressing
 				graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
@@ -496,6 +497,9 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This begins rendering world geometry
 		public void StartGeometry()
 		{
+			// Advance the Doom 64 glowing sector lights (runs at the game's 30 tics per second)
+			SectorGlow.Update();
+
 			// Make collections (once, they are reused for every frame)
 			if(geometry == null)
 			{
@@ -742,6 +746,8 @@ namespace CodeImp.DoomBuilder.Rendering
 			bool settingsdirty = true;
 			int lasthighlightcolor = 0;
 			bool havehighlightcolor = false;
+			float lastglow = 0.0f;
+			bool haveglow = false;
 
 			// Begin rendering with this shader
 			graphics.Shaders.World3D.BeginPass(shaderpass);
@@ -860,6 +866,16 @@ namespace CodeImp.DoomBuilder.Rendering
 								settingsdirty = true;
 							}
 							
+							// Doom 64 glowing sector specials add light to the texture, only update when it differs
+							float glow = SectorGlow.GetGlow(g.Sector.Sector);
+							if(!haveglow || (glow != lastglow))
+							{
+								graphics.Shaders.World3D.SetGlowLevel(glow);
+								lastglow = glow;
+								haveglow = true;
+								settingsdirty = true;
+							}
+							
 							// Commit the effect settings, but only when something changed
 							if(settingsdirty)
 							{
@@ -880,6 +896,9 @@ namespace CodeImp.DoomBuilder.Rendering
 				graphics.Device.SetSamplerState(0, SamplerState.AddressU, TextureAddress.Wrap);
 				graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
 			}
+
+			// Things set their own glow below, so make sure nothing is left over from the geometry
+			if(haveglow && (lastglow != 0.0f)) graphics.Shaders.World3D.SetGlowLevel(0.0f);
 
 			// Get things for this pass
 			Dictionary<ImageData, List<VisualThing>> thingspass = things[pass];
@@ -940,6 +959,11 @@ namespace CodeImp.DoomBuilder.Rendering
 								else
 								{
 									graphics.Shaders.World3D.SetHighlightColor(CalculateHighlightColor((t == highlighted) && showhighlight, (t.Selected && showselection)).ToArgb());
+
+									// Things standing in a glowing sector glow with it (camera and trigger icons are fullbright)
+									Thing thing = t.Thing;
+									bool thingglows = (thing != null) && (thing.Type != 0) && (thing.Type != 89);
+									graphics.Shaders.World3D.SetGlowLevel(thingglows ? SectorGlow.GetGlow(thing.Sector) : 0.0f);
 								}
 
 								// Create the matrix for positioning / rotation
@@ -964,6 +988,9 @@ namespace CodeImp.DoomBuilder.Rendering
 				graphics.Device.SetSamplerState(0, SamplerState.AddressV, TextureAddress.Wrap);
 				graphics.Device.SetSamplerState(0, SamplerState.AddressW, TextureAddress.Wrap);
 			}
+
+			// Don't let the glow leak into whatever is rendered next
+			graphics.Shaders.World3D.SetGlowLevel(0.0f);
 
 			// Done rendering with this shader
 			graphics.Shaders.World3D.EndPass();
