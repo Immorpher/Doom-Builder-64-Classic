@@ -46,6 +46,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private EffectHandle transformsettings;
 		private EffectHandle filtersettings;
 		private EffectHandle uvoffset;
+		private EffectHandle glowsettings;
 		
 		#endregion
 
@@ -71,6 +72,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				transformsettings = effect.GetParameter(null, "transformsettings");
 				filtersettings = effect.GetParameter(null, "filtersettings");
 				uvoffset = effect.GetParameter(null, "uvoffset");
+				glowsettings = effect.GetParameter(null, "glowsettings");
 			}
 			
 			// Initialize world vertex declaration
@@ -99,6 +101,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				if(transformsettings != null) transformsettings.Dispose();
 				if(filtersettings != null) filtersettings.Dispose();
 				if(uvoffset != null) uvoffset.Dispose();
+				if(glowsettings != null) glowsettings.Dispose();
 				
 				// Done
 				base.Dispose();
@@ -131,6 +134,17 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(manager.Enabled)
 			{
 				effect.SetValue(uvoffset, new Vector4(u, v, 0.0f, 0.0f));
+			}
+		}
+
+		// This sets the sector light effect used by pass 4. The level is added to the color (0..1).
+		// With beforecolor the level is added to the texture before the sector color is applied (like the game does),
+		// otherwise it is added to the final color (for the color view modes, where the texture is plain white).
+		public void SetGlow(float level, bool beforecolor)
+		{
+			if(manager.Enabled)
+			{
+				effect.SetValue(glowsettings, new Vector4(level, beforecolor ? 1.0f : 0.0f, 0.0f, 0.0f));
 			}
 		}
 

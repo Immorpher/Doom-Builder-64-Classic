@@ -30,8 +30,13 @@ float4x4 transformsettings;
 // Filter settings
 dword filtersettings;
 
-// Texture coordinate offset (xy), only used by the scrolling pass (p3)
+// Texture coordinate offset (xy), only used by the scrolling passes (p3, p4)
 float4 uvoffset;
+
+// Doom 64 sector light effect, only used by the glow pass (p4)
+// x = light level added (0..1)
+// y = 1 to add it to the texture before the sector color is applied (like the game), 0 to add it to the final color
+float4 glowsettings;
 
 // Texture1 input
 texture texture1
@@ -124,6 +129,15 @@ float4 ps_normal(PixelData pd) : COLOR
 	return float4(c.rgb, c.a * rendersettings.w) * pd.color;
 }
 
+// Pixel shader for sectors with a light effect
+float4 ps_glow(PixelData pd) : COLOR
+{
+	float4 c = tex2D(texture1samp, pd.uv);
+	float3 lit = saturate(c.rgb + glowsettings.x) * pd.color.rgb;
+	float3 added = saturate(c.rgb * pd.color.rgb + glowsettings.x);
+	return float4(lerp(added, lit, glowsettings.y), c.a * rendersettings.w * pd.color.a);
+}
+
 // Pixel shader for text
 float4 ps_text(PixelData pd) : COLOR
 {
@@ -157,5 +171,11 @@ technique SM20
 	{
 	    VertexShader = compile vs_2_0 vs_transform_scroll();
 	    PixelShader = compile ps_2_0 ps_normal();
+	}
+	
+	pass p4
+	{
+	    VertexShader = compile vs_2_0 vs_transform_scroll();
+	    PixelShader = compile ps_2_0 ps_glow();
 	}
 }

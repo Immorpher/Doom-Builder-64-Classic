@@ -80,7 +80,7 @@ namespace CodeImp.DoomBuilder.Editing
         protected bool panning;
 		private bool autopanenabled;
 
-		// Animation of the Doom 64 scrolling and liquid flats in the floor/ceiling view modes
+		// Animation of the Doom 64 scrolling flats, liquid floors and light effects in the floor/ceiling view modes
 		private const int SCROLL_ANIMATION_INTERVAL = 33;
 		private System.Windows.Forms.Timer scrolltimer;
 		private long lastscrolltic = -1;
@@ -633,14 +633,14 @@ namespace CodeImp.DoomBuilder.Editing
 			}
 		}
 
-		// Doom 64 moves flats in whole steps at 30 tics per second. When the floor or ceiling view
-		// shows such a flat, redraw the display once for every new tic.
+		// Doom 64 moves flats and changes sector lights in whole steps at 30 tics per second. When the
+		// floor or ceiling view shows such a sector, redraw the display once for every new tic.
 		private void ScrollAnimationTick(object sender, EventArgs e)
 		{
 			if((General.Map == null) || (General.Editing.Mode != this)) return;
 			if(!TextureScroll.Enabled || !General.Map.FormatInterface.InDoom64Mode) return;
-			if((renderer2d.ViewMode != ViewMode.FloorTextures) && (renderer2d.ViewMode != ViewMode.CeilingTextures)) return;
-			if(!renderer2d.Surfaces.HasScrollingSurfaces) return;
+			if(renderer2d.ViewMode == ViewMode.Normal) return;
+			if(!renderer2d.Surfaces.HasAnimatedSurfaces) return;
 
 			long tic = TextureScroll.GetCurrentTic();
 			if(tic == lastscrolltic) return;

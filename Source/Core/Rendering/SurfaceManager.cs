@@ -74,10 +74,11 @@ namespace CodeImp.DoomBuilder.Rendering
 		// (effectively rendering the ceiling vertices instead of floor vertices)
 		private int surfacevertexoffsetmul;
 		
-		// Entries with a flat that scrolls in the game (Doom 64 scroll and liquid sector flags).
-		// These are drawn separately, with a texture coordinate offset.
+		// Entries that change over time in the game: flats that scroll (Doom 64 scroll and liquid sector flags)
+		// and sectors with a light effect. These are drawn separately, with a texture coordinate offset and glow.
 		private List<SurfaceEntry> scrollentries = new List<SurfaceEntry>();
 		private bool scrollceiling;
+		private bool scrolltextured;
 		
 		// This is set to true when the resources have been unloaded
 		private bool resourcesunloaded;
@@ -86,8 +87,8 @@ namespace CodeImp.DoomBuilder.Rendering
 
 		#region ================== Properties
 
-		// True when the last render included sectors with moving flats (so the 2D view has to keep redrawing)
-		public bool HasScrollingSurfaces { get { return scrollentries.Count > 0; } }
+		// True when the last render included sectors with moving flats or light effects (so the 2D view has to keep redrawing)
+		public bool HasAnimatedSurfaces { get { return scrollentries.Count > 0; } }
 
 		#endregion
 
@@ -585,6 +586,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			surfacevertexoffsetmul = 0;
 			scrollentries.Clear();
 			scrollceiling = false;
+			scrolltextured = true;
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -594,7 +596,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				{
 					if(entry.bbox.IntersectsWith(viewport))
 					{
-						if(IsScrollingEntry(entry, false))
+						if(IsAnimatedEntry(entry, false, true))
 							scrollentries.Add(entry);
 						else
 							AddSurfaceEntryForRendering(entry, entry.floortexture);
@@ -610,6 +612,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			surfacevertexoffsetmul = 1;
 			scrollentries.Clear();
 			scrollceiling = true;
+			scrolltextured = true;
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -619,7 +622,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				{
 					if(entry.bbox.IntersectsWith(viewport))
 					{
-						if(IsScrollingEntry(entry, true))
+						if(IsAnimatedEntry(entry, true, true))
 							scrollentries.Add(entry);
 						else
 							AddSurfaceEntryForRendering(entry, entry.ceiltexture);
@@ -634,6 +637,8 @@ namespace CodeImp.DoomBuilder.Rendering
 			surfaces = new Dictionary<ImageData, List<SurfaceEntry>>();
 			surfacevertexoffsetmul = 0;
 			scrollentries.Clear();
+			scrollceiling = false;
+			scrolltextured = false;
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -642,15 +647,22 @@ namespace CodeImp.DoomBuilder.Rendering
 				foreach(SurfaceEntry entry in set.Value.entries)
 				{
 					if(entry.bbox.IntersectsWith(viewport))
-						AddSurfaceEntryForRendering(entry, 0);
+					{
+						if(IsAnimatedEntry(entry, false, false))
+							scrollentries.Add(entry);
+						else
+							AddSurfaceEntryForRendering(entry, 0);
+					}
 				}
 			}
 		}
 
-		// This returns true when the flat of the entry moves in the game (Doom 64 only)
-		private static bool IsScrollingEntry(SurfaceEntry entry, bool ceiling)
+		// This returns true when the entry changes over time in the game (Doom 64 only): the flat moves
+		// (only when flats are shown) or the sector has a light effect
+		private static bool IsAnimatedEntry(SurfaceEntry entry, bool ceiling, bool textured)
 		{
-			return (entry.sector != null) && !entry.sector.IsDisposed && TextureScroll.IsScrolling(entry.sector, ceiling);
+			if((entry.sector == null) || entry.sector.IsDisposed) return false;
+			return (textured && TextureScroll.IsScrolling(entry.sector, ceiling)) || SectorGlow.IsAnimated(entry.sector);
 		}
 
 		// This adds a surface entry to the list of surfaces
@@ -737,9 +749,9 @@ namespace CodeImp.DoomBuilder.Rendering
 			}
 		}
 		
-		// This draws the sectors with moving flats (Doom 64 scrolling sectors and liquid floors), using the same
-		// offsets as the 3D mode. A liquid floor is drawn the way the game does: the flat after the floor flat as the
-		// opaque bottom layer and the floor flat over it as a translucent layer.
+		// This draws the sectors with moving flats (Doom 64 scrolling sectors and liquid floors) and light effects, using
+		// the same offsets and glow as the 3D mode. A liquid floor is drawn the way the game does: the flat after the
+		// floor flat as the opaque bottom layer and the floor flat over it as a translucent layer.
 		private void RenderScrollingSurfaces(D3DDevice graphics)
 		{
 			if(scrollentries.Count == 0) return;
@@ -754,7 +766,17 @@ namespace CodeImp.DoomBuilder.Rendering
 				int firstvertex = entry.vertexoffset + (entry.numvertices * surfacevertexoffsetmul);
 				float du, dv;
 				
-				if(!scrollceiling && TextureScroll.IsLiquid(s))
+				// Light effect of the sector. In the color view modes the texture is plain white, so the light
+				// is added to the color that is shown. With flats it is added to the flat, like the game does.
+				bool light = SectorGlow.IsAnimated(s);
+				float glow = light ? SectorGlow.GetGlow(s) : 0.0f;
+				
+				if(!scrolltextured)
+				{
+					// Plain sector colors
+					DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, GetImageForRendering(0), 0.0f, 0.0f, 1.0f, false, light, glow, false);
+				}
+				else if(!scrollceiling && TextureScroll.IsLiquid(s))
 				{
 					// Opaque bottom layer
 					bool havebase = false;
@@ -762,7 +784,7 @@ namespace CodeImp.DoomBuilder.Rendering
 					if((basename != null) && TextureScroll.GetSectorLiquidOffset(s, false, out du, out dv))
 					{
 						ImageData baseimg = GetImageForRendering(CodeImp.DoomBuilder.IO.Lump.MakeLongName(basename));
-						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, baseimg, du, dv, 1.0f, false);
+						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, baseimg, du, dv, 1.0f, false, light, glow, true);
 						havebase = true;
 					}
 					
@@ -770,30 +792,32 @@ namespace CodeImp.DoomBuilder.Rendering
 					if(TextureScroll.GetSectorLiquidOffset(s, true, out du, out dv))
 					{
 						ImageData topimg = GetImageForRendering(entry.floortexture);
-						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, topimg, du, dv, havebase ? (160.0f / 255.0f) : 1.0f, havebase);
+						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, topimg, du, dv, havebase ? (160.0f / 255.0f) : 1.0f, havebase, light, glow, true);
 					}
 				}
 				else
 				{
 					long longname = scrollceiling ? entry.ceiltexture : entry.floortexture;
 					if(!TextureScroll.GetSectorPlaneOffset(s, scrollceiling, out du, out dv)) { du = 0.0f; dv = 0.0f; }
-					DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, GetImageForRendering(longname), du, dv, 1.0f, false);
+					DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, GetImageForRendering(longname), du, dv, 1.0f, false, light, glow, true);
 				}
 			}
 			
 			// Restore the settings for everything that is drawn after this
 			graphics.Shaders.Display2D.SetUVOffset(0.0f, 0.0f);
+			graphics.Shaders.Display2D.SetGlow(0.0f, false);
 			graphics.Shaders.Display2D.SetSettings(1f, 1f, 0f, 1f, General.Settings.ClassicBilinear);
 			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
 			graphics.Device.SetRenderState(RenderState.ColorWriteEnable, ColorWriteEnable.Red | ColorWriteEnable.Green | ColorWriteEnable.Blue | ColorWriteEnable.Alpha);
 		}
 		
-		// This draws one sector surface with a texture coordinate offset
-		private void DrawScrollingEntry(D3DDevice graphics, VertexBuffer vb, int firstvertex, int numvertices, ImageData img, float du, float dv, float alpha, bool blend)
+		// This draws one sector surface with a texture coordinate offset and sector light effect
+		private void DrawScrollingEntry(D3DDevice graphics, VertexBuffer vb, int firstvertex, int numvertices, ImageData img, float du, float dv, float alpha, bool blend, bool light, float glow, bool glowbeforecolor)
 		{
 			Display2DShader shader = graphics.Shaders.Display2D;
 			
 			shader.SetUVOffset(du, dv);
+			shader.SetGlow(glow, glowbeforecolor);
 			shader.SetSettings(1f, 1f, 0f, alpha, General.Settings.ClassicBilinear);
 			shader.Texture1 = img.Texture;
 			if(!graphics.Shaders.Enabled) graphics.Device.SetTexture(0, img.Texture);
@@ -807,7 +831,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			
 			graphics.Device.SetStreamSource(0, vb, 0, FlatVertex.Stride);
 			shader.Begin();
-			shader.BeginPass(3);
+			shader.BeginPass(light ? 4 : 3);
 			shader.ApplySettings();
 			graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, firstvertex, numvertices / 3);
 			shader.EndPass();

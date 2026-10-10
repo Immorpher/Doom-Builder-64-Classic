@@ -394,6 +394,13 @@ namespace CodeImp.DoomBuilder.Map
 			return GetFamily(effect) != Family.None;
 		}
 
+		// This returns true when the sector has a light effect that changes over time (Doom 64 only), so
+		// the 2D view has to keep redrawing it
+		public static bool IsAnimated(Sector s)
+		{
+			return enabled && (s != null) && (General.Map != null) && General.Map.FormatInterface.InDoom64Mode && (GetFamily(s.Effect) != Family.None);
+		}
+
 		// This returns the additive glow for a sector as a 0..1 value to add to the texture color.
 		// Returns 0 for all sectors that do not glow.
 		public static float GetGlow(Sector s)
