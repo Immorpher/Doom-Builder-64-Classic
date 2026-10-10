@@ -407,10 +407,17 @@ namespace CodeImp.DoomBuilder.Map
 
                 // Update surfaces
                 General.Map.CRenderer2D.Surfaces.UpdateSurfaces(surfaceentries, updateinfo);
+                SetSurfaceEntryOwner();
 
                 // Updated
                 updateneeded = false;
 			}
+		}
+
+		// This tells the surface entries that they belong to this sector
+		private void SetSurfaceEntryOwner()
+		{
+			foreach(SurfaceEntry e in surfaceentries) e.sector = this;
 		}
 
 		// This updates the floor surface
@@ -426,6 +433,7 @@ namespace CodeImp.DoomBuilder.Map
 
             // Update entry
             General.Map.CRenderer2D.Surfaces.UpdateSurfaces(surfaceentries, updateinfo);
+            SetSurfaceEntryOwner();
             General.Map.CRenderer2D.Surfaces.UnlockBuffers();
 		}
 
@@ -442,6 +450,7 @@ namespace CodeImp.DoomBuilder.Map
 
             // Update entry
             General.Map.CRenderer2D.Surfaces.UpdateSurfaces(surfaceentries, updateinfo);
+            SetSurfaceEntryOwner();
             General.Map.CRenderer2D.Surfaces.UnlockBuffers();
 		}
 		

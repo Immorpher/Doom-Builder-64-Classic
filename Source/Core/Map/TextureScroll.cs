@@ -79,6 +79,15 @@ namespace CodeImp.DoomBuilder.Map
 
 		#region ================== Methods
 
+		// The current game tic (as of the last Update)
+		public static long Tic { get { return tic; } }
+
+		// This returns the game tic of this moment, without changing the tic that is used for rendering
+		public static long GetCurrentTic()
+		{
+			return (long)(General.stopwatch.Elapsed.TotalMilliseconds * TICS_PER_SECOND / 1000.0);
+		}
+
 		// This updates the current game tic. Call this once per rendered frame.
 		public static void Update()
 		{
@@ -172,6 +181,14 @@ namespace CodeImp.DoomBuilder.Map
 			return true;
 		}
 
+		// This returns true when the floor (or ceiling) flat of the sector moves in the game, so the 2D view has to animate it
+		public static bool IsScrolling(Sector s, bool ceiling)
+		{
+			float du, dv;
+			if(!ceiling && IsLiquid(s)) return enabled;
+			return GetSectorPlaneOffset(s, ceiling, out du, out dv);
+		}
+
 		// This returns true when the sector is a Doom 64 liquid floor (Liquid Effect flag)
 		public static bool IsLiquid(Sector s)
 		{
@@ -217,7 +234,16 @@ namespace CodeImp.DoomBuilder.Map
 			dv = 0.0f;
 
 			if((g.Sector == null) || (g.Sector.Sector == null)) return false;
-			Sector s = g.Sector.Sector;
+			return GetSectorLiquidOffset(g.Sector.Sector, top, out du, out dv);
+		}
+
+		// Same as above for a sector, used by the 2D view (top = translucent floor layer, otherwise bottom layer)
+		public static bool GetSectorLiquidOffset(Sector s, bool top, out float du, out float dv)
+		{
+			du = 0.0f;
+			dv = 0.0f;
+
+			if(!enabled || (s == null) || (General.Map == null) || !General.Map.FormatInterface.InDoom64Mode) return false;
 
 			int xo = 0;
 			int yo = 0;
@@ -253,7 +279,16 @@ namespace CodeImp.DoomBuilder.Map
 			dv = 0.0f;
 
 			if((g.Sector == null) || (g.Sector.Sector == null)) return false;
-			Sector s = g.Sector.Sector;
+			return GetSectorPlaneOffset(g.Sector.Sector, ceiling, out du, out dv);
+		}
+
+		// Same as above for a sector, used by the 2D view
+		public static bool GetSectorPlaneOffset(Sector s, bool ceiling, out float du, out float dv)
+		{
+			du = 0.0f;
+			dv = 0.0f;
+
+			if(!enabled || (s == null) || (General.Map == null) || !General.Map.FormatInterface.InDoom64Mode) return false;
 
 			// The sector must scroll this plane
 			if(!s.IsFlagSet(ceiling ? FLAG_SECTOR_SCROLL_CEILING : FLAG_SECTOR_SCROLL_FLOOR)) return false;

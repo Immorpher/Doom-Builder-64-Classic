@@ -30,6 +30,9 @@ float4x4 transformsettings;
 // Filter settings
 dword filtersettings;
 
+// Texture coordinate offset (xy), only used by the scrolling pass (p3)
+float4 uvoffset;
+
 // Texture1 input
 texture texture1
 <
@@ -68,6 +71,16 @@ PixelData vs_transform(VertexData vd)
 	pd.pos = mul(float4(vd.pos, 1.0f), transformsettings);
 	pd.color = vd.color;
 	pd.uv = vd.uv;
+	return pd;
+}
+
+// Transformation with a texture coordinate offset (Doom 64 scrolling flats)
+PixelData vs_transform_scroll(VertexData vd)
+{
+	PixelData pd = (PixelData)0;
+	pd.pos = mul(float4(vd.pos, 1.0f), transformsettings);
+	pd.color = vd.color;
+	pd.uv = vd.uv + uvoffset.xy;
 	return pd;
 }
 
@@ -138,5 +151,11 @@ technique SM20
 	{
 	    VertexShader = compile vs_2_0 vs_transform();
 	    PixelShader = compile ps_2_0 ps_text();
+	}
+	
+	pass p3
+	{
+	    VertexShader = compile vs_2_0 vs_transform_scroll();
+	    PixelShader = compile ps_2_0 ps_normal();
 	}
 }

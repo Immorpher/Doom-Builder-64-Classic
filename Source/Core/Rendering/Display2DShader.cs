@@ -45,6 +45,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private EffectHandle rendersettings;
 		private EffectHandle transformsettings;
 		private EffectHandle filtersettings;
+		private EffectHandle uvoffset;
 		
 		#endregion
 
@@ -69,6 +70,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				rendersettings = effect.GetParameter(null, "rendersettings");
 				transformsettings = effect.GetParameter(null, "transformsettings");
 				filtersettings = effect.GetParameter(null, "filtersettings");
+				uvoffset = effect.GetParameter(null, "uvoffset");
 			}
 			
 			// Initialize world vertex declaration
@@ -96,6 +98,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				if(rendersettings != null) rendersettings.Dispose();
 				if(transformsettings != null) transformsettings.Dispose();
 				if(filtersettings != null) filtersettings.Dispose();
+				if(uvoffset != null) uvoffset.Dispose();
 				
 				// Done
 				base.Dispose();
@@ -119,6 +122,15 @@ namespace CodeImp.DoomBuilder.Rendering
 				TextureFilter filter = TextureFilter.Point;
 				if(bilinear) filter = TextureFilter.Linear;
 				effect.SetValue<int>(filtersettings, (int)filter);
+			}
+		}
+
+		// This sets the texture coordinate offset used by pass 3 (scrolling flats)
+		public void SetUVOffset(float u, float v)
+		{
+			if(manager.Enabled)
+			{
+				effect.SetValue(uvoffset, new Vector4(u, v, 0.0f, 0.0f));
 			}
 		}
 

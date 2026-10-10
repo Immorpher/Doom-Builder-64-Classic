@@ -36,9 +36,9 @@ using System.Drawing;
 
 namespace CodeImp.DoomBuilder.Editing
 {
-	/// <summary>
-	/// Provides specialized functionality for a classic (2D) Doom Builder editing mode.
-	/// </summary>
+	// 
+	// Provides specialized functionality for a classic (2D) Doom Builder editing mode.
+	// 
 	public abstract class ClassicMode : EditMode
 	{
 		#region ================== Constants
@@ -79,6 +79,11 @@ namespace CodeImp.DoomBuilder.Editing
         // View panning
         protected bool panning;
 		private bool autopanenabled;
+
+		// Animation of the Doom 64 scrolling and liquid flats in the floor/ceiling view modes
+		private const int SCROLL_ANIMATION_INTERVAL = 33;
+		private System.Windows.Forms.Timer scrolltimer;
+		private long lastscrolltic = -1;
 		
 		#endregion
 
@@ -109,9 +114,9 @@ namespace CodeImp.DoomBuilder.Editing
 
         #region ================== Constructor / Disposer
 
-        /// <summary>
-        /// Provides specialized functionality for a classic (2D) Doom Builder editing mode.
-        /// </summary>
+        // 
+        // Provides specialized functionality for a classic (2D) Doom Builder editing mode.
+        // 
         public ClassicMode()
 		{
 			// Initialize
@@ -141,6 +146,7 @@ namespace CodeImp.DoomBuilder.Editing
 			if(!isdisposed)
 			{
 				// Clean up
+				StopScrollAnimation();
 
 				// Dispose base
 				base.Dispose();
@@ -384,9 +390,9 @@ namespace CodeImp.DoomBuilder.Editing
 			if(mouseinside) OnMouseMove(new MouseEventArgs(mousebuttons, 0, (int)mousepos.x, (int)mousepos.y, 0));
 		}
 		
-		/// <summary>
-		/// This is called when the view changes (scroll/zoom), before the display is redrawn.
-		/// </summary>
+		// 
+		// This is called when the view changes (scroll/zoom), before the display is redrawn.
+		// 
 		protected virtual void OnViewChanged()
 		{
 		}
@@ -545,16 +551,16 @@ namespace CodeImp.DoomBuilder.Editing
 			base.OnMouseUp(e);
 		}
 
-		/// <summary>
-		/// Automatically called when dragging operation starts.
-		/// </summary>
+		// 
+		// Automatically called when dragging operation starts.
+		// 
 		protected virtual void OnDragStart(MouseEventArgs e)
 		{
 		}
 
-		/// <summary>
-		/// Automatically called when dragging operation stops.
-		/// </summary>
+		// 
+		// Automatically called when dragging operation stops.
+		// 
 		protected virtual void OnDragStop(MouseEventArgs e)
 		{
 		}
@@ -581,74 +587,124 @@ namespace CodeImp.DoomBuilder.Editing
 
 		#region ================== Methods
 
-		/// <summary>
-		/// Automatically called by the core when this editing mode is engaged.
-		/// </summary>
+		// 
+		// Automatically called by the core when this editing mode is engaged.
+		// 
 		public override void OnEngage()
 		{
 			// Clear display overlay
 			renderer.StartOverlay(true);
 			renderer.Finish();
 			base.OnEngage();
+			StartScrollAnimation();
 		}
 
-		/// <summary>
-		/// Called when the user requests to cancel this editing mode.
-		/// </summary>
+		// 
+		// Automatically called by the core when this editing mode is disengaged.
+		// 
+		public override void OnDisengage()
+		{
+			StopScrollAnimation();
+			base.OnDisengage();
+		}
+
+		// This starts the timer that keeps the display redrawing while moving flats are visible
+		private void StartScrollAnimation()
+		{
+			if(scrolltimer == null)
+			{
+				scrolltimer = new System.Windows.Forms.Timer();
+				scrolltimer.Interval = SCROLL_ANIMATION_INTERVAL;
+				scrolltimer.Tick += ScrollAnimationTick;
+			}
+			lastscrolltic = -1;
+			scrolltimer.Start();
+		}
+
+		// This stops the timer
+		private void StopScrollAnimation()
+		{
+			if(scrolltimer != null)
+			{
+				scrolltimer.Stop();
+				scrolltimer.Tick -= ScrollAnimationTick;
+				scrolltimer.Dispose();
+				scrolltimer = null;
+			}
+		}
+
+		// Doom 64 moves flats in whole steps at 30 tics per second. When the floor or ceiling view
+		// shows such a flat, redraw the display once for every new tic.
+		private void ScrollAnimationTick(object sender, EventArgs e)
+		{
+			if((General.Map == null) || (General.Editing.Mode != this)) return;
+			if(!TextureScroll.Enabled || !General.Map.FormatInterface.InDoom64Mode) return;
+			if((renderer2d.ViewMode != ViewMode.FloorTextures) && (renderer2d.ViewMode != ViewMode.CeilingTextures)) return;
+			if(!renderer2d.Surfaces.HasScrollingSurfaces) return;
+
+			long tic = TextureScroll.GetCurrentTic();
+			if(tic == lastscrolltic) return;
+			lastscrolltic = tic;
+			General.MainWindow.RedrawDisplay();
+		}
+
+		// 
+		// Called when the user requests to cancel this editing mode.
+		// 
 		public override void OnCancel()
 		{
 			cancelled = true;
 			base.OnCancel();
 		}
 
-		/// <summary>
-		/// This is called automatically when the Edit button is pressed.
-		/// (in Doom Builder 1, this was always the right mousebutton)
-		/// </summary>
+		// 
+		// This is called automatically when the Edit button is pressed.
+		// (in Doom Builder 1, this was always the right mousebutton)
+		// 
 		[BeginAction("classicedit", BaseAction = true)]
 		protected virtual void OnEditBegin()
 		{
 		}
 
-		/// <summary>
-		/// This is called automatically when the Edit button is released.
-		/// (in Doom Builder 1, this was always the right mousebutton)
-		/// </summary>
+		// 
+		// This is called automatically when the Edit button is released.
+		// (in Doom Builder 1, this was always the right mousebutton)
+		// 
 		[EndAction("classicedit", BaseAction = true)]
 		protected virtual void OnEditEnd()
 		{
 		}
 
-		/// <summary>
-		/// This is called automatically when the Select button is pressed.
-		/// (in Doom Builder 1, this was always the left mousebutton)
-		/// </summary>
+		// 
+		// This is called automatically when the Select button is pressed.
+		// (in Doom Builder 1, this was always the left mousebutton)
+		// 
 		[BeginAction("classicselect", BaseAction = true)]
 		protected virtual void OnSelectBegin()
 		{
 		}
 
-		/// <summary>
-		/// This is called automatically when the Select button is released.
-		/// (in Doom Builder 1, this was always the left mousebutton)
-		/// </summary>
+		// 
+		// This is called automatically when the Select button is released.
+		// (in Doom Builder 1, this was always the left mousebutton)
+		// 
 		[EndAction("classicselect", BaseAction = true)]
 		protected virtual void OnSelectEnd()
 		{
 			if(selecting) OnEndMultiSelection();
 		}
 
-		/// <summary>
-		/// This is called automatically when a rectangular multi-selection ends.
-		/// </summary>
+		// 
+		// This is called automatically when a rectangular multi-selection ends.
+		// 
 		protected virtual void OnEndMultiSelection()
 		{
 			selecting = false;
 		}
 
-		/// <summary>
-		/// Call this to initiate a rectangular multi-selection.
-		/// </summary>
+		// 
+		// Call this to initiate a rectangular multi-selection.
+		// 
 		protected virtual void StartMultiSelection()
 		{
 			selecting = true;
@@ -656,9 +712,9 @@ namespace CodeImp.DoomBuilder.Editing
 			selectionrect = new RectangleF(selectstart.x, selectstart.y, 0, 0);
 		}
 
-		/// <summary>
-		/// This is called automatically when a multi-selection is updated.
-		/// </summary>
+		// 
+		// This is called automatically when a multi-selection is updated.
+		// 
 		protected virtual void OnUpdateMultiSelection()
 		{
 			selectionrect.X = selectstart.x;
@@ -679,19 +735,19 @@ namespace CodeImp.DoomBuilder.Editing
 			}
 		}
 
-		/// <summary>
-		/// Call this to draw the selection on the overlay layer.
-		/// Must call renderer.StartOverlay first!
-		/// </summary>
+		// 
+		// Call this to draw the selection on the overlay layer.
+		// Must call renderer.StartOverlay first!
+		// 
 		protected virtual void RenderMultiSelection()
 		{
 			renderer.RenderRectangle(selectionrect, SELECTION_BORDER_SIZE,
 				General.Colors.Highlight.WithAlpha(SELECTION_ALPHA), true);
 		}
 
-        /// <summary>
-        /// This is called automatically when the mouse is moved while panning
-        /// </summary>
+        // 
+        // This is called automatically when the mouse is moved while panning
+        // 
         protected virtual void OnUpdateViewPanning()
         {
 			// We can only drag the map when the mouse pointer is inside

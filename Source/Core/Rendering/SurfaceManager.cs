@@ -74,12 +74,20 @@ namespace CodeImp.DoomBuilder.Rendering
 		// (effectively rendering the ceiling vertices instead of floor vertices)
 		private int surfacevertexoffsetmul;
 		
+		// Entries with a flat that scrolls in the game (Doom 64 scroll and liquid sector flags).
+		// These are drawn separately, with a texture coordinate offset.
+		private List<SurfaceEntry> scrollentries = new List<SurfaceEntry>();
+		private bool scrollceiling;
+		
 		// This is set to true when the resources have been unloaded
 		private bool resourcesunloaded;
 
 		#endregion
 
 		#region ================== Properties
+
+		// True when the last render included sectors with moving flats (so the 2D view has to keep redrawing)
+		public bool HasScrollingSurfaces { get { return scrollentries.Count > 0; } }
 
 		#endregion
 
@@ -183,6 +191,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This resets all buffers and requires all sectors to get new entries
 		public void Reset()
 		{
+			scrollentries.Clear();
+			
 			// Clear all items
 			foreach(KeyValuePair<int, SurfaceBufferSet> set in sets)
 			{
@@ -573,6 +583,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		{
 			surfaces = new Dictionary<ImageData, List<SurfaceEntry>>();
 			surfacevertexoffsetmul = 0;
+			scrollentries.Clear();
+			scrollceiling = false;
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -581,7 +593,12 @@ namespace CodeImp.DoomBuilder.Rendering
 				foreach(SurfaceEntry entry in set.Value.entries)
 				{
 					if(entry.bbox.IntersectsWith(viewport))
-						AddSurfaceEntryForRendering(entry, entry.floortexture);
+					{
+						if(IsScrollingEntry(entry, false))
+							scrollentries.Add(entry);
+						else
+							AddSurfaceEntryForRendering(entry, entry.floortexture);
+					}
 				}
 			}
 		}
@@ -591,6 +608,8 @@ namespace CodeImp.DoomBuilder.Rendering
 		{
 			surfaces = new Dictionary<ImageData, List<SurfaceEntry>>();
 			surfacevertexoffsetmul = 1;
+			scrollentries.Clear();
+			scrollceiling = true;
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -599,7 +618,12 @@ namespace CodeImp.DoomBuilder.Rendering
 				foreach(SurfaceEntry entry in set.Value.entries)
 				{
 					if(entry.bbox.IntersectsWith(viewport))
-						AddSurfaceEntryForRendering(entry, entry.ceiltexture);
+					{
+						if(IsScrollingEntry(entry, true))
+							scrollentries.Add(entry);
+						else
+							AddSurfaceEntryForRendering(entry, entry.ceiltexture);
+					}
 				}
 			}
 		}
@@ -609,6 +633,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		{
 			surfaces = new Dictionary<ImageData, List<SurfaceEntry>>();
 			surfacevertexoffsetmul = 0;
+			scrollentries.Clear();
 			
 			// Go for all surfaces as they are sorted in the buffers, so that
 			// they are automatically already sorted by vertexbuffer
@@ -622,8 +647,25 @@ namespace CodeImp.DoomBuilder.Rendering
 			}
 		}
 
+		// This returns true when the flat of the entry moves in the game (Doom 64 only)
+		private static bool IsScrollingEntry(SurfaceEntry entry, bool ceiling)
+		{
+			return (entry.sector != null) && !entry.sector.IsDisposed && TextureScroll.IsScrolling(entry.sector, ceiling);
+		}
+
 		// This adds a surface entry to the list of surfaces
 		private void AddSurfaceEntryForRendering(SurfaceEntry entry, long longimagename)
+		{
+			ImageData img = GetImageForRendering(longimagename);
+			
+			// Store by texture
+			if(!surfaces.ContainsKey(img))
+				surfaces.Add(img, new List<SurfaceEntry>());
+			surfaces[img].Add(entry);
+		}
+
+		// This determines the image to draw for a flat (0 = white)
+		private ImageData GetImageForRendering(long longimagename)
 		{
 			// Determine texture to use
 			ImageData img;
@@ -653,10 +695,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				}
 			}
 			
-			// Store by texture
-			if(!surfaces.ContainsKey(img))
-				surfaces.Add(img, new List<SurfaceEntry>());
-			surfaces[img].Add(entry);
+			return img;
 		}
 		
 		// This renders the sorted sector surfaces
@@ -692,7 +731,87 @@ namespace CodeImp.DoomBuilder.Rendering
 					graphics.Shaders.Display2D.EndPass();
 				}
 				graphics.Shaders.Display2D.End();
+				
+				// Flats that move in the game
+				RenderScrollingSurfaces(graphics);
 			}
+		}
+		
+		// This draws the sectors with moving flats (Doom 64 scrolling sectors and liquid floors), using the same
+		// offsets as the 3D mode. A liquid floor is drawn the way the game does: the flat after the floor flat as the
+		// opaque bottom layer and the floor flat over it as a translucent layer.
+		private void RenderScrollingSurfaces(D3DDevice graphics)
+		{
+			if(scrollentries.Count == 0) return;
+			
+			foreach(SurfaceEntry entry in scrollentries)
+			{
+				if((entry.numvertices <= 0) || (entry.bufferindex < 0) || !sets.ContainsKey(entry.numvertices)) continue;
+				
+				Sector s = entry.sector;
+				SurfaceBufferSet set = sets[entry.numvertices];
+				VertexBuffer vb = set.buffers[entry.bufferindex];
+				int firstvertex = entry.vertexoffset + (entry.numvertices * surfacevertexoffsetmul);
+				float du, dv;
+				
+				if(!scrollceiling && TextureScroll.IsLiquid(s))
+				{
+					// Opaque bottom layer
+					bool havebase = false;
+					string basename = TextureScroll.GetLiquidBaseName(s);
+					if((basename != null) && TextureScroll.GetSectorLiquidOffset(s, false, out du, out dv))
+					{
+						ImageData baseimg = GetImageForRendering(CodeImp.DoomBuilder.IO.Lump.MakeLongName(basename));
+						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, baseimg, du, dv, 1.0f, false);
+						havebase = true;
+					}
+					
+					// Translucent top layer (alpha 160 of 255 in the game)
+					if(TextureScroll.GetSectorLiquidOffset(s, true, out du, out dv))
+					{
+						ImageData topimg = GetImageForRendering(entry.floortexture);
+						DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, topimg, du, dv, havebase ? (160.0f / 255.0f) : 1.0f, havebase);
+					}
+				}
+				else
+				{
+					long longname = scrollceiling ? entry.ceiltexture : entry.floortexture;
+					if(!TextureScroll.GetSectorPlaneOffset(s, scrollceiling, out du, out dv)) { du = 0.0f; dv = 0.0f; }
+					DrawScrollingEntry(graphics, vb, firstvertex, entry.numvertices, GetImageForRendering(longname), du, dv, 1.0f, false);
+				}
+			}
+			
+			// Restore the settings for everything that is drawn after this
+			graphics.Shaders.Display2D.SetUVOffset(0.0f, 0.0f);
+			graphics.Shaders.Display2D.SetSettings(1f, 1f, 0f, 1f, General.Settings.ClassicBilinear);
+			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
+			graphics.Device.SetRenderState(RenderState.ColorWriteEnable, ColorWriteEnable.Red | ColorWriteEnable.Green | ColorWriteEnable.Blue | ColorWriteEnable.Alpha);
+		}
+		
+		// This draws one sector surface with a texture coordinate offset
+		private void DrawScrollingEntry(D3DDevice graphics, VertexBuffer vb, int firstvertex, int numvertices, ImageData img, float du, float dv, float alpha, bool blend)
+		{
+			Display2DShader shader = graphics.Shaders.Display2D;
+			
+			shader.SetUVOffset(du, dv);
+			shader.SetSettings(1f, 1f, 0f, alpha, General.Settings.ClassicBilinear);
+			shader.Texture1 = img.Texture;
+			if(!graphics.Shaders.Enabled) graphics.Device.SetTexture(0, img.Texture);
+			
+			// A translucent layer must not write the alpha channel, because the surface is
+			// drawn into a texture that is blended over the background afterwards
+			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, blend);
+			graphics.Device.SetRenderState(RenderState.ColorWriteEnable, blend ?
+				(ColorWriteEnable.Red | ColorWriteEnable.Green | ColorWriteEnable.Blue) :
+				(ColorWriteEnable.Red | ColorWriteEnable.Green | ColorWriteEnable.Blue | ColorWriteEnable.Alpha));
+			
+			graphics.Device.SetStreamSource(0, vb, 0, FlatVertex.Stride);
+			shader.Begin();
+			shader.BeginPass(3);
+			shader.ApplySettings();
+			graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, firstvertex, numvertices / 3);
+			shader.EndPass();
+			shader.End();
 		}
 		
 		#endregion

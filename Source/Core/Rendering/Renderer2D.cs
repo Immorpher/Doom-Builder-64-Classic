@@ -1336,6 +1336,9 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(renderlayer != RenderLayers.None) throw new InvalidOperationException("Renderer starting called before finished previous layer. Call Finish() first!");
 			renderlayer = RenderLayers.Surface;
 
+			// Advance the Doom 64 texture scrolling (the flats that move in the game)
+			TextureScroll.Update();
+
 			// Rendertargets available?
 			if(surfacetex != null)
 			{

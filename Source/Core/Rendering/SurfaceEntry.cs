@@ -67,6 +67,10 @@ namespace CodeImp.DoomBuilder.Rendering
 		public long floortexture;
 		public long ceiltexture;
 		
+		// The sector that owns this entry (used to find out if the flats scroll)
+		// The sector must set this!
+		public Sector sector;
+		
 		// Constructor
 		internal SurfaceEntry(int numvertices, int bufferindex, int vertexoffset)
 		{
