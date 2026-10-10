@@ -48,6 +48,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private EffectHandle modulatecolor;
 		private EffectHandle highlightcolor;
 		private EffectHandle glowlevel;
+		private EffectHandle uvoffset;
 		
 		#endregion
 
@@ -76,6 +77,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				modulatecolor = effect.GetParameter(null, "modulatecolor");
 				highlightcolor = effect.GetParameter(null, "highlightcolor");
 				glowlevel = effect.GetParameter(null, "glowlevel");
+				uvoffset = effect.GetParameter(null, "uvoffset");
 			}
 
 			// Initialize world vertex declaration
@@ -106,6 +108,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				if(modulatecolor != null) modulatecolor.Dispose();
 				if(highlightcolor != null) highlightcolor.Dispose();
 				if(glowlevel != null) glowlevel.Dispose();
+				if(uvoffset != null) uvoffset.Dispose();
 
 				// Done
 				base.Dispose();
@@ -140,6 +143,15 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(manager.Enabled)
 			{
 				effect.SetValue(modulatecolor, new Color4(modcolor));
+			}
+		}
+
+		// This sets the texture coordinate offset, used by the Doom 64 texture scrolling
+		public void SetUVOffset(float u, float v)
+		{
+			if(manager.Enabled)
+			{
+				effect.SetValue(uvoffset, new Vector4(u, v, 0.0f, 0.0f));
 			}
 		}
 

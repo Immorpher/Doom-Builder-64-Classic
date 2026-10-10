@@ -23,6 +23,9 @@ float4 modulatecolor;
 // Highlight color
 float4 highlightcolor;
 
+// Texture coordinate offset (xy), used for the Doom 64 texture scrolling
+float4 uvoffset;
+
 // Additive sector glow (Doom 64 light level / 255), added to the texture color before lighting
 float glowlevel;
 
@@ -54,7 +57,7 @@ PixelData vs_main(VertexData vd)
     // Fill pixel data input
     pd.pos = mul(float4(vd.pos, 1.0f), worldviewproj);
     pd.color = vd.color;
-    pd.uv = vd.uv;
+    pd.uv = vd.uv + uvoffset.xy;
     
     // Return result
     return pd;

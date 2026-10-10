@@ -42,6 +42,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
             GC.SuppressFinalize(this);
         }
 
+        // Switch decals are not scrolled with the wall
+        public override ScrollSurface ScrollKind { get { return ScrollSurface.None; } }
+
         // This builds the geometry. Returns false when no geometry created.
         public override bool Setup()
         {

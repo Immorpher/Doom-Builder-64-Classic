@@ -40,6 +40,24 @@ using CodeImp.DoomBuilder.Rendering;
 
 namespace CodeImp.DoomBuilder.VisualModes
 {
+	/// <summary>
+	/// What kind of surface a visual geometry is, for the Doom 64 texture scrolling.
+	/// </summary>
+	public enum ScrollSurface
+	{
+		/// <summary>Does not scroll.</summary>
+		None,
+
+		/// <summary>Part of a wall (scrolled by the flags of the line).</summary>
+		Wall,
+
+		/// <summary>Sector floor (scrolled by the flags of the sector).</summary>
+		Floor,
+
+		/// <summary>Sector ceiling (scrolled by the flags of the sector).</summary>
+		Ceiling
+	}
+
 	public abstract class VisualGeometry : IVisualPickable, IComparable<VisualGeometry>
 	{
 		#region ================== Variables
@@ -119,6 +137,12 @@ namespace CodeImp.DoomBuilder.VisualModes
 		/// Selected or not? This is only used by the core to determine what color to draw it with.
 		/// </summary>
 		public bool Selected { get { return selected; } set { selected = value; } }
+
+		/// <summary>
+		/// The kind of surface this geometry is, which decides how it is affected by the Doom 64 scroll flags.
+		/// Geometry that belongs to a sidedef is a wall by default, floors and ceilings override this.
+		/// </summary>
+		public virtual ScrollSurface ScrollKind { get { return (sidedef != null) ? ScrollSurface.Wall : ScrollSurface.None; } }
 
 		#endregion
 

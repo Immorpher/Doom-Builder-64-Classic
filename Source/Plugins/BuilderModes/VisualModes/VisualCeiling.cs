@@ -54,6 +54,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		#endregion
 
+		#region ================== Properties
+
+		// Ceilings scroll with the flags of the sector
+		public override ScrollSurface ScrollKind { get { return ScrollSurface.Ceiling; } }
+
+		#endregion
+
 		#region ================== Constructor / Setup
 
 		// Constructor
