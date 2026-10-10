@@ -149,9 +149,15 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This sets the texture coordinate offset, used by the Doom 64 texture scrolling
 		public void SetUVOffset(float u, float v)
 		{
+			SetUVOffset(u, v, 0.0f);
+		}
+
+		// This sets the texture coordinate offset and the height offset (for switches that scroll with the wall)
+		public void SetUVOffset(float u, float v, float z)
+		{
 			if(manager.Enabled)
 			{
-				effect.SetValue(uvoffset, new Vector4(u, v, 0.0f, 0.0f));
+				effect.SetValue(uvoffset, new Vector4(u, v, z, 0.0f));
 			}
 		}
 

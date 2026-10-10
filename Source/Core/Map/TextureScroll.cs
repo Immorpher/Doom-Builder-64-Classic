@@ -81,12 +81,14 @@ namespace CodeImp.DoomBuilder.Map
 			return (int)r;
 		}
 
-		// This returns the texture coordinate offset (to add to the u and v of the vertices) for a geometry.
+		// This returns the texture coordinate offset (to add to the u and v of the vertices) for a geometry,
+		// and the height offset (to add to the z of the vertices, only used by switches).
 		// Returns false when the geometry does not scroll.
-		public static bool GetOffset(VisualGeometry g, out float du, out float dv)
+		public static bool GetOffset(VisualGeometry g, out float du, out float dv, out float dz)
 		{
 			du = 0.0f;
 			dv = 0.0f;
+			dz = 0.0f;
 
 			if(!enabled || (g == null) || (General.Map == null) || !General.Map.FormatInterface.InDoom64Mode) return false;
 
@@ -95,6 +97,7 @@ namespace CodeImp.DoomBuilder.Map
 				case ScrollSurface.Wall: return GetWallOffset(g, out du, out dv);
 				case ScrollSurface.Floor: return GetPlaneOffset(g, false, out du, out dv);
 				case ScrollSurface.Ceiling: return GetPlaneOffset(g, true, out du, out dv);
+				case ScrollSurface.Switch: return GetSwitchOffset(g, out dz);
 				default: return false;
 			}
 		}
@@ -128,6 +131,28 @@ namespace CodeImp.DoomBuilder.Map
 
 			du = (Wrap(dirx * tic, WALL_WRAP) * scalex) / width;
 			dv = (Wrap(diry * tic, WALL_WRAP) * scaley) / height;
+			return true;
+		}
+
+		// Switches: the game places a switch using the vertical offset of the front sidedef (rowoffset), which
+		// the Scroll Up / Scroll Down flags change, so the switch moves up and down with the wall. It does not
+		// move sideways. The offset wraps at 127 like the one of the sidedef (the geometry was built with the
+		// offset that is set in the map, so only the difference is added).
+		private static bool GetSwitchOffset(VisualGeometry g, out float dz)
+		{
+			dz = 0.0f;
+
+			Sidedef sd = g.Sidedef;
+			if((sd == null) || (sd.Line == null) || !sd.IsFront) return false;
+
+			Linedef line = sd.Line;
+			int diry = 0;
+			if(line.IsFlagSet(FLAG_LINE_SCROLL_UP)) diry = 1;
+			else if(line.IsFlagSet(FLAG_LINE_SCROLL_DOWN)) diry = -1;
+			if(diry == 0) return false;
+
+			int start = sd.OffsetY;
+			dz = Wrap(start + (diry * tic), WALL_WRAP) - start;
 			return true;
 		}
 

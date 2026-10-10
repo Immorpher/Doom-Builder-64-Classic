@@ -40,22 +40,25 @@ using CodeImp.DoomBuilder.Rendering;
 
 namespace CodeImp.DoomBuilder.VisualModes
 {
-	/// <summary>
-	/// What kind of surface a visual geometry is, for the Doom 64 texture scrolling.
-	/// </summary>
+	// 
+	// What kind of surface a visual geometry is, for the Doom 64 texture scrolling.
+	// 
 	public enum ScrollSurface
 	{
-		/// <summary>Does not scroll.</summary>
+		// Does not scroll.
 		None,
 
-		/// <summary>Part of a wall (scrolled by the flags of the line).</summary>
+		// Part of a wall (scrolled by the flags of the line).
 		Wall,
 
-		/// <summary>Sector floor (scrolled by the flags of the sector).</summary>
+		// Sector floor (scrolled by the flags of the sector).
 		Floor,
 
-		/// <summary>Sector ceiling (scrolled by the flags of the sector).</summary>
-		Ceiling
+		// Sector ceiling (scrolled by the flags of the sector).
+		Ceiling,
+
+		// Switch decal on a wall (moves up and down with the vertical scrolling of the wall).
+		Switch
 	}
 
 	public abstract class VisualGeometry : IVisualPickable, IComparable<VisualGeometry>
@@ -81,14 +84,14 @@ namespace CodeImp.DoomBuilder.VisualModes
 		private VisualSector sector;
 		private Sidedef sidedef;
 
-		/// <summary>
-		/// Absolute intersecting coordinates are set during object picking. This is not set if the geometry is not bound to a sidedef.
-		/// </summary>
+		// 
+		// Absolute intersecting coordinates are set during object picking. This is not set if the geometry is not bound to a sidedef.
+		// 
 		protected Vector3D pickintersect;
 
-		/// <summary>
-		/// Distance unit along the object picking ray is set during object picking. (0.0 is at camera, 1.0f is at far plane) This is not set if the geometry is not bound to a sidedef.
-		/// </summary>
+		// 
+		// Distance unit along the object picking ray is set during object picking. (0.0 is at camera, 1.0f is at far plane) This is not set if the geometry is not bound to a sidedef.
+		// 
 		protected float pickrayu;
 		
 		// Rendering
@@ -108,59 +111,59 @@ namespace CodeImp.DoomBuilder.VisualModes
 		internal int RenderPassInt { get { return renderpass; } }
 		internal Color4 ModColor4 { get { return modcolor4; } }
 
-		/// <summary>
-		/// Render pass in which this geometry must be rendered. Default is Solid.
-		/// </summary>
+		// 
+		// Render pass in which this geometry must be rendered. Default is Solid.
+		// 
 		public RenderPass RenderPass { get { return (RenderPass)renderpass; } set { renderpass = (int)value; } }
 
-		/// <summary>
-		/// Image to use as texture on this geometry.
-		/// </summary>
+		// 
+		// Image to use as texture on this geometry.
+		// 
 		public ImageData Texture { get { return texture; } set { texture = value; } }
 
-		/// <summary>
-		/// Color to modulate the texture pixels with.
-		/// </summary>
+		// 
+		// Color to modulate the texture pixels with.
+		// 
 		public PixelColor ModulateColor { get { return modulatecolor; } set { modcolor4 = value.ToColorValue(); modulatecolor = value; } }
 
-		/// <summary>
-		/// Returns the VisualSector this geometry has been added to.
-		/// </summary>
+		// 
+		// Returns the VisualSector this geometry has been added to.
+		// 
 		public VisualSector Sector { get { return sector; } internal set { sector = value; } }
 		
-		/// <summary>
-		/// Returns the Sidedef that this geometry is created for. Null for geometry that is sector-wide.
-		/// </summary>
+		// 
+		// Returns the Sidedef that this geometry is created for. Null for geometry that is sector-wide.
+		// 
 		public Sidedef Sidedef { get { return sidedef; } }
 
-		/// <summary>
-		/// Selected or not? This is only used by the core to determine what color to draw it with.
-		/// </summary>
+		// 
+		// Selected or not? This is only used by the core to determine what color to draw it with.
+		// 
 		public bool Selected { get { return selected; } set { selected = value; } }
 
-		/// <summary>
-		/// The kind of surface this geometry is, which decides how it is affected by the Doom 64 scroll flags.
-		/// Geometry that belongs to a sidedef is a wall by default, floors and ceilings override this.
-		/// </summary>
+		// 
+		// The kind of surface this geometry is, which decides how it is affected by the Doom 64 scroll flags.
+		// Geometry that belongs to a sidedef is a wall by default, floors and ceilings override this.
+		// 
 		public virtual ScrollSurface ScrollKind { get { return (sidedef != null) ? ScrollSurface.Wall : ScrollSurface.None; } }
 
 		#endregion
 
 		#region ================== Constructor / Destructor
 		
-		/// <summary>
-		/// This creates sector-global visual geometry. This geometry is always visible when any of the sector is visible.
-		/// </summary>
+		// 
+		// This creates sector-global visual geometry. This geometry is always visible when any of the sector is visible.
+		// 
 		public VisualGeometry(VisualSector vs)
 		{
 			this.sector = vs;
 			this.ModulateColor = new PixelColor(255, 255, 255, 255);
 		}
 
-		/// <summary>
-		/// This creates visual geometry that is bound to a sidedef. This geometry is only visible when the sidedef is visible. It is automatically back-face culled during rendering and automatically XY intersection tested as well as back-face culled during object picking.
-		/// </summary>
-		/// <param name="sd"></param>
+		// 
+		// This creates visual geometry that is bound to a sidedef. This geometry is only visible when the sidedef is visible. It is automatically back-face culled during rendering and automatically XY intersection tested as well as back-face culled during object picking.
+		// 
+		// <param name="sd"></param>
 		public VisualGeometry(VisualSector vs, Sidedef sd)
 		{
 			this.sector = vs;
@@ -196,19 +199,19 @@ namespace CodeImp.DoomBuilder.VisualModes
 			this.pickrayu = u;
 		}
 		
-		/// <summary>
-		/// This is called when the geometry must be tested for line intersection. This should reject
-		/// as fast as possible to rule out all geometry that certainly does not touch the line.
-		/// </summary>
+		// 
+		// This is called when the geometry must be tested for line intersection. This should reject
+		// as fast as possible to rule out all geometry that certainly does not touch the line.
+		// 
 		public virtual bool PickFastReject(Vector3D from, Vector3D to, Vector3D dir)
 		{
 			return false;
 		}
 		
-		/// <summary>
-		/// This is called when the geometry must be tested for line intersection. This should perform
-		/// accurate hit detection and set u_ray to the position on the ray where this hits the geometry.
-		/// </summary>
+		// 
+		// This is called when the geometry must be tested for line intersection. This should perform
+		// accurate hit detection and set u_ray to the position on the ray where this hits the geometry.
+		// 
 		public virtual bool PickAccurate(Vector3D from, Vector3D to, Vector3D dir, ref float u_ray)
 		{
 			return false;

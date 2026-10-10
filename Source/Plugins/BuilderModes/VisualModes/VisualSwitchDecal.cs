@@ -42,8 +42,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
             GC.SuppressFinalize(this);
         }
 
-        // Switch decals are not scrolled with the wall
-        public override ScrollSurface ScrollKind { get { return ScrollSurface.None; } }
+        // Switch decals are placed using the vertical offset of the sidedef, so they move up and down
+        // with the Scroll Up / Scroll Down flags of the line (they don't scroll sideways)
+        public override ScrollSurface ScrollKind { get { return ScrollSurface.Switch; } }
 
         // This builds the geometry. Returns false when no geometry created.
         public override bool Setup()

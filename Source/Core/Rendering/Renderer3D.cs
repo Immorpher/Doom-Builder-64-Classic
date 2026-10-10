@@ -754,6 +754,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			bool haveglow = false;
 			float lastscrollu = 0.0f;
 			float lastscrollv = 0.0f;
+			float lastscrollz = 0.0f;
 
 			// Begin rendering with this shader
 			graphics.Shaders.World3D.BeginPass(shaderpass);
@@ -883,13 +884,14 @@ namespace CodeImp.DoomBuilder.Rendering
 							}
 							
 							// Doom 64 scrolling textures, only update when the offset differs from the previous draw
-							float scrollu, scrollv;
-							TextureScroll.GetOffset(g, out scrollu, out scrollv);
-							if((scrollu != lastscrollu) || (scrollv != lastscrollv))
+							float scrollu, scrollv, scrollz;
+							TextureScroll.GetOffset(g, out scrollu, out scrollv, out scrollz);
+							if((scrollu != lastscrollu) || (scrollv != lastscrollv) || (scrollz != lastscrollz))
 							{
-								graphics.Shaders.World3D.SetUVOffset(scrollu, scrollv);
+								graphics.Shaders.World3D.SetUVOffset(scrollu, scrollv, scrollz);
 								lastscrollu = scrollu;
 								lastscrollv = scrollv;
+								lastscrollz = scrollz;
 								settingsdirty = true;
 							}
 							
@@ -915,7 +917,7 @@ namespace CodeImp.DoomBuilder.Rendering
 			}
 
 			// Things are never scrolled, so make sure nothing is left over from the geometry
-			if((lastscrollu != 0.0f) || (lastscrollv != 0.0f)) graphics.Shaders.World3D.SetUVOffset(0.0f, 0.0f);
+			if((lastscrollu != 0.0f) || (lastscrollv != 0.0f) || (lastscrollz != 0.0f)) graphics.Shaders.World3D.SetUVOffset(0.0f, 0.0f);
 
 			// Things set their own glow below, so make sure nothing is left over from the geometry
 			if(haveglow && (lastglow != 0.0f)) graphics.Shaders.World3D.SetGlowLevel(0.0f);
