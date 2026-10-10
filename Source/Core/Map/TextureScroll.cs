@@ -2,6 +2,8 @@
 #region ================== Namespaces
 
 using System;
+using System.Collections.Generic;
+using CodeImp.DoomBuilder.Config;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.VisualModes;
 
@@ -9,15 +11,24 @@ using CodeImp.DoomBuilder.VisualModes;
 
 namespace CodeImp.DoomBuilder.Map
 {
-	/// <summary>
-	/// Calculates the texture scrolling of Doom 64 for the 3D mode, like the game does in P_UpdateSpecials (p_spec.c):
-	///  - Lines with the Scroll Right/Left/Up/Down flags scroll the textures of their FRONT side by 1 pixel per tic.
-	///  - Sectors with Floor Scroll / Ceiling Scroll and a direction flag scroll their flat by 1 unit per tic
-	///    (3 units per tic with the Fast Scrolling flag).
-	/// The game runs at 30 tics per second and moves the textures in whole steps, so this does the same.
-	/// The editor does not change the map; the result is only used as a texture coordinate offset when rendering.
-	/// </summary>
-	internal static class TextureScroll
+	// 
+	// Calculates the texture scrolling of Doom 64 for the 3D mode, like the game does in P_UpdateSpecials (p_spec.c):
+	//  - Lines with the Scroll Right/Left/Up/Down flags scroll the textures of their FRONT side by 1 pixel per tic.
+	//  - Sectors with Floor Scroll / Ceiling Scroll and a direction flag scroll their flat by 1 unit per tic
+	//    (3 units per tic with the Fast Scrolling flag).
+	// The game runs at 30 tics per second and moves the textures in whole steps, so this does the same.
+	// The editor does not change the map; the result is only used as a texture coordinate offset when rendering.
+	// 
+	// 
+	// Implemented by the visual geometry that makes up a Doom 64 liquid floor.
+	// 
+	public interface ILiquidLayer
+	{
+		// 0 = not a liquid layer, 1 = opaque bottom layer, 2 = translucent top layer.
+		int LiquidLayer { get; }
+	}
+
+	public static class TextureScroll
 	{
 		#region ================== Constants
 
@@ -35,6 +46,7 @@ namespace CodeImp.DoomBuilder.Map
 		private const string FLAG_LINE_SCROLL_DOWN = "1048576";
 
 		// Sector flags
+		private const string FLAG_SECTOR_LIQUID = "4";
 		private const string FLAG_SECTOR_SCROLL_FAST = "16";
 		private const string FLAG_SECTOR_SCROLL_CEILING = "1024";
 		private const string FLAG_SECTOR_SCROLL_FLOOR = "2048";
@@ -54,9 +66,9 @@ namespace CodeImp.DoomBuilder.Map
 
 		#region ================== Properties
 
-		/// <summary>
-		/// Turns the texture scrolling on or off. When off, textures are drawn without scrolling.
-		/// </summary>
+		// 
+		// Turns the texture scrolling on or off. When off, textures are drawn without scrolling.
+		// 
 		public static bool Enabled
 		{
 			get { return enabled; }
@@ -91,6 +103,10 @@ namespace CodeImp.DoomBuilder.Map
 			dz = 0.0f;
 
 			if(!enabled || (g == null) || (General.Map == null) || !General.Map.FormatInterface.InDoom64Mode) return false;
+
+			// Layers of a liquid floor
+			ILiquidLayer liquid = g as ILiquidLayer;
+			if((liquid != null) && (liquid.LiquidLayer != 0)) return GetLiquidOffset(g, liquid.LiquidLayer == 2, out du, out dv);
 
 			switch(g.ScrollKind)
 			{
@@ -153,6 +169,80 @@ namespace CodeImp.DoomBuilder.Map
 
 			int start = sd.OffsetY;
 			dz = Wrap(start + (diry * tic), WALL_WRAP) - start;
+			return true;
+		}
+
+		// This returns true when the sector is a Doom 64 liquid floor (Liquid Effect flag)
+		public static bool IsLiquid(Sector s)
+		{
+			return (s != null) && (General.Map != null) && General.Map.FormatInterface.InDoom64Mode && s.IsFlagSet(FLAG_SECTOR_LIQUID);
+		}
+
+		// The game draws a liquid floor with the flat after the floor flat (floorpic + 1) as the opaque bottom layer.
+		// This finds the name of that flat using the texture index list of the game configuration (the order of the
+		// textures in the game). Returns null when there is none.
+		public static string GetLiquidBaseName(Sector s)
+		{
+			if((s == null) || (General.Map == null)) return null;
+			List<TextureIndexInfo> list = General.Map.Config.D64TextureIndex;
+			int index = -1;
+			for(int i = 0; i < list.Count; i++)
+			{
+				if(string.Equals(list[i].Title, s.FloorTexture, StringComparison.OrdinalIgnoreCase))
+				{
+					index = list[i].Index;
+					break;
+				}
+			}
+			if(index < 0) return null;
+
+			for(int i = 0; i < list.Count; i++)
+			{
+				if(list[i].Index == index + 1)
+				{
+					string name = list[i].Title;
+					if(string.IsNullOrEmpty(name) || (name == "-")) return null;
+					return name;
+				}
+			}
+			return null;
+		}
+
+		// Liquid floors: both layers scroll all the time. Without the Floor Scroll flag the game moves them by half
+		// a unit per tic (scrollfrac): the bottom layer along x, the top layer along y (the game
+		// swaps and negates its offsets for the top layer). With the Floor Scroll flag the sector offsets are used instead.
+		private static bool GetLiquidOffset(VisualGeometry g, bool top, out float du, out float dv)
+		{
+			du = 0.0f;
+			dv = 0.0f;
+
+			if((g.Sector == null) || (g.Sector.Sector == null)) return false;
+			Sector s = g.Sector.Sector;
+
+			int xo = 0;
+			int yo = 0;
+			if(s.IsFlagSet(FLAG_SECTOR_SCROLL_FLOOR))
+			{
+				int dirx = 0;
+				int diry = 0;
+				if(s.IsFlagSet(FLAG_SECTOR_SCROLL_LEFT)) dirx = 1;
+				else if(s.IsFlagSet(FLAG_SECTOR_SCROLL_RIGHT)) dirx = -1;
+				if(s.IsFlagSet(FLAG_SECTOR_SCROLL_UP)) diry = -1;
+				else if(s.IsFlagSet(FLAG_SECTOR_SCROLL_DOWN)) diry = 1;
+				int speed = s.IsFlagSet(FLAG_SECTOR_SCROLL_FAST) ? 3 : 1;
+				xo = Wrap(dirx * speed * tic, FLAT_WRAP);
+				yo = Wrap(diry * speed * tic, FLAT_WRAP);
+			}
+			else
+			{
+				xo = Wrap(tic / 2, FLAT_WRAP);
+			}
+
+			// The top layer uses (-yoffset, xoffset)
+			int px = top ? -yo : xo;
+			int py = top ? xo : yo;
+			du = Wrap(px, FLAT_WRAP) / 64.0f;
+			dv = -Wrap(py, FLAT_WRAP) / 64.0f;
 			return true;
 		}
 

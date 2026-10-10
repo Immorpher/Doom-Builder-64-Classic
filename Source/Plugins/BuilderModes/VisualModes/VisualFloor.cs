@@ -40,7 +40,7 @@ using CodeImp.DoomBuilder.Windows;
 
 namespace CodeImp.DoomBuilder.BuilderModes
 {
-	internal sealed class VisualFloor : BaseVisualGeometrySector
+	internal sealed class VisualFloor : BaseVisualGeometrySector, ILiquidLayer
 	{
 		#region ================== Constants
 
@@ -58,6 +58,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// Floors scroll with the flags of the sector
 		public override ScrollSurface ScrollKind { get { return ScrollSurface.Floor; } }
+
+		// A liquid floor draws the floor flat as the translucent top layer
+		public int LiquidLayer { get { return TextureScroll.IsLiquid(Sector.Sector) ? 2 : 0; } }
 
 		#endregion
 
@@ -91,6 +94,18 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					setuponloadedtexture = s.LongFloorTexture;
 			}
 			
+			// A liquid floor draws this flat as a translucent layer (alpha 160 of 255) over the flat after it
+			bool liquid = TextureScroll.IsLiquid(s);
+			if(liquid)
+			{
+				brightness = (160 << 24) | (brightness & 0x00FFFFFF);
+				base.RenderPass = RenderPass.Alpha;
+			}
+			else
+			{
+				base.RenderPass = RenderPass.Solid;
+			}
+
 			// Make vertices
 			verts = new WorldVertex[s.Triangles.Vertices.Count];
 			for(int i = 0; i < s.Triangles.Vertices.Count; i++)
@@ -119,6 +134,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			
 			// Apply vertices
 			base.SetVertices(verts);
+
+			// Keep the bottom layer of a liquid floor in sync
+			if(base.Sector.LiquidBase != null) base.Sector.LiquidBase.Setup();
 			return (verts.Length > 0);
 		}
 		

@@ -133,6 +133,7 @@
     <Compile Include="VisualModes\BaseVisualThing.cs" />
     <Compile Include="VisualModes\VisualCeiling.cs" />
     <Compile Include="VisualModes\VisualFloor.cs" />
+    <Compile Include="VisualModes\VisualLiquidBase.cs" />
     <Compile Include="VisualModes\VisualLower.cs" />
     <Compile Include="VisualModes\VisualMiddleSingle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

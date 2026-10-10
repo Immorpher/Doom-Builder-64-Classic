@@ -1457,6 +1457,14 @@ namespace CodeImp.DoomBuilder.Data
 					// Add used flats to dictionary
 					usedimages[s.LongFloorTexture] = 0;
 					usedimages[s.LongCeilTexture] = 0;
+
+					// The bottom layer of a Doom 64 liquid floor is the flat after the floor flat,
+					// which no sector uses itself, but it must be loaded to be drawn in 3D mode
+					if(TextureScroll.IsLiquid(s))
+					{
+						string liquidbase = TextureScroll.GetLiquidBaseName(s);
+						if(liquidbase != null) usedimages[Lump.MakeLongName(liquidbase)] = 0;
+					}
 				}
 				
 				// Notify the background thread that it needs to update the images

@@ -48,6 +48,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		protected VisualFloor floor;
 		protected VisualCeiling ceiling;
+		protected VisualLiquidBase liquidbase;
 		protected Dictionary<Sidedef, VisualSidedefParts> sides;
 		
 		// If this is set to true, the sector will be rebuilt after the action is performed.
@@ -59,6 +60,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		public VisualFloor Floor { get { return floor; } }
 		public VisualCeiling Ceiling { get { return ceiling; } }
+		public VisualLiquidBase LiquidBase { get { return liquidbase; } }
 		public bool Changed { get { return changed; } set { changed |= value; } }
 		
 		#endregion
@@ -87,6 +89,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				sides = null;
 				floor = null;
 				ceiling = null;
+				liquidbase = null;
 				
 				// Dispose base
 				base.Dispose();
@@ -140,10 +143,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Forget old geometry
 			base.ClearGeometry();
 			
+			// Create the bottom layer of a liquid floor (made first, because the floor keeps it up to date)
+			if(liquidbase == null) liquidbase = new VisualLiquidBase(mode, this);
+
 			// Create floor
 			if(floor == null) floor = new VisualFloor(mode, this);
 			floor.Setup();
 			base.AddGeometry(floor);
+
+			// Add the bottom layer when this is a liquid floor
+			if(liquidbase.IsActive) base.AddGeometry(liquidbase);
 
 			// Create ceiling
 			if(ceiling == null) ceiling = new VisualCeiling(mode, this);
