@@ -110,9 +110,6 @@ namespace CodeImp.DoomBuilder.Editing
 					// This links sidedefs that are not linked to a marked sector to a virtual sector
 					MapSet copyset = General.Map.Map.CloneMarked();
 					
-					// Convert flags and activations to UDMF fields, if needed
-					copyset.TranslateToUDMF();
-
 					// Write data to stream
 					MemoryStream memstream = new MemoryStream();
 					UniversalStreamWriter writer = new UniversalStreamWriter();
@@ -188,9 +185,6 @@ namespace CodeImp.DoomBuilder.Editing
 			// The new geometry is not marked, so invert the marks to get it marked
 			General.Map.Map.InvertAllMarks();
 			
-			// Convert UDMF fields back to flags and activations, if needed
-			General.Map.Map.TranslateFromUDMF();
-
 			// Modify tags and actions if preferred
 			if(options.ChangeTags == PasteOptions.TAGS_REMOVE) Tools.RemoveMarkedTags();
 			if(options.ChangeTags == PasteOptions.TAGS_RENUMBER) Tools.RenumberMarkedTags();
@@ -220,9 +214,6 @@ namespace CodeImp.DoomBuilder.Editing
 					// Copy the marked geometry
 					// This links sidedefs that are not linked to a marked sector to a virtual sector
 					MapSet copyset = General.Map.Map.CloneMarked();
-					
-					// Convert flags and activations to UDMF fields, if needed
-					copyset.TranslateToUDMF();
 					
 					// Write data to stream
 					MemoryStream memstream = new MemoryStream();
@@ -281,9 +272,6 @@ namespace CodeImp.DoomBuilder.Editing
 						// The new geometry is not marked, so invert the marks to get it marked
 						General.Map.Map.InvertAllMarks();
 
-						// Convert UDMF fields back to flags and activations, if needed
-						General.Map.Map.TranslateFromUDMF();
-						
 						// Modify tags and actions if preferred
 						if(options.ChangeTags == PasteOptions.TAGS_REMOVE) Tools.RemoveMarkedTags();
 						if(options.ChangeTags == PasteOptions.TAGS_RENUMBER) Tools.RenumberMarkedTags();

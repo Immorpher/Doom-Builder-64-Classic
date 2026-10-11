@@ -46,8 +46,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		internal enum ColorPreset
 		{
 			DOOM,
-			HEXEN,
-			STRIFE,
 			DOOM64,
 		}
 
@@ -91,7 +89,12 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			menusform = new MenusForm();
 			menusform.ShowHiddenLines = General.Settings.ReadPluginSetting("automapmode.showhiddenlines", false);
 			menusform.ShowSecretSectors = General.Settings.ReadPluginSetting("automapmode.showsecretsectors", false);
-			menusform.ColorPreset = (ColorPreset)General.Settings.ReadPluginSetting("automapmode.colorpreset", (int)ColorPreset.DOOM);
+			// The preset list used to be Doom, Hexen, Strife, Doom 64 (stored in "automapmode.colorpreset").
+			// Migrate: only the old Doom 64 entry (3) carries over, anything else falls back to Doom.
+			int legacypreset = General.Settings.ReadPluginSetting("automapmode.colorpreset", 0);
+			int presetindex = General.Settings.ReadPluginSetting("automapmode.colorpresetindex", (legacypreset == 3) ? (int)ColorPreset.DOOM64 : (int)ColorPreset.DOOM);
+			if((presetindex < 0) || (presetindex > (int)ColorPreset.DOOM64)) presetindex = (int)ColorPreset.DOOM;
+			menusform.ColorPreset = (ColorPreset)presetindex;
 
 			// Doom 64 maps default to the Doom 64 preset the first time this map is opened
 			if(General.Map != null && General.Map.FormatInterface.InDoom64Mode &&
@@ -258,26 +261,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 					ColorBackground = new PixelColor(255, 0, 0, 0);
 					break;
 
-				case ColorPreset.HEXEN:
-					ColorSingleSided = new PixelColor(255, 89, 64, 27);
-					ColorSecret = new PixelColor(255, 255, 0, 255);
-					ColorFloorDiff = new PixelColor(255, 208, 176, 133);
-					ColorCeilDiff = new PixelColor(255, 103, 59, 31);
-					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorMatchingHeight = new PixelColor(255, 108, 108, 108);
-					ColorBackground = new PixelColor(255, 163, 129, 84);
-					break;
-
-				case ColorPreset.STRIFE:
-					ColorSingleSided = new PixelColor(255, 199, 195, 195);
-					ColorSecret = new PixelColor(255, 255, 0, 255);
-					ColorFloorDiff = new PixelColor(255, 55, 59, 91);
-					ColorCeilDiff = new PixelColor(255, 108, 108, 108);
-					ColorHiddenFlag = new PixelColor(255, 0, 87, 130);
-					ColorMatchingHeight = new PixelColor(255, 112, 112, 160);
-					ColorBackground = new PixelColor(255, 0, 0, 0);
-					break;
-
 				case ColorPreset.DOOM64:
 					// Doom 64 automap palette
 					ColorSingleSided = new PixelColor(255, 0xE5, 0x00, 0x00);		// #e50000
@@ -332,7 +315,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			// Store settings
 			General.Settings.WritePluginSetting("automapmode.showhiddenlines", menusform.ShowHiddenLines);
 			General.Settings.WritePluginSetting("automapmode.showsecretsectors", menusform.ShowSecretSectors);
-			General.Settings.WritePluginSetting("automapmode.colorpreset", (int)menusform.ColorPreset);
+			General.Settings.WritePluginSetting("automapmode.colorpresetindex", (int)menusform.ColorPreset);
 
 			// Hide UI
 			menusform.Unregister();

@@ -55,7 +55,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			{
 				string f = General.Map.Config.SecretFlag;
 				if(!string.IsNullOrEmpty(f) && f != "0") return f;
-				return IsUDMF ? "secret" : "32";
+				return "32";
 			}
 		}
 
@@ -67,7 +67,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			{
 				string f = General.Map.Config.InvisibleFlag;
 				if(!string.IsNullOrEmpty(f) && f != "0") return f;
-				return IsUDMF ? "dontdraw" : "128";
+				return "128";
 			}
 		}
 
@@ -81,11 +81,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		public string HideSpecialFlag
 		{
 			get { return "33554432"; }
-		}
-
-		private static bool IsUDMF
-		{
-			get { return General.Map.Config.FormatInterface == "UniversalMapSetIO"; }
 		}
 
 		// Static property to access the BuilderPlug

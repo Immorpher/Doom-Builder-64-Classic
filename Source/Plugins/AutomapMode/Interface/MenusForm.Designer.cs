@@ -68,8 +68,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			this.colorpreset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.colorpreset.Items.AddRange(new object[] {
             "Doom",
-            "Hexen",
-            "Strife",
             "Doom 64"});
 			this.colorpreset.Name = "colorpreset";
 			this.colorpreset.Size = new System.Drawing.Size(75, 25);

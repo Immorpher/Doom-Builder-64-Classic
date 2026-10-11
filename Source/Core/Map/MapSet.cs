@@ -2861,23 +2861,6 @@ namespace CodeImp.DoomBuilder.Map
 			General.WriteLogLine("Sidedefs compressed: " + numsidedefs + " remaining out of " + originalsidescount + " (" + ratio.ToString("########0.00") + "%) in " + deltatimesec.ToString("########0.00") + " seconds");
 		}
 
-		// This converts flags and activations to UDMF fields
-		internal void TranslateToUDMF()
-		{
-            // FUCK UDMF
-			//foreach(Linedef l in linedefs) l.TranslateToUDMF();
-			//foreach(Thing t in things) t.TranslateToUDMF();
-		}
-
-		// This converts UDMF fields back into flags and activations
-		// NOTE: Only converts the marked items
-		internal void TranslateFromUDMF()
-		{
-            // FUCK UDMF
-			//foreach(Linedef l in linedefs) if(l.Marked) l.TranslateFromUDMF();
-			//foreach(Thing t in things) if(t.Marked) t.TranslateFromUDMF();
-		}
-
 		/// <summary>This removes unused vertices.</summary>
 		public void RemoveUnusedVertices()
 		{
