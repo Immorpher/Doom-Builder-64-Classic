@@ -175,19 +175,6 @@ namespace CodeImp.DoomBuilder.Data
 			// Add images from TEXTURE1 and TEXTURE2 lump files
 			AddImagesToList(images, imgset);
 			
-			// Load TEXTURES lump file
-			imgset.Clear();
-			string[] alltexturefiles = GetAllFilesWithTitle("", "TEXTURES", false);
-			foreach(string texturesfile in alltexturefiles)
-			{
-				MemoryStream filedata = LoadFile(texturesfile);
-				WADReader.LoadHighresTextures(filedata, texturesfile, ref imgset, images, null);
-				filedata.Dispose();
-			}
-			
-			// Add images from TEXTURES lump file
-			AddImagesToList(images, imgset);
-			
 			// Add images to the container-specific texture set
 			foreach(ImageData img in images.Values)
 				textureset.AddTexture(img);
@@ -242,7 +229,6 @@ namespace CodeImp.DoomBuilder.Data
 		{
 			Dictionary<long, ImageData> images = new Dictionary<long, ImageData>();
 			ICollection<ImageData> collection;
-			List<ImageData> imgset = new List<ImageData>();
 			
 			// Error when suspended
 			if(issuspended) throw new Exception("Data reader is suspended");
@@ -270,19 +256,6 @@ namespace CodeImp.DoomBuilder.Data
 			foreach(ImageData img in images.Values)
 				textureset.AddFlat(img);
 
-			// Load TEXTURES lump file
-			imgset.Clear();
-			string[] alltexturefiles = GetAllFilesWithTitle("", "TEXTURES", false);
-			foreach(string texturesfile in alltexturefiles)
-			{
-				MemoryStream filedata = LoadFile(texturesfile);
-				WADReader.LoadHighresFlats(filedata, texturesfile, ref imgset, null, images);
-				filedata.Dispose();
-			}
-
-			// Add images from TEXTURES lump file
-			AddImagesToList(images, imgset);
-			
 			return new List<ImageData>(images.Values);
 		}
 		
@@ -320,7 +293,6 @@ namespace CodeImp.DoomBuilder.Data
 		{
 			Dictionary<long, ImageData> images = new Dictionary<long, ImageData>();
 			ICollection<ImageData> collection;
-			List<ImageData> imgset = new List<ImageData>();
 			
 			// Error when suspended
 			if(issuspended) throw new Exception("Data reader is suspended");
@@ -332,19 +304,6 @@ namespace CodeImp.DoomBuilder.Data
 				collection = wads[i].LoadSprites();
 				AddImagesToList(images, collection);
 			}
-			
-			// Load TEXTURES lump file
-			imgset.Clear();
-			string[] alltexturefiles = GetAllFilesWithTitle("", "TEXTURES", false);
-			foreach(string texturesfile in alltexturefiles)
-			{
-				MemoryStream filedata = LoadFile(texturesfile);
-				WADReader.LoadHighresSprites(filedata, texturesfile, ref imgset, null, null);
-				filedata.Dispose();
-			}
-			
-			// Add images from TEXTURES lump file
-			AddImagesToList(images, imgset);
 			
 			return new List<ImageData>(images.Values);
 		}

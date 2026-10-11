@@ -26,7 +26,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.IO;
-using CodeImp.DoomBuilder.ZDoom;
 using CodeImp.DoomBuilder.Rendering;
 
 #endregion
@@ -341,7 +340,6 @@ namespace CodeImp.DoomBuilder.Data
 		public override ICollection<ImageData> LoadTextures(PatchNames pnames)
 		{
 			List<ImageData> images = new List<ImageData>();
-			int lumpindex;
 			Lump lump;
 
 			// Error when suspended
@@ -433,18 +431,6 @@ namespace CodeImp.DoomBuilder.Data
                 }
             }
 
-			// Load TEXTURES lump file
-			lumpindex = file.FindLumpIndex("TEXTURES");
-			while(lumpindex > -1)
-			{
-				MemoryStream filedata = new MemoryStream(file.Lumps[lumpindex].Stream.ReadAllBytes());
-				WADReader.LoadHighresTextures(filedata, "TEXTURES", ref images, null, null);
-				filedata.Dispose();
-				
-				// Find next
-				lumpindex = file.FindLumpIndex("TEXTURES", lumpindex + 1);
-			}
-			
 			// Add images to the container-specific texture set
 			foreach(ImageData img in images)
 				textureset.AddTexture(img);
@@ -489,30 +475,6 @@ namespace CodeImp.DoomBuilder.Data
 			}
 		}
 
-		// This loads the texture definitions from a TEXTURES lump
-		public static void LoadHighresTextures(Stream stream, string filename, ref List<ImageData> images, Dictionary<long, ImageData> textures, Dictionary<long, ImageData> flats)
-		{
-			// Parse the data
-			TexturesParser parser = new TexturesParser();
-			parser.Parse(stream, filename);
-
-			// Make the textures
-			foreach(TextureStructure t in parser.Textures)
-			{
-				if(t.Name.Length > 0)
-				{
-					// Add the texture
-					ImageData img = t.MakeImage(textures, flats);
-					images.Add(img);
-				}
-				else
-				{
-					// Can't load image without name
-					General.ErrorLogger.Add(ErrorType.Error, "Can't load an unnamed texture from \"" + filename + "\". Please consider giving names to your resources.");
-				}
-			}
-		}
-		
 		// This loads a set of textures
 		public static void LoadTextureSet(string sourcename, Stream texturedata, ref List<ImageData> images, PatchNames pnames)
 		{
@@ -699,7 +661,6 @@ namespace CodeImp.DoomBuilder.Data
         {
             List<ImageData> images = new List<ImageData>();
             string rangestart, rangeend;
-            int lumpindex;
 
             // Error when suspended
             if(issuspended) throw new Exception("Data reader is suspended");
@@ -716,18 +677,6 @@ namespace CodeImp.DoomBuilder.Data
 					LoadFlatsRange(rangestart, rangeend, ref images);
 				}
 			}
-
-            // Load TEXTURES lump file
-            lumpindex = file.FindLumpIndex("TEXTURES");
-            while(lumpindex > -1)
-            {
-                MemoryStream filedata = new MemoryStream(file.Lumps[lumpindex].Stream.ReadAllBytes());
-                WADReader.LoadHighresFlats(filedata, "TEXTURES", ref images, null, null);
-                filedata.Dispose();
-
-                // Find next
-                lumpindex = file.FindLumpIndex("TEXTURES", lumpindex + 1);
-            }
 
             // Add images to the container-specific texture set
             foreach(ImageData img in images)
@@ -775,30 +724,6 @@ namespace CodeImp.DoomBuilder.Data
 			}
 		}
 
-        // This loads the flat definitions from a TEXTURES lump
-        public static void LoadHighresFlats(Stream stream, string filename, ref List<ImageData> images, Dictionary<long, ImageData> textures, Dictionary<long, ImageData> flats)
-        {
-            // Parse the data
-            TexturesParser parser = new TexturesParser();
-            parser.Parse(stream, filename);
-
-            // Make the textures
-            foreach(TextureStructure t in parser.Flats)
-            {
-                if(t.Name.Length > 0)
-                {
-                    // Add the texture
-                    ImageData img = t.MakeImage(textures, flats);
-                    images.Add(img);
-                }
-                else
-                {
-                    // Can't load image without name
-                    General.ErrorLogger.Add(ErrorType.Error, "Can't load an unnamed flat from \"" + filename + "\". Please consider giving names to your resources.");
-                }
-            }
-        }
-
         // This finds and returns a patch stream
         public override Stream GetFlatData(string pname)
 		{
@@ -825,49 +750,12 @@ namespace CodeImp.DoomBuilder.Data
 		public override ICollection<ImageData> LoadSprites()
 		{
 			List<ImageData> images = new List<ImageData>();
-			int lumpindex;
 			
 			// Error when suspended
 			if(issuspended) throw new Exception("Data reader is suspended");
 			
-			// Load TEXTURES lump file
-			lumpindex = file.FindLumpIndex("TEXTURES");
-			while(lumpindex > -1)
-			{
-				MemoryStream filedata = new MemoryStream(file.Lumps[lumpindex].Stream.ReadAllBytes());
-				WADReader.LoadHighresSprites(filedata, "TEXTURES", ref images, null, null);
-				filedata.Dispose();
-				
-				// Find next
-				lumpindex = file.FindLumpIndex("TEXTURES", lumpindex + 1);
-			}
-			
 			// Return result
 			return images;
-		}
-
-		// This loads the sprites definitions from a TEXTURES lump
-		public static void LoadHighresSprites(Stream stream, string filename, ref List<ImageData> images, Dictionary<long, ImageData> textures, Dictionary<long, ImageData> flats)
-		{
-			// Parse the data
-			TexturesParser parser = new TexturesParser();
-			parser.Parse(stream, filename);
-			
-			// Make the textures
-			foreach(TextureStructure t in parser.Sprites)
-			{
-				if(t.Name.Length > 0)
-				{
-					// Add the sprite
-					ImageData img = t.MakeImage(textures, flats);
-					images.Add(img);
-				}
-				else
-				{
-					// Can't load image without name
-					General.ErrorLogger.Add(ErrorType.Error, "Can't load an unnamed sprite from \"" + filename + "\". Please consider giving names to your resources.");
-				}
-			}
 		}
 
 		// This finds and returns a sprite stream
