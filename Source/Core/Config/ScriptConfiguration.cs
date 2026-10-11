@@ -62,6 +62,7 @@ namespace CodeImp.DoomBuilder.Config
 		private string argumentdelimiter;
 		private string terminator;
 		private string functionregex;
+		private bool constantsasliterals;
 		
 		// Collections
 		private Dictionary<string, string> keywords;
@@ -91,6 +92,10 @@ namespace CodeImp.DoomBuilder.Config
 		public string ArgumentDelimiter { get { return argumentdelimiter; } }
 		public string Terminator { get { return terminator; } }
 		public string FunctionRegEx { get { return functionregex; } }
+		
+		// When true, the constants are shown like numbers (and are not added to the autocomplete list).
+		// This is for words that are values, such as hexadecimal numbers without a prefix (like d0 and ff).
+		public bool ConstantsAsLiterals { get { return constantsasliterals; } }
 		
 		// Collections
 		public ICollection<string> Keywords { get { return keywords.Keys; } }
@@ -158,6 +163,7 @@ namespace CodeImp.DoomBuilder.Config
 			argumentdelimiter = cfg.ReadSetting("argumentdelimiter", "");
 			terminator = cfg.ReadSetting("terminator", "");
 			functionregex = cfg.ReadSetting("functionregex", "");
+			constantsasliterals = cfg.ReadSetting("constantsasliterals", false);
 			
 			// Make extensions array
 			extensions = extensionsstring.Split(',');

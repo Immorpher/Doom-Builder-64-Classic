@@ -333,7 +333,9 @@ namespace CodeImp.DoomBuilder.Controls
 				if(int.TryParse(de.Key.ToString(), out stylenum))
 				{
 					// Add style to lookup table
-					stylelookup.Add(stylenum, (ScriptStyleType)(int)de.Value);
+					ScriptStyleType styletype = (ScriptStyleType)(int)de.Value;
+					if((styletype == ScriptStyleType.Constant) && scriptconfig.ConstantsAsLiterals) styletype = ScriptStyleType.Literal;
+					stylelookup.Add(stylenum, styletype);
 					
 					// Apply color to style
 					int colorindex = 0;
@@ -341,7 +343,7 @@ namespace CodeImp.DoomBuilder.Controls
 					{
 						case ScriptStyleType.PlainText: colorindex = ColorCollection.PLAINTEXT; break;
 						case ScriptStyleType.Comment: colorindex = ColorCollection.COMMENTS; break;
-						case ScriptStyleType.Constant: colorindex = ColorCollection.CONSTANTS; break;
+						case ScriptStyleType.Constant: colorindex = scriptconfig.ConstantsAsLiterals ? ColorCollection.LITERALS : ColorCollection.CONSTANTS; break;
 						case ScriptStyleType.Keyword: colorindex = ColorCollection.KEYWORDS; break;
 						case ScriptStyleType.LineNumber: colorindex = ColorCollection.LINENUMBERS; break;
 						case ScriptStyleType.Literal: colorindex = ColorCollection.LITERALS; break;
@@ -377,7 +379,7 @@ namespace CodeImp.DoomBuilder.Controls
 				{
 					if(constantslist.Length > 0) constantslist.Append(" ");
 					constantslist.Append(c);
-					autocompletelist.Add(c.ToUpperInvariant(), c + "?" + imageindex.ToString(CultureInfo.InvariantCulture));
+					if(!scriptconfig.ConstantsAsLiterals) autocompletelist.Add(c.ToUpperInvariant(), c + "?" + imageindex.ToString(CultureInfo.InvariantCulture));
 				}
 				string words = constantslist.ToString();
 				scriptedit.KeyWords(constantsindex, words.ToLowerInvariant());

@@ -328,6 +328,123 @@ namespace CodeImp.DoomBuilder.IO
 			File.Move(tempfile, targetfile);
 		}
 
+		// This reads the data of a top-level lump from a WAD file on disk.
+		// Returns null when the file or the lump does not exist, or when the file is not a valid WAD.
+		// The file is opened read-only and is closed again before returning.
+		public static byte[] ReadTopLevelLump(string wadfile, string lumpname)
+		{
+			if(string.IsNullOrEmpty(wadfile) || !File.Exists(wadfile)) return null;
+			long longname = Lump.MakeLongName(lumpname);
+
+			try
+			{
+				using(FileStream fs = new FileStream(wadfile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					if(fs.Length < HEADER_SIZE) return null;
+					BinaryReader reader = new BinaryReader(fs, WAD.ENCODING);
+					string wadtype = WAD.ENCODING.GetString(reader.ReadBytes(4));
+					if((wadtype != WAD.TYPE_IWAD) && (wadtype != WAD.TYPE_PWAD)) return null;
+					int numlumps = reader.ReadInt32();
+					int tableoffset = reader.ReadInt32();
+					if((numlumps < 0) || (tableoffset < HEADER_SIZE) || (((long)tableoffset + ((long)numlumps * ENTRY_SIZE)) > fs.Length)) return null;
+
+					// Walk the lump table. When a name occurs more than once, the first one is used,
+					// which is also what WAD.FindLump does.
+					fs.Seek(tableoffset, SeekOrigin.Begin);
+					for(int i = 0; i < numlumps; i++)
+					{
+						int offset = reader.ReadInt32();
+						int length = reader.ReadInt32();
+						byte[] fixedname = reader.ReadBytes(8);
+						if(Lump.MakeLongName(Lump.MakeNormalName(fixedname, WAD.ENCODING)) == longname)
+							return ReadBytes(fs, offset, length);
+					}
+				}
+			}
+			catch(IOException) { }
+			catch(UnauthorizedAccessException) { }
+
+			return null;
+		}
+
+		// This adds, replaces or removes top-level lumps in the WAD file 'targetfile'.
+		// For every entry in 'lumps' the key is the lump name. When the value is null or empty,
+		// the lump is removed from the file (all lumps with that name). Otherwise every lump with that name
+		// is replaced in place, or the lump is added at the end of the file when there is none.
+		// All other lumps and the WAD type are preserved. When the target file does not exist, it is created as a PWAD.
+		public static void WriteTopLevelLumps(string targetfile, IDictionary<string, byte[]> lumps)
+		{
+			if((lumps == null) || (lumps.Count == 0)) return;
+
+			string tempfile = targetfile + ".lumptmp";
+			string sourcetype = WAD.TYPE_PWAD;
+			List<byte[]> names = new List<byte[]>();
+			List<byte[]> datas = new List<byte[]>();
+
+			// Read the entire existing WAD, when there is one
+			if(File.Exists(targetfile) && (new FileInfo(targetfile).Length >= HEADER_SIZE))
+			{
+				using(FileStream fs = new FileStream(targetfile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+				{
+					BinaryReader reader = new BinaryReader(fs, WAD.ENCODING);
+					sourcetype = WAD.ENCODING.GetString(reader.ReadBytes(4));
+					int numlumps = reader.ReadInt32();
+					int tableoffset = reader.ReadInt32();
+					if((sourcetype != WAD.TYPE_IWAD) && (sourcetype != WAD.TYPE_PWAD)) throw new IOException("The target file is not a valid WAD file.");
+					if((numlumps < 0) || (tableoffset < HEADER_SIZE) || (((long)tableoffset + ((long)numlumps * ENTRY_SIZE)) > fs.Length))
+						throw new IOException("The target file has an invalid lump table.");
+
+					int[] offsets = new int[numlumps];
+					int[] lengths = new int[numlumps];
+					fs.Seek(tableoffset, SeekOrigin.Begin);
+					for(int i = 0; i < numlumps; i++)
+					{
+						offsets[i] = reader.ReadInt32();
+						lengths[i] = reader.ReadInt32();
+						names.Add(reader.ReadBytes(8));
+					}
+					for(int i = 0; i < numlumps; i++) datas.Add(ReadBytes(fs, offsets[i], lengths[i]));
+				}
+			}
+
+			// Apply the changes
+			foreach(KeyValuePair<string, byte[]> kv in lumps)
+			{
+				long longname = Lump.MakeLongName(kv.Key);
+				bool remove = (kv.Value == null) || (kv.Value.Length == 0);
+				bool replaced = false;
+
+				for(int i = names.Count - 1; i >= 0; i--)
+				{
+					if(Lump.MakeLongName(Lump.MakeNormalName(names[i], WAD.ENCODING)) != longname) continue;
+
+					if(remove)
+					{
+						names.RemoveAt(i);
+						datas.RemoveAt(i);
+					}
+					else
+					{
+						// Replace in place (all occurrences, so no stale duplicate can win)
+						datas[i] = kv.Value;
+						replaced = true;
+					}
+				}
+
+				// Add at the end when it did not exist
+				if(!remove && !replaced)
+				{
+					names.Add(Lump.MakeFixedName(kv.Key, WAD.ENCODING));
+					datas.Add(kv.Value);
+				}
+			}
+
+			// Write the new WAD next to the old one, then swap them
+			WriteWadFile(tempfile, sourcetype, names, datas);
+			if(File.Exists(targetfile)) File.Delete(targetfile);
+			File.Move(tempfile, targetfile);
+		}
+
 		// This reads a block of bytes from a stream
 		private static byte[] ReadBytes(Stream s, int offset, int length)
 		{

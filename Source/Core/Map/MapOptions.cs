@@ -58,6 +58,12 @@ namespace CodeImp.DoomBuilder.Map
 
 		// Script files opened
 		private List<string> scriptfiles;
+
+		// What the script editor was showing when it was closed: the lump type (SCRIPTS, ANIMDEFS, MAPINFO
+		// or SKYDEFS) and the key of the tab that was selected. The lump type is only remembered while
+		// the map is open (a map always starts with the SCRIPTS), the tab is also stored in the map settings.
+		private string scripteditorlumptype = "";
+		private string scripteditortab = "";
 		
 		#endregion
 
@@ -67,6 +73,8 @@ namespace CodeImp.DoomBuilder.Map
 		internal DataLocationList Resources { get { return resources; } }
 		internal bool StrictPatches { get { return strictpatches; } set { strictpatches = value; } }
 		internal List<string> ScriptFiles { get { return scriptfiles; } set { scriptfiles = value; } }
+		internal string ScriptEditorLumpType { get { return scripteditorlumptype; } set { scripteditorlumptype = value ?? ""; } }
+		internal string ScriptEditorTab { get { return scripteditortab; } set { scripteditortab = value ?? ""; } }
 		internal string PreviousName { get { return previousname; } set { previousname = value; } }
 		internal string CurrentName
 		{
@@ -146,6 +154,9 @@ namespace CodeImp.DoomBuilder.Map
 			IDictionary scplist = this.mapconfig.ReadSetting("scripts", new Hashtable());
 			foreach(DictionaryEntry mp in scplist)
 				scriptfiles.Add(mp.Value.ToString());
+
+			// Script editor position
+			this.scripteditortab = this.mapconfig.ReadSetting("scripteditor.tab", "");
 		}
 
 		~MapOptions()
@@ -207,6 +218,10 @@ namespace CodeImp.DoomBuilder.Map
 			mapconfig.DeleteSetting("scripts");
 			for(int i = 0; i < scriptfiles.Count; i++)
 				mapconfig.WriteSetting("scripts." + "file" + i.ToString(CultureInfo.InvariantCulture), scriptfiles[i]);
+
+			// Write the script editor position to config
+			mapconfig.DeleteSetting("scripteditor");
+			if(scripteditortab.Length > 0) mapconfig.WriteSetting("scripteditor.tab", scripteditortab);
 
 			// Load the file or make a new file
 			if(File.Exists(settingsfile))

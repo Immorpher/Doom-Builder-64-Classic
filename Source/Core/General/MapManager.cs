@@ -50,6 +50,13 @@ namespace CodeImp.DoomBuilder
 		internal const string BUILD_MAP_HEADER = "MAP01";
 		public const string CONFIG_MAP_HEADER = "~MAP";
 
+		// Global script lumps. These are not part of a map: they are stored as separate lumps
+		// in the PWAD and replace the lump of the same name in engine memory when present.
+		internal const string LUMP_MAPINFO = "MAPINFO";
+		internal const string LUMP_ANIMDEFS = "ANIMDEFS";
+		internal const string LUMP_SKYDEFS = "SKYDEFS";
+		internal static readonly string[] GLOBAL_SCRIPT_LUMPS = new string[] { LUMP_ANIMDEFS, LUMP_MAPINFO, LUMP_SKYDEFS };
+
 		#endregion
 
 		#region ================== Variables
@@ -81,6 +88,11 @@ namespace CodeImp.DoomBuilder
 		private Renderer2D renderer2d;
 		private Renderer3D renderer3d;
 		private WAD tempwad;
+
+		// Edited global script lumps (ANIMDEFS, MAPINFO, SKYDEFS) that are written to the PWAD when saving.
+		// A null value means that the lump must be removed from the PWAD.
+		private Dictionary<string, byte[]> globallumps = new Dictionary<string, byte[]>();
+		private bool animdefschanged;
 		private GridSetup grid;
 		private UndoManager undoredo;
 		private CopyPasteManager copypaste;
@@ -521,7 +533,11 @@ namespace CodeImp.DoomBuilder
 			bool localscriptschanged = CheckScriptChanged();
 			
 			// If the scripts window is open, save the scripts first
-			if(IsScriptsWindowOpen) scriptwindow.Editor.ImplicitSave();
+			if(IsScriptsWindowOpen)
+			{
+				scriptwindow.Editor.ImplicitSave();
+				scriptwindow.Editor.WriteOpenFilesToConfiguration();
+			}
 			
 			// Only recompile scripts when the scripts have changed
 			// (not when only the map changed)
@@ -709,6 +725,10 @@ namespace CodeImp.DoomBuilder
 			// Copy map lumps to target file
 			CopyLumpsByType(tempwad, TEMP_MAP_HEADER, targetwad, nestedmap ? nestedmarker : origmapname, true, true, includenodes, true);
 
+			// Store the edited global script lumps in the target file
+			// (nested maps keep their lumps in an inner WAD, so those go into the outer file below)
+			if(!nestedmap) WriteGlobalLumps(targetwad);
+
 			// Nested map? Then store the map WAD as a lump in the target file
 			if(nestedmap)
 			{
@@ -724,6 +744,9 @@ namespace CodeImp.DoomBuilder
 					// Replace (and rename, if needed) the map lump in the target file
 					NestedWad.WriteMapLump(newfilepathname, origmapname, options.CurrentName, nesteddata, nestedtype);
 					options.PreviousName = "";
+
+					// Store the edited global script lumps in the outer file
+					if(globallumps.Count > 0) NestedWad.WriteTopLevelLumps(newfilepathname, globallumps);
 				}
 				catch(Exception e)
 				{
@@ -993,6 +1016,136 @@ namespace CodeImp.DoomBuilder
 			Lump l = tempwad.Insert(lumpname, insertindex, (int)data.Length);
 			l.Stream.Seek(0, SeekOrigin.Begin);
 			data.WriteTo(l.Stream);
+		}
+
+		// This returns the data of a global script lump (ANIMDEFS, MAPINFO or SKYDEFS) for editing.
+		// The data comes from the first of these that has it:
+		//  1. Changes made in this editing session that are not in the PWAD yet
+		//  2. The lump in the PWAD (the map file) on disk
+		//  3. The last loaded resource that has the lump
+		// 'source' tells where the data came from. Returns null when the lump does not exist anywhere.
+		internal byte[] GetGlobalLumpData(string lumpname, out string source)
+		{
+			lumpname = lumpname.ToUpperInvariant();
+			source = null;
+
+			// Edited in this session?
+			byte[] edited;
+			if(globallumps.TryGetValue(lumpname, out edited))
+			{
+				source = (edited == null) ? "removed from the PWAD" : "edited, not yet saved";
+				return (edited == null) ? new byte[0] : (byte[])edited.Clone();
+			}
+
+			// In the PWAD?
+			if(filepathname.Length > 0)
+			{
+				byte[] pwaddata = NestedWad.ReadTopLevelLump(filepathname, lumpname);
+				if(pwaddata != null)
+				{
+					source = "PWAD";
+					return pwaddata;
+				}
+			}
+
+			// In the last loaded resource? (The PWAD itself was checked above, and may be out of date in memory)
+			try
+			{
+				Stream resdata = data.GetLumpData(lumpname, filepathname);
+				if(resdata != null)
+				{
+					using(resdata)
+					{
+						resdata.Seek(0, SeekOrigin.Begin);
+						byte[] bytes = new byte[(int)resdata.Length];
+						int read = 0;
+						while(read < bytes.Length)
+						{
+							int n = resdata.Read(bytes, read, bytes.Length - read);
+							if(n <= 0) break;
+							read += n;
+						}
+						source = "resources";
+						return bytes;
+					}
+				}
+			}
+			catch(Exception e)
+			{
+				General.ErrorLogger.Add(ErrorType.Warning, "Cannot read " + lumpname + " from the resources.\n" + e.GetType().Name + ": " + e.Message);
+			}
+
+			return null;
+		}
+
+		// This returns true when the global script lump was edited in this editing session. The data is then the edited
+		// data, or null when the lump was removed.
+		internal bool TryGetEditedGlobalLump(string lumpname, out byte[] lumpdata)
+		{
+			return globallumps.TryGetValue(lumpname.ToUpperInvariant(), out lumpdata);
+		}
+
+		// This applies the changes that were made to global script lumps to the editor
+		private void ApplyGlobalLumpChanges()
+		{
+			// The texture animations: use the edited ANIMDEFS and show the result in the 2D and 3D views
+			if(animdefschanged)
+			{
+				animdefschanged = false;
+				if(!isdisposed && (data != null))
+				{
+					try
+					{
+						General.WriteLogLine("Applying the changed ANIMDEFS...");
+						data.ReloadAnimations();
+					}
+					catch(Exception e)
+					{
+						General.ErrorLogger.Add(ErrorType.Warning, "Could not apply the changed ANIMDEFS. " + e.GetType().Name + ": " + e.Message);
+					}
+					General.Interface.RedrawDisplay();
+				}
+			}
+		}
+
+		// This stores edited data for a global script lump. The lump is written to the PWAD when the map is saved.
+		// When the data is null or empty, the lump is removed from the PWAD instead, so that the
+		// engine uses its own version again.
+		internal void SetGlobalLumpData(string lumpname, byte[] lumpdata)
+		{
+			lumpname = lumpname.ToUpperInvariant();
+			if((lumpdata != null) && (lumpdata.Length == 0)) lumpdata = null;
+			globallumps[lumpname] = lumpdata;
+			if(lumpname == LUMP_ANIMDEFS) animdefschanged = true;
+			
+			// The scripts changed, but not the map itself (so nodes do not need to be rebuilt)
+			scriptschanged = true;
+			General.MainWindow.UpdateMapChangedStatus();
+		}
+
+		// This writes the edited global script lumps into a WAD file
+		private void WriteGlobalLumps(WAD target)
+		{
+			foreach(KeyValuePair<string, byte[]> kv in globallumps)
+			{
+				// Remove the existing lump(s)
+				int index;
+				int insertindex = target.Lumps.Count;
+				while((index = target.FindLumpIndex(kv.Key)) > -1)
+				{
+					insertindex = index;
+					target.RemoveAt(index);
+				}
+
+				// Insert the new data (at the same position as the old lump, or at the end)
+				if(kv.Value != null)
+				{
+					General.WriteLogLine("Writing global script lump " + kv.Key + " to the target file.");
+					Lump l = target.Insert(kv.Key, insertindex, kv.Value.Length);
+					l.Stream.Seek(0, SeekOrigin.Begin);
+					l.Stream.Write(kv.Value, 0, kv.Value.Length);
+				}
+			}
 		}
 
         // This checks if the specified lump exists in the temp file
@@ -1425,6 +1578,9 @@ namespace CodeImp.DoomBuilder
 				
 				// Done
 				scriptwindow = null;
+				
+				// The user closed the script editor: show the changes to the texture animations
+				if(closing) ApplyGlobalLumpChanges();
 			}
 		}
 		
@@ -1726,6 +1882,9 @@ namespace CodeImp.DoomBuilder
 			// Keep old display info
 			oldstatus = General.MainWindow.Status;
 			oldcursor = Cursor.Current;
+			
+			// The script editor starts with the SCRIPTS again
+			options.ScriptEditorLumpType = "";
 			
 			// Show status
 			General.MainWindow.DisplayStatus(StatusType.Busy, "Reloading data resources...");

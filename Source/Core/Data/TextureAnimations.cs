@@ -132,6 +132,15 @@ namespace CodeImp.DoomBuilder.Data
 		// This loads the animations from the resource with the highest priority that has an ANIMDEFS lump
 		public void Load(List<DataReader> containers, List<TextureIndexInfo> textureindex)
 		{
+			Load(containers, textureindex, null, null);
+		}
+
+		// Same as above, but with changes that are made in the script editor and are not saved to the PWAD yet:
+		// - When 'editeddata' is not null, these are the ANIMDEFS to use and the resources are not used at all.
+		// - Otherwise the resource with the location 'excludelocation' (when not null) is ignored. This is used
+		//   when the ANIMDEFS lump was removed from the PWAD in the script editor, but the PWAD was not saved yet.
+		public void Load(List<DataReader> containers, List<TextureIndexInfo> textureindex, byte[] editeddata, string excludelocation)
+		{
 			defs.Clear();
 			order.Clear();
 			source = null;
@@ -149,9 +158,31 @@ namespace CodeImp.DoomBuilder.Data
 				}
 			}
 
+			// Edited in the script editor?
+			if(editeddata != null)
+			{
+				source = "the script editor";
+				Parse(Encoding.ASCII.GetString(editeddata));
+				General.WriteLogLine("Loaded " + order.Count + " texture animations from the edited ANIMDEFS");
+				return;
+			}
+
+			string exclude = null;
+			if(!string.IsNullOrEmpty(excludelocation))
+			{
+				try { exclude = Path.GetFullPath(excludelocation); } catch(Exception) { }
+			}
+
 			// The last resource that has the lump wins, and the others are ignored completely
 			for(int i = containers.Count - 1; i >= 0; i--)
 			{
+				if(exclude != null)
+				{
+					bool same = false;
+					try { same = (string.Compare(Path.GetFullPath(containers[i].Location.location), exclude, true) == 0); } catch(Exception) { }
+					if(same) continue;
+				}
+
 				Stream data = null;
 				try { data = containers[i].GetLumpData("ANIMDEFS"); }
 				catch(Exception e)

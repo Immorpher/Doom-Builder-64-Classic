@@ -126,6 +126,9 @@
     <Compile Include="Controls\ScriptFileDocumentTab.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\ScriptGlobalLumpDocumentTab.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\ScriptLumpDocumentTab.cs">
       <SubType>Component</SubType>
     </Compile>

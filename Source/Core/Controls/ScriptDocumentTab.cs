@@ -68,7 +68,7 @@ namespace CodeImp.DoomBuilder.Controls
 		public virtual bool IsReconfigurable { get { return true; } }
 		public virtual string Filename { get { return null; } }
 		public ScriptEditorPanel Panel { get { return panel; } }
-		public bool IsChanged { get { return editor.IsChanged; } }
+		public virtual bool IsChanged { get { return editor.IsChanged; } }
 		public int SelectionStart { get { return editor.SelectionStart; } set { editor.SelectionStart = value; } }
 		public int SelectionEnd { get { return editor.SelectionEnd; } set { editor.SelectionEnd = value; } }
 		public ScriptConfiguration Config { get { return config; } }

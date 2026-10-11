@@ -384,9 +384,7 @@ namespace CodeImp.DoomBuilder.Data
 			foreach(ThingCategory tc in thingcategories) tc.SortIfNeeded();
 
 			// Load the Doom 64 texture animations (ANIMDEFS of the resource with the highest priority)
-			if(animations != null) animations.Dispose();
-			animations = new TextureAnimations();
-			animations.Load(containers, General.Map.Config.D64TextureIndex);
+			ReloadAnimations();
 
 			// Update the used textures
 			General.Map.Data.UpdateUsedTextures();
@@ -1017,11 +1015,44 @@ namespace CodeImp.DoomBuilder.Data
 			return counter;
 		}
 
+		// This (re)loads the Doom 64 texture animations (ANIMDEFS). Changes that were made in the script editor
+		// and are not saved to the PWAD yet are used instead of the lump in the PWAD.
+		internal void ReloadAnimations()
+		{
+			byte[] edited;
+			bool haschanges = General.Map.TryGetEditedGlobalLump(MapManager.LUMP_ANIMDEFS, out edited);
+
+			if(animations != null) animations.Dispose();
+			animations = new TextureAnimations();
+			animations.Load(containers, General.Map.Config.D64TextureIndex, edited,
+							(haschanges && (edited == null)) ? General.Map.FilePathName : null);
+		}
+
 		// This returns the data of a lump by name from the resource with the highest priority that has it
 		internal Stream GetLumpData(string name)
 		{
 			for(int i = containers.Count - 1; i >= 0; i--)
 			{
+				Stream data = containers[i].GetLumpData(name);
+				if(data != null) return data;
+			}
+			return null;
+		}
+
+		// Same as above, but ignores the resource with the given location (path of a WAD file)
+		internal Stream GetLumpData(string name, string excludelocation)
+		{
+			string exclude = string.IsNullOrEmpty(excludelocation) ? null : Path.GetFullPath(excludelocation);
+			for(int i = containers.Count - 1; i >= 0; i--)
+			{
+				if(exclude != null)
+				{
+					string loc = containers[i].Location.location;
+					bool same = false;
+					try { same = (string.Compare(Path.GetFullPath(loc), exclude, true) == 0); } catch(Exception) { }
+					if(same) continue;
+				}
+
 				Stream data = containers[i].GetLumpData(name);
 				if(data != null) return data;
 			}

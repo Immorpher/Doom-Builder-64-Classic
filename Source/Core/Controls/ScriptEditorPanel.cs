@@ -42,9 +42,20 @@ namespace CodeImp.DoomBuilder.Controls
 	{
 		#region ================== Constants
 		
+		// The kinds of script lumps that can be edited. SCRIPTS are the scripts of the map (the
+		// document tabs in 'tabs'). The others are global lumps that are not part of a map.
+		private const string LUMPTYPE_SCRIPTS = "SCRIPTS";
+		
 		#endregion
 		
 		#region ================== Variables
+		
+		// The tab control that is currently shown. This is 'tabs' for SCRIPTS,
+		// or one of the tab controls in globaltabs for ANIMDEFS, MAPINFO and SKYDEFS.
+		private TabControl activetabs;
+		private string activelumptype = LUMPTYPE_SCRIPTS;
+		private Dictionary<string, TabControl> globaltabs = new Dictionary<string, TabControl>();
+		private bool syncinglumptype;
 		
 		private List<ScriptConfiguration> scriptconfigs;
 		private List<CompilerError> compilererrors;
@@ -57,7 +68,22 @@ namespace CodeImp.DoomBuilder.Controls
 		
 		#region ================== Properties
 		
-		public ScriptDocumentTab ActiveTab { get { return (tabs.SelectedTab as ScriptDocumentTab); } }
+		public ScriptDocumentTab ActiveTab { get { return (activetabs.SelectedTab as ScriptDocumentTab); } }
+		
+		// All the document tabs of all lump types, also those that are not currently shown
+		private List<ScriptDocumentTab> AllTabs
+		{
+			get
+			{
+				List<ScriptDocumentTab> all = new List<ScriptDocumentTab>();
+				foreach(TabPage page in tabs.TabPages)
+					if(page is ScriptDocumentTab) all.Add((ScriptDocumentTab)page);
+				foreach(TabControl tc in globaltabs.Values)
+					foreach(TabPage page in tc.TabPages)
+						if(page is ScriptDocumentTab) all.Add((ScriptDocumentTab)page);
+				return all;
+			}
+		}
 		
 		#endregion
 		
@@ -67,6 +93,7 @@ namespace CodeImp.DoomBuilder.Controls
 		public ScriptEditorPanel()
 		{
 			InitializeComponent();
+			activetabs = tabs;
 		}
 		
 		// This initializes the control
@@ -138,6 +165,16 @@ namespace CodeImp.DoomBuilder.Controls
 
 			// Select the first tab
 			if(tabs.TabPages.Count > 0) tabs.SelectedIndex = 0;
+			
+			// Fill the list of script lump types that can be edited
+			syncinglumptype = true;
+			lumptypecombo.Items.Add(LUMPTYPE_SCRIPTS);
+			foreach(string lumptype in MapManager.GLOBAL_SCRIPT_LUMPS) lumptypecombo.Items.Add(lumptype);
+			lumptypecombo.SelectedIndex = 0;
+			syncinglumptype = false;
+			
+			// Return to the script that was being edited when the script editor was closed
+			RestoreLastScript();
 			
 			// If the map has remembered any compile errors, then show them
 			ShowErrors(General.Map.Errors);
@@ -301,7 +338,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// This refreshes all settings
 		public void RefreshSettings()
 		{
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				t.RefreshSettings();
 			}
@@ -315,7 +352,7 @@ namespace CodeImp.DoomBuilder.Controls
 			errorlist.Items.Clear();
 
 			// Clear marks
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				t.ClearMarks();
 			}
@@ -351,7 +388,7 @@ namespace CodeImp.DoomBuilder.Controls
 			errorlist.EndUpdate();
 			
 			// Show marks on scripts
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				t.MarkScriptErrors(compilererrors);
 			}
@@ -360,11 +397,55 @@ namespace CodeImp.DoomBuilder.Controls
 			splitter.Panel2Collapsed = (errorlist.Items.Count == 0);
 		}
 		
+		// This returns a key that identifies a SCRIPTS tab, to find it again later (or null when it can't be identified)
+		private static string GetTabKey(ScriptDocumentTab t)
+		{
+			if(t is ScriptLumpDocumentTab) return "lump:" + t.Text;
+			if(!string.IsNullOrEmpty(t.Filename)) return "file:" + t.Filename;
+			return null;
+		}
+		
+		// This selects the script (and lump type) that was being edited when the script editor was last closed
+		private void RestoreLastScript()
+		{
+			string lumptype = General.Map.Options.ScriptEditorLumpType;
+			string tabkey = General.Map.Options.ScriptEditorTab;
+			
+			// Select the tab of the scripts
+			if(tabkey.Length > 0)
+			{
+				foreach(TabPage page in tabs.TabPages)
+				{
+					ScriptDocumentTab t = (page as ScriptDocumentTab);
+					if((t != null) && (GetTabKey(t) == tabkey))
+					{
+						tabs.SelectedTab = t;
+						break;
+					}
+				}
+			}
+			
+			// Select the lump type
+			foreach(string item in lumptypecombo.Items)
+			{
+				if(item == lumptype)
+				{
+					SelectLumpType(item);
+					break;
+				}
+			}
+		}
+		
 		// This writes all explicitly opened files to the configuration
+		// Also remembers what the script editor is showing, to show that again when it is opened again
 		public void WriteOpenFilesToConfiguration()
 		{
+			General.Map.Options.ScriptEditorLumpType = activelumptype;
+			ScriptDocumentTab selected = (tabs.SelectedTab as ScriptDocumentTab);
+			General.Map.Options.ScriptEditorTab = (selected != null) ? (GetTabKey(selected) ?? "") : "";
+
 			List<string> files = new List<string>();
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				if(t.ExplicitSave) files.Add(t.Filename);
 			}
@@ -374,7 +455,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// This asks to save files and returns the result
 		public bool AskSaveAll()
 		{
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				if(t.ExplicitSave)
 				{
@@ -417,7 +498,7 @@ namespace CodeImp.DoomBuilder.Controls
 		public bool CheckImplicitChanges()
 		{
 			bool changes = false;
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				if(!t.ExplicitSave && t.IsChanged) changes = true;
 			}
@@ -427,8 +508,8 @@ namespace CodeImp.DoomBuilder.Controls
 		// This forces the focus to the script editor
 		public void ForceFocus()
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
-			tabs.Focus();
+			ScriptDocumentTab t = ActiveTab;
+			activetabs.Focus();
 			if(t != null) t.Focus();
 		}
 		
@@ -437,7 +518,7 @@ namespace CodeImp.DoomBuilder.Controls
 		public void ImplicitSave()
 		{
 			// Save all scripts
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				if(!t.ExplicitSave) t.Save();
 			}
@@ -448,17 +529,17 @@ namespace CodeImp.DoomBuilder.Controls
 		// This updates the toolbar for the current status
 		private void UpdateToolbar(bool focuseditor)
 		{
-			int numscriptsopen = tabs.TabPages.Count;
+			int numscriptsopen = activetabs.TabPages.Count;
 			int explicitsavescripts = 0;
 			ScriptDocumentTab t = null;
 			
 			// Any explicit save scripts?
-			foreach(ScriptDocumentTab dt in tabs.TabPages)
+			foreach(ScriptDocumentTab dt in AllTabs)
 				if(dt.ExplicitSave) explicitsavescripts++;
 			
 			// Get current script, if any are open
 			if(numscriptsopen > 0)
-				t = (tabs.SelectedTab as ScriptDocumentTab);
+				t = ActiveTab;
 			
 			// Enable/disable buttons
 			buttonsave.Enabled = (t != null) && t.ExplicitSave;
@@ -491,6 +572,9 @@ namespace CodeImp.DoomBuilder.Controls
 		public ScriptFileDocumentTab OpenFile(string filename)
 		{
 			ScriptConfiguration foundconfig = new ScriptConfiguration();
+
+			// Script files are shown with the SCRIPTS
+			SelectLumpType(LUMPTYPE_SCRIPTS);
 
 			// Find the most suitable script configuration to use
 			foreach(ScriptConfiguration cfg in scriptconfigs)
@@ -532,7 +616,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// This saves the current open script
 		public void ExplicitSaveCurrentTab()
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			if((t != null) && t.ExplicitSave)
 			{
 				buttonsave_Click(this, EventArgs.Empty);
@@ -541,6 +625,68 @@ namespace CodeImp.DoomBuilder.Controls
 			{
 				General.MessageBeep(MessageBeepType.Default);
 			}
+		}
+		
+		// This shows the editor for the given lump type: SCRIPTS (the scripts of the map)
+		// or one of the global lumps (ANIMDEFS, MAPINFO, SKYDEFS).
+		// The tab controls are hidden and shown instead of tabs being removed and added again,
+		// so that the text and undo history of all tabs are always kept.
+		private void SelectLumpType(string lumptype)
+		{
+			if(lumptype == activelumptype) return;
+			
+			TabControl next;
+			if(lumptype == LUMPTYPE_SCRIPTS)
+			{
+				next = tabs;
+			}
+			else if(!globaltabs.TryGetValue(lumptype, out next))
+			{
+				// First time this global lump is shown. Create a tab control with a tab for it.
+				next = CreateGlobalLumpTabs(lumptype);
+			}
+			
+			// Switch
+			activetabs.Visible = false;
+			next.Visible = true;
+			activetabs = next;
+			activelumptype = lumptype;
+			
+			// Keep the drop down list in sync (this may have been called from elsewhere)
+			syncinglumptype = true;
+			lumptypecombo.SelectedItem = lumptype;
+			syncinglumptype = false;
+			
+			UpdateToolbar(true);
+		}
+		
+		// This creates a tab control, shaped like 'tabs', with the one tab for a global lump
+		private TabControl CreateGlobalLumpTabs(string lumpname)
+		{
+			// Find the script configuration for highlighting
+			ScriptConfiguration config;
+			if(!General.ScriptConfigs.TryGetValue("doom64_" + lumpname.ToLowerInvariant() + ".cfg", out config))
+				config = new ScriptConfiguration();
+			
+			TabControl tc = new TabControl();
+			tc.Name = "tabs" + lumpname.ToLowerInvariant();
+			tc.Anchor = tabs.Anchor;
+			tc.Margin = tabs.Margin;
+			tc.Padding = tabs.Padding;
+			tc.Location = tabs.Location;
+			tc.Size = tabs.Size;
+			tc.TabStop = false;
+			tc.ShowToolTips = true;
+			tc.Visible = false;
+			tc.Selecting += new TabControlCancelEventHandler(tabs_Selecting);
+			tc.MouseUp += new MouseEventHandler(tabs_MouseUp);
+			tabs.Parent.Controls.Add(tc);
+			
+			ScriptGlobalLumpDocumentTab t = new ScriptGlobalLumpDocumentTab(this, lumpname, config);
+			tc.TabPages.Add(t);
+			
+			globaltabs.Add(lumpname, tc);
+			return tc;
 		}
 		
 		// This opens a script
@@ -564,7 +710,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private void buttonkeywordhelp_Click(object sender, EventArgs e)
 		{
 			// Get script
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.LaunchKeywordHelp();
 		}
 
@@ -572,7 +718,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private void buttonscriptconfig_Click(object sender, EventArgs e)
 		{
 			// Get the tab and new script config
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			ScriptConfiguration scriptconfig = ((sender as ToolStripMenuItem).Tag as ScriptConfiguration);
 			
 			// Change script config
@@ -587,6 +733,9 @@ namespace CodeImp.DoomBuilder.Controls
 		{
 			// Get the script config to use
 			ScriptConfiguration scriptconfig = ((sender as ToolStripMenuItem).Tag as ScriptConfiguration);
+			
+			// New documents are shown with the SCRIPTS
+			SelectLumpType(LUMPTYPE_SCRIPTS);
 			
 			// Create new document
 			ScriptFileDocumentTab t = new ScriptFileDocumentTab(this, scriptconfig);
@@ -612,7 +761,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private void buttonsave_Click(object sender, EventArgs e)
 		{
 			// Save the current script
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			SaveScript(t);
 			UpdateToolbar(true);
 		}
@@ -621,7 +770,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private void buttonsaveall_Click(object sender, EventArgs e)
 		{
 			// Save all scripts
-			foreach(ScriptDocumentTab t in tabs.TabPages)
+			foreach(ScriptDocumentTab t in AllTabs)
 			{
 				// Use explicit save for this script?
 				if(t.ExplicitSave)
@@ -663,6 +812,13 @@ namespace CodeImp.DoomBuilder.Controls
 			}
 		}
 		
+		// The user chooses another script lump type in the drop down list
+		private void lumptypecombo_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			if(syncinglumptype || (lumptypecombo.SelectedItem == null)) return;
+			SelectLumpType(lumptypecombo.SelectedItem.ToString());
+		}
+		
 		// A tab is selected
 		private void tabs_Selecting(object sender, TabControlCancelEventArgs e)
 		{
@@ -672,7 +828,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// This closes the current file
 		private void buttonclose_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			CloseScript(t, false);
 			UpdateToolbar(true);
 		}
@@ -684,7 +840,7 @@ namespace CodeImp.DoomBuilder.Controls
 			ImplicitSave();
 			
 			// Get script
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 
 			// Check if it must be saved as a new file
 			if(t.ExplicitSave && t.IsSaveAsRequired)
@@ -726,7 +882,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// Undo clicked
 		private void buttonundo_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.Undo();
 			UpdateToolbar(true);
 		}
@@ -734,7 +890,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// Redo clicked
 		private void buttonredo_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.Redo();
 			UpdateToolbar(true);
 		}
@@ -742,7 +898,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// Cut clicked
 		private void buttoncut_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.Cut();
 			UpdateToolbar(true);
 		}
@@ -750,7 +906,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// Copy clicked
 		private void buttoncopy_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.Copy();
 			UpdateToolbar(true);
 		}
@@ -758,7 +914,7 @@ namespace CodeImp.DoomBuilder.Controls
 		// Paste clicked
 		private void buttonpaste_Click(object sender, EventArgs e)
 		{
-			ScriptDocumentTab t = (tabs.SelectedTab as ScriptDocumentTab);
+			ScriptDocumentTab t = ActiveTab;
 			t.Paste();
 			UpdateToolbar(true);
 		}
@@ -780,10 +936,11 @@ namespace CodeImp.DoomBuilder.Controls
 				
 				// Show the tab with the script that matches
 				bool foundscript = false;
-				foreach(ScriptDocumentTab t in tabs.TabPages)
+				foreach(ScriptDocumentTab t in AllTabs)
 				{
 					if(t.VerifyErrorForScript(err))
 					{
+						SelectLumpType(LUMPTYPE_SCRIPTS);
 						tabs.SelectedTab = t;
 						t.MoveToLine(err.linenumber);
 						foundscript = true;

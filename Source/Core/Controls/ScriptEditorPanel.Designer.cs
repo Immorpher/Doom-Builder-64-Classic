@@ -48,6 +48,7 @@ namespace CodeImp.DoomBuilder.Controls
 			this.buttoncompile = new System.Windows.Forms.ToolStripButton();
 			this.buttonclose = new System.Windows.Forms.ToolStripButton();
 			this.buttonkeywordhelp = new System.Windows.Forms.ToolStripButton();
+			this.lumptypecombo = new System.Windows.Forms.ToolStripComboBox();
 			this.openfile = new System.Windows.Forms.OpenFileDialog();
 			this.savefile = new System.Windows.Forms.SaveFileDialog();
 			this.splitter = new System.Windows.Forms.SplitContainer();
@@ -99,7 +100,8 @@ namespace CodeImp.DoomBuilder.Controls
             this.buttonscriptconfig,
             this.buttoncompile,
             this.buttonclose,
-            this.buttonkeywordhelp});
+            this.buttonkeywordhelp,
+            this.lumptypecombo});
 			this.toolbar.Location = new System.Drawing.Point(0, 0);
 			this.toolbar.Name = "toolbar";
 			this.toolbar.Size = new System.Drawing.Size(726, 25);
@@ -262,6 +264,15 @@ namespace CodeImp.DoomBuilder.Controls
 			this.buttonkeywordhelp.Text = "Keyword Help";
 			this.buttonkeywordhelp.Click += new System.EventHandler(this.buttonkeywordhelp_Click);
 			// 
+			// lumptypecombo
+			// 
+			this.lumptypecombo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+			this.lumptypecombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.lumptypecombo.Name = "lumptypecombo";
+			this.lumptypecombo.Size = new System.Drawing.Size(110, 25);
+			this.lumptypecombo.ToolTipText = "Script lump to edit";
+			this.lumptypecombo.SelectedIndexChanged += new System.EventHandler(this.lumptypecombo_SelectedIndexChanged);
+			// 
 			// openfile
 			// 
 			this.openfile.Title = "Open Script";
@@ -392,6 +403,7 @@ namespace CodeImp.DoomBuilder.Controls
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
 		private System.Windows.Forms.ToolStripDropDownButton buttonscriptconfig;
 		private System.Windows.Forms.ToolStripButton buttonclose;
+		private System.Windows.Forms.ToolStripComboBox lumptypecombo;
 		private System.Windows.Forms.SplitContainer splitter;
 		private System.Windows.Forms.ListView errorlist;
 		private System.Windows.Forms.Label label1;
