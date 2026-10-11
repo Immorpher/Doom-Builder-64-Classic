@@ -2541,6 +2541,22 @@ namespace CodeImp.DoomBuilder.Map
 			return 0;
 		}
 
+		/// <summary>This returns the next tag number that is unused by the map and is not in the given extra set of used tags.</summary>
+		public int GetNewTag(ICollection<int> extrausedtags)
+		{
+			Dictionary<int, bool> usedtags = new Dictionary<int, bool>();
+			ForAllTags(NewTagHandler, false, usedtags);
+			ForAllTags(NewTagHandler, true, usedtags);
+			foreach(int t in extrausedtags) usedtags[t] = true;
+			
+			// Now find the first unused index
+			for(int i = 1; i <= General.Map.FormatInterface.MaxTag; i++)
+				if(!usedtags.ContainsKey(i)) return i;
+			
+			// All tags used!
+			return 0;
+		}
+
 		/// <summary>This returns the next unused tag number within the marked geometry.</summary>
 		public int GetNewTag(bool marked)
 		{

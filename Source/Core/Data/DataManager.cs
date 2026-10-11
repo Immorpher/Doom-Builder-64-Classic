@@ -292,16 +292,6 @@ namespace CodeImp.DoomBuilder.Data
 						case DataLocation.RESOURCE_WAD:
 							c = new WADReader(dl);
 							break;
-
-						// Directory container
-						case DataLocation.RESOURCE_DIRECTORY:
-							c = new DirectoryReader(dl);
-							break;
-
-						// PK3 file container
-						case DataLocation.RESOURCE_PK3:
-							c = new PK3Reader(dl);
-							break;
 					}
 				}
 				catch(Exception e)
@@ -478,17 +468,9 @@ namespace CodeImp.DoomBuilder.Data
 		{
 			try
 			{
-				if(dl.type == DataLocation.RESOURCE_DIRECTORY)
-				{
-					if(!Directory.Exists(dl.location)) return "missing";
-					return "dir " + Directory.GetLastWriteTimeUtc(dl.location).Ticks.ToString(CultureInfo.InvariantCulture);
-				}
-				else
-				{
-					FileInfo fi = new FileInfo(dl.location);
-					if(!fi.Exists) return "missing";
-					return "file " + fi.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture) + " " + fi.Length.ToString(CultureInfo.InvariantCulture);
-				}
+				FileInfo fi = new FileInfo(dl.location);
+				if(!fi.Exists) return "missing";
+				return "file " + fi.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture) + " " + fi.Length.ToString(CultureInfo.InvariantCulture);
 			}
 			catch(Exception)
 			{

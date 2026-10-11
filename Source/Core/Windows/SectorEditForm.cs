@@ -429,31 +429,84 @@ namespace CodeImp.DoomBuilder.Windows
 			tag.Text = General.Map.Map.GetNewTag().ToString();
 		}
 
+        // This returns the lights (color slots) of a sector by slot index
+        // (0=Ceiling, 1=Top, 2=Thing, 3=Lower, 4=Floor)
+        private static Lights GetSlotLight(Sector s, int slot)
+        {
+            switch(slot)
+            {
+                case 0: return s.CeilColor;
+                case 1: return s.TopColor;
+                case 2: return s.ThingColor;
+                case 3: return s.LowerColor;
+                default: return s.FloorColor;
+            }
+        }
+
+        // This finds a new tag for a light slot that is not used by any other light
+        // (in other sectors, in the other slots of the sectors being edited, or in the
+        // other light tag boxes of this window), nor by any regular sector/linedef/thing tag
+        private int GetNewLightTag(int slot)
+        {
+            ButtonsNumericTextbox[] tagboxes = new ButtonsNumericTextbox[] { ceilingcolortag, topcolortag, thingcolortag, lowercolortag, floorcolortag };
+            List<int> usedlighttags = new List<int>();
+            HashSet<Sector> editing = new HashSet<Sector>(sectors);
+
+            // Lights of the sectors that are not being edited
+            foreach(Sector s in General.Map.Map.Sectors)
+            {
+                if(editing.Contains(s)) continue;
+                for(int i = 0; i < Sector.NUM_COLORS; i++)
+                    usedlighttags.Add(GetSlotLight(s, i).tag);
+            }
+
+            // Lights of the sectors being edited (except the slot we are replacing)
+            for(int i = 0; i < Sector.NUM_COLORS; i++)
+            {
+                if(i == slot) continue;
+
+                int boxtag = tagboxes[i].GetResult(initialtags[i]);
+                if(boxtag != initialtags[i])
+                {
+                    // This tag will be applied to all selected sectors
+                    usedlighttags.Add(boxtag);
+                }
+                else
+                {
+                    // Untouched, so the sectors keep their own tags
+                    foreach(Sector s in sectors)
+                        usedlighttags.Add(GetSlotLight(s, i).tag);
+                }
+            }
+
+            return General.Map.Map.GetNewTag(usedlighttags);
+        }
+
         // styd: same "find a new unused tag" behavior as the sector's own New Tag button,
-        // applied per color
+        // applied per color (also avoiding the tags used by other lights)
         private void ceilingcolornewtag_Click(object sender, EventArgs e)
         {
-            ceilingcolortag.Text = General.Map.Map.GetNewTag().ToString();
+            ceilingcolortag.Text = GetNewLightTag(0).ToString();
         }
 
         private void topcolornewtag_Click(object sender, EventArgs e)
         {
-            topcolortag.Text = General.Map.Map.GetNewTag().ToString();
+            topcolortag.Text = GetNewLightTag(1).ToString();
         }
 
         private void thingcolornewtag_Click(object sender, EventArgs e)
         {
-            thingcolortag.Text = General.Map.Map.GetNewTag().ToString();
+            thingcolortag.Text = GetNewLightTag(2).ToString();
         }
 
         private void lowercolornewtag_Click(object sender, EventArgs e)
         {
-            lowercolortag.Text = General.Map.Map.GetNewTag().ToString();
+            lowercolortag.Text = GetNewLightTag(3).ToString();
         }
 
         private void floorcolornewtag_Click(object sender, EventArgs e)
         {
-            floorcolortag.Text = General.Map.Map.GetNewTag().ToString();
+            floorcolortag.Text = GetNewLightTag(4).ToString();
         }
 
         // Browse Effect clicked

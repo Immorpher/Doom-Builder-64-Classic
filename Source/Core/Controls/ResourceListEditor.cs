@@ -81,14 +81,8 @@ namespace CodeImp.DoomBuilder.Controls
 			// What type?
 			switch(locationtype)
 			{
-				case DataLocation.RESOURCE_DIRECTORY:
-					return 0 + lockedaddition;
-
 				case DataLocation.RESOURCE_WAD:
 					return 1 + lockedaddition;
-
-				case DataLocation.RESOURCE_PK3:
-					return 2 + lockedaddition;
 
 				default:
 					return -1;
