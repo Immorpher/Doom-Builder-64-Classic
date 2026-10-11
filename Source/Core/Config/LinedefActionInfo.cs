@@ -46,7 +46,6 @@ namespace CodeImp.DoomBuilder.Config
 		private string category;
 		private string name;
 		private string title;
-		private ArgumentInfo[] args;
 		private bool isgeneralized;
 		private bool isknown;
 		
@@ -62,7 +61,6 @@ namespace CodeImp.DoomBuilder.Config
 		public bool IsGeneralized { get { return isgeneralized; } }
 		public bool IsKnown { get { return isknown; } }
 		public bool IsNull { get { return (index == 0); } }
-		public ArgumentInfo[] Args { get { return args; } }
 
 		#endregion
 
@@ -76,7 +74,6 @@ namespace CodeImp.DoomBuilder.Config
 			// Initialize
 			this.index = index;
 			this.category = categoryname;
-			this.args = new ArgumentInfo[Linedef.NUM_ARGS];
 			this.isgeneralized = false;
 			this.isknown = true;
 			
@@ -86,10 +83,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.title = this.prefix + " " + this.name;
 			this.title = this.title.Trim();
 
-			// Read the args
-			for(int i = 0; i < Linedef.NUM_ARGS; i++)
-				this.args[i] = new ArgumentInfo(cfg, actionsetting, i, enums);
-			
 			// We have no destructor
 			GC.SuppressFinalize(this);
 		}
@@ -101,9 +94,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.isgeneralized = isgeneralized;
 			this.isknown = isknown;
 			this.title = title;
-			this.args = new ArgumentInfo[Linedef.NUM_ARGS];
-			for(int i = 0; i < Linedef.NUM_ARGS; i++)
-				this.args[i] = new ArgumentInfo(i);
 		}
 
 		#endregion

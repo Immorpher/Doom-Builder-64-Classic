@@ -201,11 +201,6 @@ namespace CodeImp.DoomBuilder.IO
 				if(l.Action != 0) coll.Add("special", l.Action);
                 if (l.Activate != 0) coll.Add("activate", l.Activate);  // villsa 9/13/11
                 if (l.SwitchMask != 0) coll.Add("switchmask", l.SwitchMask);    // villsa 9/13/11
-				if(l.Args[0] != 0) coll.Add("arg0", l.Args[0]);
-				if(l.Args[1] != 0) coll.Add("arg1", l.Args[1]);
-				if(l.Args[2] != 0) coll.Add("arg2", l.Args[2]);
-				if(l.Args[3] != 0) coll.Add("arg3", l.Args[3]);
-				if(l.Args[4] != 0) coll.Add("arg4", l.Args[4]);
 
 				// Flags
 				foreach(KeyValuePair<string, bool> flag in l.Flags)
@@ -297,11 +292,6 @@ namespace CodeImp.DoomBuilder.IO
 				coll.Add("angle", Angle2D.RealToDoom(t.Angle));
 				coll.Add("type", t.Type);
 				if(t.Action != 0) coll.Add("special", t.Action);
-				if(t.Args[0] != 0) coll.Add("arg0", t.Args[0]);
-				if(t.Args[1] != 0) coll.Add("arg1", t.Args[1]);
-				if(t.Args[2] != 0) coll.Add("arg2", t.Args[2]);
-				if(t.Args[3] != 0) coll.Add("arg3", t.Args[3]);
-				if(t.Args[4] != 0) coll.Add("arg4", t.Args[4]);
 				coll.Comment = t.Index.ToString();
 
 				// Flags

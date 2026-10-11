@@ -46,9 +46,7 @@ namespace CodeImp.DoomBuilder.IO
 		bool HasThingAction { get; }
 		bool HasCustomFields { get; }
 		bool HasThingHeight { get; }
-		bool HasActionArgs { get; }
 		bool HasMixedActivations { get; }
-		bool HasPresetActivations { get; }
 		bool HasBuiltInActivations { get; }
 		bool HasNumericLinedefFlags { get; }
 		bool HasNumericThingFlags { get; }
@@ -57,8 +55,6 @@ namespace CodeImp.DoomBuilder.IO
 		int MinTag { get; }
 		int MaxAction { get; }
 		int MinAction { get; }
-		int MaxArgument { get; }
-		int MinArgument { get; }
 		int MaxEffect { get; }
 		int MinEffect { get; }
 		int MaxBrightness { get; }

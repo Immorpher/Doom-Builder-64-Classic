@@ -509,65 +509,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					}
 				}
 			}
-			else
-			{
-				// Linedefs
-				foreach(Linedef l in General.Map.Map.Linedefs)
-				{
-					// Known action on this line?
-					if((l.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(l.Action))
-					{
-						LinedefActionInfo action = General.Map.Config.LinedefActions[l.Action];
-						bool match = false;
-						for(int i = 0; i < Linedef.NUM_ARGS; i++)
-							if((action.Args[i].Type == (int)asso.type) && (l.Args[i] == asso.tag)) match = true;
-						
-						if(match)
-						{
-							renderer.PlotLinedef(l, General.Colors.Indication);
-							AddEventLine(lines, l.GetCenterPoint(), asso.Center);
-						}
-					}
-				}
-			}
-			
+
 			// Draw the event lines
 			if(General.Settings.GZShowEventLines)
 				foreach(Line3D line in lines) renderer.PlotArrow(line, General.Colors.InfoLine);
 		}
 		
-
-		// This renders the associated things with the indication color
-		public void RenderReverseAssociations(IRenderer2D renderer, Association asso)
-		{
-			// Tag must be above zero
-			if(asso.tag <= 0) return;
-
-			List<Line3D> lines = new List<Line3D>();
-			
-			// Things
-			foreach(Thing t in General.Map.Map.Things)
-			{
-				// Known action on this thing?
-				if((t.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(t.Action))
-				{
-					LinedefActionInfo action = General.Map.Config.LinedefActions[t.Action];
-					bool match = false;
-					for(int i = 0; i < Thing.NUM_ARGS; i++)
-						if((action.Args[i].Type == (int)asso.type) && (t.Args[i] == asso.tag)) match = true;
-					
-					if(match)
-					{
-						renderer.RenderThing(t, General.Colors.Indication, 1.0f);
-						AddEventLine(lines, t.Position, asso.Center);
-					}
-				}
-			}
-			
-			// Draw the event lines
-			if(General.Settings.GZShowEventLines)
-				foreach(Line3D line in lines) renderer.RenderArrow(line, General.Colors.InfoLine);
-		}
 
 		#endregion
 	}

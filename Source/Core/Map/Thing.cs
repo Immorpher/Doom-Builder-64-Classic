@@ -36,7 +36,6 @@ namespace CodeImp.DoomBuilder.Map
 	{
 		#region ================== Constants
 
-		public const int NUM_ARGS = 5;
 
 		#endregion
 
@@ -58,7 +57,6 @@ namespace CodeImp.DoomBuilder.Map
 		private Dictionary<string, bool> flags;
 		private int tag;
 		private int action;
-		private int[] args;
 
 		// Configuration
 		private float size;
@@ -78,7 +76,6 @@ namespace CodeImp.DoomBuilder.Map
 		public int AngleDoom { get { return Angle2D.RealToDoom(angle); } }
 		internal Dictionary<string, bool> Flags { get { return flags; } }
 		public int Action { get { return action; } set { BeforePropsChange(); action = value; } }
-		public int[] Args { get { return args; } }
 		public float Size { get { return size; } }
 		public float IconOffset { get { return iconoffset; } }
 		public PixelColor Color { get { return color; } }
@@ -97,7 +94,6 @@ namespace CodeImp.DoomBuilder.Map
 			this.map = map;
 			this.listindex = listindex;
 			this.flags = new Dictionary<string, bool>();
-			this.args = new int[NUM_ARGS];
 			
 			if(map == General.Map.Map)
 				General.Map.UndoRedo.RecAddThing(this);
@@ -179,7 +175,6 @@ namespace CodeImp.DoomBuilder.Map
 			s.rwFloat(ref angle);
 			s.rwInt(ref tag);
 			s.rwInt(ref action);
-			for(int i = 0; i < NUM_ARGS; i++) s.rwInt(ref args[i]);
 		}
 
 		// This copies all properties to another thing
@@ -194,7 +189,6 @@ namespace CodeImp.DoomBuilder.Map
 			t.flags = new Dictionary<string,bool>(flags);
 			t.tag = tag;
 			t.action = action;
-			t.args = (int[])args.Clone();
 			t.size = size;
 			t.color = color;
 			t.iconoffset = iconoffset;
@@ -384,7 +378,7 @@ namespace CodeImp.DoomBuilder.Map
 		// This updates all properties
 		// NOTE: This does not update sector! (call DetermineSector)
 		public void Update(int type, float x, float y, float zoffset, float angle,
-						   Dictionary<string, bool> flags, int tag, int action, int[] args)
+						   Dictionary<string, bool> flags, int tag, int action)
 		{
 			// Apply changes
 			this.type = type;
@@ -392,8 +386,6 @@ namespace CodeImp.DoomBuilder.Map
 			this.flags = new Dictionary<string, bool>(flags);
 			this.tag = tag;
 			this.action = action;
-			this.args = new int[NUM_ARGS];
-			args.CopyTo(this.args, 0);
 			this.Move(x, y, zoffset);
 		}
 		

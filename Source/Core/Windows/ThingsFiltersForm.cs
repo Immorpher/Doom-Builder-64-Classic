@@ -100,7 +100,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// Map format specific fields
 			filterzheight.Visible = General.Map.FormatInterface.HasThingHeight;
 			labelzheight.Visible = General.Map.FormatInterface.HasThingHeight;
-			argumentspanel.Visible = General.Map.FormatInterface.HasActionArgs;
 			labeltag.Visible = General.Map.FormatInterface.HasThingTag;
 			filtertag.Visible = General.Map.FormatInterface.HasThingTag;
 			if(!General.Map.FormatInterface.HasCustomFields)
@@ -213,12 +212,6 @@ namespace CodeImp.DoomBuilder.Windows
 					filteraction.Value = f.ThingAction;
 				else
 					filteraction.Empty = true;
-				
-				if(f.ThingArgs[0] > -1) arg0.SetValue(f.ThingArgs[0]); else arg0.ClearValue();
-				if(f.ThingArgs[1] > -1) arg1.SetValue(f.ThingArgs[1]); else arg1.ClearValue();
-				if(f.ThingArgs[2] > -1) arg2.SetValue(f.ThingArgs[2]); else arg2.ClearValue();
-				if(f.ThingArgs[3] > -1) arg3.SetValue(f.ThingArgs[3]); else arg3.ClearValue();
-				if(f.ThingArgs[4] > -1) arg4.SetValue(f.ThingArgs[4]); else arg4.ClearValue();
 				
 				if(f.ThingTag > -1)
 					filtertag.Text = f.ThingTag.ToString();
@@ -404,9 +397,6 @@ namespace CodeImp.DoomBuilder.Windows
 
 		private void filteraction_ValueChanges(object sender, EventArgs e)
 		{
-			int showaction = 0;
-			ArgumentInfo[] arginfo;
-
 			// Anything selected?
 			if(listfilters.SelectedItems.Count > 0)
 			{
@@ -417,32 +407,6 @@ namespace CodeImp.DoomBuilder.Windows
 				else
 					f.ThingAction = filteraction.GetValue();
 			}
-			
-			// Only when line type is known, otherwise use the thing arguments
-			if(General.Map.Config.LinedefActions.ContainsKey(filteraction.Value)) showaction = filteraction.Value;
-			arginfo = General.Map.Config.LinedefActions[showaction].Args;
-			
-			// Change the argument descriptions
-			arg0label.Text = arginfo[0].Title + ":";
-			arg1label.Text = arginfo[1].Title + ":";
-			arg2label.Text = arginfo[2].Title + ":";
-			arg3label.Text = arginfo[3].Title + ":";
-			arg4label.Text = arginfo[4].Title + ":";
-			arg0label.Enabled = arginfo[0].Used;
-			arg1label.Enabled = arginfo[1].Used;
-			arg2label.Enabled = arginfo[2].Used;
-			arg3label.Enabled = arginfo[3].Used;
-			arg4label.Enabled = arginfo[4].Used;
-			if(arg0label.Enabled) arg0.ForeColor = SystemColors.WindowText; else arg0.ForeColor = SystemColors.GrayText;
-			if(arg1label.Enabled) arg1.ForeColor = SystemColors.WindowText; else arg1.ForeColor = SystemColors.GrayText;
-			if(arg2label.Enabled) arg2.ForeColor = SystemColors.WindowText; else arg2.ForeColor = SystemColors.GrayText;
-			if(arg3label.Enabled) arg3.ForeColor = SystemColors.WindowText; else arg3.ForeColor = SystemColors.GrayText;
-			if(arg4label.Enabled) arg4.ForeColor = SystemColors.WindowText; else arg4.ForeColor = SystemColors.GrayText;
-			arg0.Setup(arginfo[0]);
-			arg1.Setup(arginfo[1]);
-			arg2.Setup(arginfo[2]);
-			arg3.Setup(arginfo[3]);
-			arg4.Setup(arginfo[4]);
 		}
 		
 		private void browseaction_Click(object sender, EventArgs e)
@@ -461,21 +425,6 @@ namespace CodeImp.DoomBuilder.Windows
 			}
 		}
 
-		private void arg_Validated(object sender, EventArgs e)
-		{
-			// Anything selected?
-			if(listfilters.SelectedItems.Count > 0)
-			{
-				// Get selected filter
-				ThingsFilter f = listfilters.SelectedItems[0].Tag as ThingsFilter;
-				
-				int index;
-				int.TryParse((sender as Control).Tag.ToString(), out index);
-				ArgumentBox filterarg = (sender as ArgumentBox);
-				f.ThingArgs[index] = filterarg.GetResult(-1);
-			}
-		}
-		
 		private void fieldslist_Validated(object sender, EventArgs e)
 		{
 			// Anything selected?

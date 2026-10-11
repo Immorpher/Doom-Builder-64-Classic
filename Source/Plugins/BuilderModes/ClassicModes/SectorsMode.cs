@@ -498,7 +498,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Render selection
 			if(renderer.StartOverlay(true))
 			{
-				if((highlighted != null) && !highlighted.IsDisposed) BuilderPlug.Me.RenderReverseAssociations(renderer, highlightasso);
 				if(selecting) RenderMultiSelection();
 				renderer.Finish();
 			}
@@ -984,9 +983,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 						// Lower the ceiling down to the floor
 						s.CeilHeight = s.FloorHeight;
 
-						// Make a unique tag (not sure if we need it yet, depends on the args)
-						int tag = General.Map.Map.GetNewTag();
-
 						// Go for all it's sidedefs
 						foreach(Sidedef sd in s.Sidedefs)
 						{
@@ -1015,23 +1011,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 								
 								// Get door linedef type from config
 								sd.Line.Action = General.Map.Config.MakeDoorAction;
-
-								// Set the linedef args
-								for(int i = 0; i < Linedef.NUM_ARGS; i++)
-								{
-									// A -1 arg indicates that the arg must be set to the new sector tag
-									// and only in this case we set the tag on the sector, because only
-									// then we know for sure that we need a tag.
-									if(General.Map.Config.MakeDoorArgs[i] == -1)
-									{
-										sd.Line.Args[i] = tag;
-										s.Tag = tag;
-									}
-									else
-									{
-										sd.Line.Args[i] = General.Map.Config.MakeDoorArgs[i];
-									}
-								}
 
 								// Make sure the line is facing outwards
 								if(sd.IsFront)

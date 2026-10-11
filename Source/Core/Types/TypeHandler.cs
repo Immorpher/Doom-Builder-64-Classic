@@ -35,7 +35,7 @@ namespace CodeImp.DoomBuilder.Types
 {
 	/// <summary>
 	/// Type Handler base class. A Type Handler takes care of editing, validating and
-	/// displaying values of different types for UDMF fields and hexen arguments.
+	/// displaying values of different types for UDMF fields.
 	/// </summary>
 	internal abstract class TypeHandler
 	{
@@ -48,8 +48,6 @@ namespace CodeImp.DoomBuilder.Types
 		protected int index;
 		protected string typename;
 		protected bool customusable;
-		protected bool forargument;
-		protected ArgumentInfo arginfo;
 		protected TypeHandlerAttribute attribute;
 		
 		#endregion
@@ -59,7 +57,6 @@ namespace CodeImp.DoomBuilder.Types
 		public int Index { get { return index; } }
 		public string TypeName { get { return typename; } }
 		public bool IsCustomUsable { get { return customusable; } }
-		public bool IsForArgument { get { return forargument; } }
 		public TypeHandlerAttribute Attribute { get { return attribute; } }
 
 		public virtual bool IsBrowseable { get { return false; } }
@@ -77,35 +74,10 @@ namespace CodeImp.DoomBuilder.Types
 		{
 		}
 
-		// This sets up the handler for arguments
-		public virtual void SetupArgument(TypeHandlerAttribute attr, ArgumentInfo arginfo)
-		{
-			// Setup
-			this.forargument = true;
-			this.arginfo = arginfo;
-			if(attr != null)
-			{
-				// Set attributes
-				this.attribute = attr;
-				this.index = attr.Index;
-				this.typename = attr.Name;
-				this.customusable = attr.IsCustomUsable;
-			}
-			else
-			{
-				// Indexless
-				this.attribute = null;
-				this.index = -1;
-				this.typename = "Unknown";
-				this.customusable = false;
-			}
-		}
-
-		// This sets up the handler for arguments
+		// This sets up the handler for universal fields
 		public virtual void SetupField(TypeHandlerAttribute attr, UniversalFieldInfo fieldinfo)
 		{
 			// Setup
-			this.forargument = false;
 			if(attr != null)
 			{
 				// Set attributes

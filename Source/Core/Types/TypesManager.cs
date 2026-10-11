@@ -102,25 +102,6 @@ namespace CodeImp.DoomBuilder.Types
 
 		#region ================== Methods
 
-		// This returns the type handler for the given argument
-		public TypeHandler GetArgumentHandler(ArgumentInfo arginfo)
-		{
-			Type t = typeof(NullHandler);
-			TypeHandlerAttribute ta = null;
-			
-			// Do we have a handler type for this?
-			if(handlertypes.ContainsKey(arginfo.Type))
-			{
-				ta = handlertypes[arginfo.Type];
-				t = ta.Type;
-			}
-
-			// Create instance
-			TypeHandler th = (TypeHandler)General.ThisAssembly.CreateInstance(t.FullName);
-			th.SetupArgument(ta, arginfo);
-			return th;
-		}
-
 		// This returns the type handler for a custom universal field
 		public TypeHandler GetFieldHandler(int type, object defaultsetting)
 		{

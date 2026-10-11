@@ -169,7 +169,6 @@ namespace CodeImp.DoomBuilder.IO
 			{
 				// Read fields
 				UniversalCollection c = collections[i];
-				int[] args = new int[Linedef.NUM_ARGS];
 				string where = "thing " + i;
 				float x = GetCollectionEntry<float>(c, "x", true, 0.0f, where);
 				float y = GetCollectionEntry<float>(c, "y", true, 0.0f, where);
@@ -178,11 +177,6 @@ namespace CodeImp.DoomBuilder.IO
 				int angledeg = GetCollectionEntry<int>(c, "angle", false, 0, where);
 				int type = GetCollectionEntry<int>(c, "type", true, 0, where);
 				int special = GetCollectionEntry<int>(c, "special", false, 0, where);
-				args[0] = GetCollectionEntry<int>(c, "arg0", false, 0, where);
-				args[1] = GetCollectionEntry<int>(c, "arg1", false, 0, where);
-				args[2] = GetCollectionEntry<int>(c, "arg2", false, 0, where);
-				args[3] = GetCollectionEntry<int>(c, "arg3", false, 0, where);
-				args[4] = GetCollectionEntry<int>(c, "arg4", false, 0, where);
 
 				// Flags
 				Dictionary<string, bool> stringflags = new Dictionary<string, bool>();
@@ -198,7 +192,7 @@ namespace CodeImp.DoomBuilder.IO
 				Thing t = map.CreateThing();
 				if(t != null)
 				{
-					t.Update(type, x, y, height, Angle2D.DoomToReal(angledeg), stringflags, tag, special, args);
+					t.Update(type, x, y, height, Angle2D.DoomToReal(angledeg), stringflags, tag, special);
 
 					// Custom fields
 					ReadCustomFields(c, t, "thing");
@@ -220,7 +214,6 @@ namespace CodeImp.DoomBuilder.IO
 			{
 				// Read fields
 				UniversalCollection lc = linescolls[i];
-				int[] args = new int[Linedef.NUM_ARGS];
 				string where = "linedef " + i;
 				int tag = GetCollectionEntry<int>(lc, "id", false, 0, where);
 				int v1 = GetCollectionEntry<int>(lc, "v1", true, 0, where);
@@ -228,11 +221,6 @@ namespace CodeImp.DoomBuilder.IO
 				int special = GetCollectionEntry<int>(lc, "special", false, 0, where);
                 int acti = GetCollectionEntry<int>(lc, "activate", false, 0, where);    // villsa 9/13/11
                 int switchmask = GetCollectionEntry<int>(lc, "switchmask", false, 0, where);    // villsa 9/13/11
-				args[0] = GetCollectionEntry<int>(lc, "arg0", false, 0, where);
-				args[1] = GetCollectionEntry<int>(lc, "arg1", false, 0, where);
-				args[2] = GetCollectionEntry<int>(lc, "arg2", false, 0, where);
-				args[3] = GetCollectionEntry<int>(lc, "arg3", false, 0, where);
-				args[4] = GetCollectionEntry<int>(lc, "arg4", false, 0, where);
 				int s1 = GetCollectionEntry<int>(lc, "sidefront", true, -1, where);
 				int s2 = GetCollectionEntry<int>(lc, "sideback", false, -1, where);
 
@@ -260,7 +248,7 @@ namespace CodeImp.DoomBuilder.IO
 						Linedef l = map.CreateLinedef(vertexlink[v1], vertexlink[v2]);
 						if(l != null)
 						{
-                            l.Update(stringflags, acti, tag, special, switchmask, args);
+                            l.Update(stringflags, acti, tag, special, switchmask);
 							l.UpdateCache();
 
 							// Custom fields

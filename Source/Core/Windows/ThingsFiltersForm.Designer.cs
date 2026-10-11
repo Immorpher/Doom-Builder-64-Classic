@@ -50,18 +50,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.filterfields = new CodeImp.DoomBuilder.Controls.CheckboxArrayControl();
 			this.label3 = new System.Windows.Forms.Label();
 			this.tabaction = new System.Windows.Forms.TabPage();
-			this.argumentspanel = new System.Windows.Forms.Panel();
-			this.label8 = new System.Windows.Forms.Label();
-			this.arg2 = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.arg1 = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.arg0 = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.arg3 = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.arg4 = new CodeImp.DoomBuilder.Controls.ArgumentBox();
-			this.arg1label = new System.Windows.Forms.Label();
-			this.arg0label = new System.Windows.Forms.Label();
-			this.arg3label = new System.Windows.Forms.Label();
-			this.arg2label = new System.Windows.Forms.Label();
-			this.arg4label = new System.Windows.Forms.Label();
 			this.filteraction = new CodeImp.DoomBuilder.Controls.ActionSelectorControl();
 			this.browseaction = new System.Windows.Forms.Button();
 			this.label7 = new System.Windows.Forms.Label();
@@ -78,7 +66,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabbasic.SuspendLayout();
 			this.tabflags.SuspendLayout();
 			this.tabaction.SuspendLayout();
-			this.argumentspanel.SuspendLayout();
 			this.tabcustom.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -347,7 +334,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// 
 			// tabaction
 			// 
-			this.tabaction.Controls.Add(this.argumentspanel);
 			this.tabaction.Controls.Add(this.filteraction);
 			this.tabaction.Controls.Add(this.browseaction);
 			this.tabaction.Controls.Add(this.label7);
@@ -361,136 +347,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabaction.TabIndex = 2;
 			this.tabaction.Text = "Action";
 			this.tabaction.UseVisualStyleBackColor = true;
-			// 
-			// argumentspanel
-			// 
-			this.argumentspanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.argumentspanel.Controls.Add(this.label8);
-			this.argumentspanel.Controls.Add(this.arg2);
-			this.argumentspanel.Controls.Add(this.arg1);
-			this.argumentspanel.Controls.Add(this.arg0);
-			this.argumentspanel.Controls.Add(this.arg3);
-			this.argumentspanel.Controls.Add(this.arg4);
-			this.argumentspanel.Controls.Add(this.arg1label);
-			this.argumentspanel.Controls.Add(this.arg0label);
-			this.argumentspanel.Controls.Add(this.arg3label);
-			this.argumentspanel.Controls.Add(this.arg2label);
-			this.argumentspanel.Controls.Add(this.arg4label);
-			this.argumentspanel.Location = new System.Drawing.Point(6, 70);
-			this.argumentspanel.Name = "argumentspanel";
-			this.argumentspanel.Size = new System.Drawing.Size(418, 163);
-			this.argumentspanel.TabIndex = 17;
-			// 
-			// label8
-			// 
-			this.label8.AutoSize = true;
-			this.label8.Location = new System.Drawing.Point(22, 4);
-			this.label8.Name = "label8";
-			this.label8.Size = new System.Drawing.Size(102, 14);
-			this.label8.TabIndex = 21;
-			this.label8.Text = "Filter by arguments:";
-			// 
-			// arg2
-			// 
-			this.arg2.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.arg2.Location = new System.Drawing.Point(236, 75);
-			this.arg2.Name = "arg2";
-			this.arg2.Size = new System.Drawing.Size(93, 24);
-			this.arg2.TabIndex = 2;
-			this.arg2.Tag = "2";
-			this.arg2.Validated += new System.EventHandler(this.arg_Validated);
-			// 
-			// arg1
-			// 
-			this.arg1.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.arg1.Location = new System.Drawing.Point(236, 49);
-			this.arg1.Name = "arg1";
-			this.arg1.Size = new System.Drawing.Size(93, 24);
-			this.arg1.TabIndex = 1;
-			this.arg1.Tag = "1";
-			this.arg1.Validated += new System.EventHandler(this.arg_Validated);
-			// 
-			// arg0
-			// 
-			this.arg0.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.arg0.Location = new System.Drawing.Point(236, 23);
-			this.arg0.Name = "arg0";
-			this.arg0.Size = new System.Drawing.Size(93, 24);
-			this.arg0.TabIndex = 0;
-			this.arg0.Tag = "0";
-			this.arg0.Validated += new System.EventHandler(this.arg_Validated);
-			// 
-			// arg3
-			// 
-			this.arg3.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.arg3.Location = new System.Drawing.Point(236, 102);
-			this.arg3.Name = "arg3";
-			this.arg3.Size = new System.Drawing.Size(93, 24);
-			this.arg3.TabIndex = 3;
-			this.arg3.Tag = "3";
-			this.arg3.Validated += new System.EventHandler(this.arg_Validated);
-			// 
-			// arg4
-			// 
-			this.arg4.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.arg4.Location = new System.Drawing.Point(236, 128);
-			this.arg4.Name = "arg4";
-			this.arg4.Size = new System.Drawing.Size(93, 24);
-			this.arg4.TabIndex = 4;
-			this.arg4.Tag = "4";
-			this.arg4.Validated += new System.EventHandler(this.arg_Validated);
-			// 
-			// arg1label
-			// 
-			this.arg1label.Location = new System.Drawing.Point(33, 54);
-			this.arg1label.Name = "arg1label";
-			this.arg1label.Size = new System.Drawing.Size(197, 14);
-			this.arg1label.TabIndex = 14;
-			this.arg1label.Text = "Argument 2:";
-			this.arg1label.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.arg1label.UseMnemonic = false;
-			// 
-			// arg0label
-			// 
-			this.arg0label.Location = new System.Drawing.Point(33, 28);
-			this.arg0label.Name = "arg0label";
-			this.arg0label.Size = new System.Drawing.Size(197, 14);
-			this.arg0label.TabIndex = 12;
-			this.arg0label.Text = "Argument 1:";
-			this.arg0label.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.arg0label.UseMnemonic = false;
-			// 
-			// arg3label
-			// 
-			this.arg3label.Location = new System.Drawing.Point(33, 107);
-			this.arg3label.Name = "arg3label";
-			this.arg3label.Size = new System.Drawing.Size(197, 14);
-			this.arg3label.TabIndex = 20;
-			this.arg3label.Text = "Argument 4:";
-			this.arg3label.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.arg3label.UseMnemonic = false;
-			// 
-			// arg2label
-			// 
-			this.arg2label.Location = new System.Drawing.Point(33, 80);
-			this.arg2label.Name = "arg2label";
-			this.arg2label.Size = new System.Drawing.Size(197, 14);
-			this.arg2label.TabIndex = 18;
-			this.arg2label.Text = "Argument 3:";
-			this.arg2label.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.arg2label.UseMnemonic = false;
-			// 
-			// arg4label
-			// 
-			this.arg4label.Location = new System.Drawing.Point(33, 133);
-			this.arg4label.Name = "arg4label";
-			this.arg4label.Size = new System.Drawing.Size(197, 14);
-			this.arg4label.TabIndex = 16;
-			this.arg4label.Text = "Argument 5:";
-			this.arg4label.TextAlign = System.Drawing.ContentAlignment.TopRight;
-			this.arg4label.UseMnemonic = false;
 			// 
 			// filteraction
 			// 
@@ -652,8 +508,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabflags.PerformLayout();
 			this.tabaction.ResumeLayout(false);
 			this.tabaction.PerformLayout();
-			this.argumentspanel.ResumeLayout(false);
-			this.argumentspanel.PerformLayout();
 			this.tabcustom.ResumeLayout(false);
 			this.ResumeLayout(false);
 
@@ -692,18 +546,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private CodeImp.DoomBuilder.Controls.ActionSelectorControl filteraction;
 		private System.Windows.Forms.Button browseaction;
 		private System.Windows.Forms.Label label7;
-		private System.Windows.Forms.Panel argumentspanel;
-		private System.Windows.Forms.Label label8;
-		private CodeImp.DoomBuilder.Controls.ArgumentBox arg2;
-		private CodeImp.DoomBuilder.Controls.ArgumentBox arg1;
-		private CodeImp.DoomBuilder.Controls.ArgumentBox arg0;
-		private CodeImp.DoomBuilder.Controls.ArgumentBox arg3;
-		private CodeImp.DoomBuilder.Controls.ArgumentBox arg4;
-		private System.Windows.Forms.Label arg1label;
-		private System.Windows.Forms.Label arg0label;
-		private System.Windows.Forms.Label arg3label;
-		private System.Windows.Forms.Label arg2label;
-		private System.Windows.Forms.Label arg4label;
 		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.Label label6;
 	}

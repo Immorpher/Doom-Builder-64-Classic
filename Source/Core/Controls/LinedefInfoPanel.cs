@@ -36,8 +36,6 @@ namespace CodeImp.DoomBuilder.Controls
 {
 	internal partial class LinedefInfoPanel : UserControl
 	{
-		private int hexenformatwidth;
-		private int doomformatwidth;
 		
 		// Constructor
 		public LinedefInfoPanel()
@@ -45,48 +43,16 @@ namespace CodeImp.DoomBuilder.Controls
 			// Initialize
 			InitializeComponent();
 
-			// Hide stuff when in Doom format
-			hexenformatwidth = infopanel.Width;
-			doomformatwidth = infopanel.Width - 190;
+			// Doom 64 has no action arguments, so this panel is narrower
+			infopanel.Width = infopanel.Width - 190;
 		}
 		
 		// This shows the info
 		public void ShowInfo(Linedef l)
 		{
-			TypeHandler th;
 			bool upperunpegged, lowerunpegged;
 			string peggedness;
 			
-			// Show/hide stuff depending on format
-			if(!General.Map.FormatInterface.HasActionArgs)
-			{
-				arglbl1.Visible = false;
-				arglbl2.Visible = false;
-				arglbl3.Visible = false;
-				arglbl4.Visible = false;
-				arglbl5.Visible = false;
-				arg1.Visible = false;
-				arg2.Visible = false;
-				arg3.Visible = false;
-				arg4.Visible = false;
-				arg5.Visible = false;
-				infopanel.Width = doomformatwidth;
-			}
-			else
-			{
-				arglbl1.Visible = true;
-				arglbl2.Visible = true;
-				arglbl3.Visible = true;
-				arglbl4.Visible = true;
-				arglbl5.Visible = true;
-				arg1.Visible = true;
-				arg2.Visible = true;
-				arg3.Visible = true;
-				arg4.Visible = true;
-				arg5.Visible = true;
-				infopanel.Width = hexenformatwidth;
-			}
-
 			// Move panels
 			frontpanel.Left = infopanel.Left + infopanel.Width + infopanel.Margin.Right + frontpanel.Margin.Left;
 			backpanel.Left = frontpanel.Left + frontpanel.Width + frontpanel.Margin.Right + backpanel.Margin.Left;
@@ -114,33 +80,6 @@ namespace CodeImp.DoomBuilder.Controls
 			tag.Text = l.Tag.ToString();
 			unpegged.Text = peggedness;
 			
-			// Arguments
-			arglbl1.Text = act.Args[0].Title + ":";
-			arglbl2.Text = act.Args[1].Title + ":";
-			arglbl3.Text = act.Args[2].Title + ":";
-			arglbl4.Text = act.Args[3].Title + ":";
-			arglbl5.Text = act.Args[4].Title + ":";
-			arglbl1.Enabled = act.Args[0].Used;
-			arglbl2.Enabled = act.Args[1].Used;
-			arglbl3.Enabled = act.Args[2].Used;
-			arglbl4.Enabled = act.Args[3].Used;
-			arglbl5.Enabled = act.Args[4].Used;
-			arg1.Enabled = act.Args[0].Used;
-			arg2.Enabled = act.Args[1].Used;
-			arg3.Enabled = act.Args[2].Used;
-			arg4.Enabled = act.Args[3].Used;
-			arg5.Enabled = act.Args[4].Used;
-			th = General.Types.GetArgumentHandler(act.Args[0]);
-			th.SetValue(l.Args[0]); arg1.Text = th.GetStringValue();
-			th = General.Types.GetArgumentHandler(act.Args[1]);
-			th.SetValue(l.Args[1]); arg2.Text = th.GetStringValue();
-			th = General.Types.GetArgumentHandler(act.Args[2]);
-			th.SetValue(l.Args[2]); arg3.Text = th.GetStringValue();
-			th = General.Types.GetArgumentHandler(act.Args[3]);
-			th.SetValue(l.Args[3]); arg4.Text = th.GetStringValue();
-			th = General.Types.GetArgumentHandler(act.Args[4]);
-			th.SetValue(l.Args[4]); arg5.Text = th.GetStringValue();
-
 			// Front side available?
 			if(l.Front != null)
 			{

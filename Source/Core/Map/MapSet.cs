@@ -2632,26 +2632,6 @@ namespace CodeImp.DoomBuilder.Map
 					}
 			}
 
-			// Remove tags from thing actions
-			if(General.Map.FormatInterface.HasThingAction &&
-			   General.Map.FormatInterface.HasActionArgs)
-			{
-				foreach(Thing t in things)
-				{
-					if(t.Marked == marked)
-					{
-						LinedefActionInfo info = General.Map.Config.GetLinedefActionInfo(t.Action);
-						for(int i = 0; i < Thing.NUM_ARGS; i++)
-							if(info.Args[i].Used && CheckIsTagType(info.Args[i].Type))
-							{
-								int tag = t.Args[i];
-								handler(t, true, (UniversalType)(info.Args[i].Type), ref tag, obj);
-								if(tag != t.Args[i]) t.Args[i] = tag;
-							}
-					}
-				}
-			}
-
 			// Remove tags from linedefs
 			if(General.Map.FormatInterface.HasLinedefTag)
 			{
@@ -2663,33 +2643,6 @@ namespace CodeImp.DoomBuilder.Map
 						if(tag != l.Tag) l.Tag = tag;
 					}
 			}
-
-			// Remove tags from linedef actions
-			if(General.Map.FormatInterface.HasActionArgs)
-			{
-				foreach(Linedef l in linedefs)
-				{
-					if(l.Marked == marked)
-					{
-						LinedefActionInfo info = General.Map.Config.GetLinedefActionInfo(l.Action);
-						for(int i = 0; i < Linedef.NUM_ARGS; i++)
-							if(info.Args[i].Used && CheckIsTagType(info.Args[i].Type))
-							{
-								int tag = l.Args[i];
-								handler(l, true, (UniversalType)(info.Args[i].Type), ref tag, obj);
-								if(tag != l.Args[i]) l.Args[i] = tag;
-							}
-					}
-				}
-			}
-		}
-		
-		// This checks if the given action argument type is a tag type
-		private bool CheckIsTagType(int argtype)
-		{
-			return (argtype == (int)UniversalType.LinedefTag) ||
-				   (argtype == (int)UniversalType.SectorTag) ||
-				   (argtype == (int)UniversalType.ThingTag);
 		}
 		
 		/// <summary>This makes a list of lines related to marked vertices.

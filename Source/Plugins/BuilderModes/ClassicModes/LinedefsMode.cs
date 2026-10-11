@@ -56,7 +56,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// Highlighted item
 		private Linedef highlighted;
-		private Association[] association = new Association[Linedef.NUM_ARGS];
+		private Association[] association = new Association[2];
 		private Association highlightasso = new Association();
 		
 		// Interface
@@ -80,7 +80,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		protected void Highlight(Linedef l)
 		{
 			bool completeredraw = false;
-			LinedefActionInfo action = null;
 
 			// Often we can get away by simply undrawing the previous
 			// highlight and drawing the new highlight. But if associations
@@ -113,35 +112,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
                     association[1].Set(new Vector2D(), 0, 0); // styd - reset thing tag association
                 }
             }
-			else
-			{
-				if(l != null)
-				{
-					// Check if we can find the linedefs action
-					if((l.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(l.Action))
-						action = General.Map.Config.LinedefActions[l.Action];
-				}
-				
-				// Determine linedef associations
-				for(int i = 0; i < Linedef.NUM_ARGS; i++)
-				{
-					// Previous association highlights something?
-					if((association[i].type == UniversalType.SectorTag) ||
-					   (association[i].type == UniversalType.LinedefTag) ||
-					   (association[i].type == UniversalType.ThingTag)) completeredraw = true;
-
-					// Make new association
-					if(action != null)
-						association[i].Set(l.GetCenterPoint(), l.Args[i], action.Args[i].Type);
-					else
-						association[i].Set(new Vector2D(), 0, 0);
-
-					// New association highlights something?
-					if((association[i].type == UniversalType.SectorTag) ||
-					   (association[i].type == UniversalType.LinedefTag) ||
-					   (association[i].type == UniversalType.ThingTag)) completeredraw = true;
-				}
-			}
 			
 			// If we're changing associations, then we
 			// need to redraw the entire display
@@ -262,7 +232,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			if(renderer.StartPlotter(true))
 			{
 				renderer.PlotLinedefSet(General.Map.Map.Linedefs);
-				for(int i = 0; i < Linedef.NUM_ARGS; i++) BuilderPlug.Me.PlotAssociations(renderer, association[i]);
+				for(int i = 0; i < association.Length; i++) BuilderPlug.Me.PlotAssociations(renderer, association[i]);
 				if((highlighted != null) && !highlighted.IsDisposed)
 				{
 					BuilderPlug.Me.PlotReverseAssociations(renderer, highlightasso);
@@ -283,8 +253,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Render selection
 			if(renderer.StartOverlay(true))
 			{
-				for(int i = 0; i < Linedef.NUM_ARGS; i++) BuilderPlug.Me.RenderAssociations(renderer, association[i]);
-				if((highlighted != null) && !highlighted.IsDisposed) BuilderPlug.Me.RenderReverseAssociations(renderer, highlightasso);
+				for(int i = 0; i < association.Length; i++) BuilderPlug.Me.RenderAssociations(renderer, association[i]);
 				if(selecting) RenderMultiSelection();
 				renderer.Finish();
 			}

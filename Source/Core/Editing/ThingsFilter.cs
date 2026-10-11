@@ -58,7 +58,6 @@ namespace CodeImp.DoomBuilder.Editing
 		
 		// Filter by action/tag
 		protected int thingaction;		// -1 indicates not used
-		protected int[] thingargs;		// -1 indicates not used
 		protected int thingtag;			// -1 indicates not used
 		
 		// Filter by custom fields
@@ -82,7 +81,6 @@ namespace CodeImp.DoomBuilder.Editing
 		internal int ThingAngle { get { return thingangle; } set { thingangle = value; } }
 		internal int ThingZHeight { get { return thingzheight; } set { thingzheight = value; } }
 		internal int ThingAction { get { return thingaction; } set { thingaction = value; } }
-		internal int[] ThingArgs { get { return thingargs; } set { Array.Copy(value, thingargs, Thing.NUM_ARGS); } }
 		internal int ThingTag { get { return thingtag; } set { thingtag = value; } }
 		internal UniFields ThingCustomFields { get { return customfields; } set { customfields = new UniFields(value); } }
 		internal ICollection<string> RequiredFields { get { return requiredfields; } }
@@ -105,8 +103,6 @@ namespace CodeImp.DoomBuilder.Editing
 			thingzheight = f.thingzheight;
 			thingangle = f.thingangle;
 			thingaction = f.thingaction;
-			thingargs = new int[Thing.NUM_ARGS];
-			Array.Copy(f.thingargs, thingargs, Thing.NUM_ARGS);
 			thingtag = f.thingtag;
 			customfields = new UniFields(f.customfields);
 			requiredfields = new List<string>(f.requiredfields);
@@ -123,7 +119,6 @@ namespace CodeImp.DoomBuilder.Editing
 			// Initialize
 			requiredfields = new List<string>();
 			forbiddenfields = new List<string>();
-			thingargs = new int[Thing.NUM_ARGS];
 			customfields = new UniFields();
 			
 			// Read settings from config
@@ -133,8 +128,6 @@ namespace CodeImp.DoomBuilder.Editing
 			thingangle = cfg.ReadSetting(path + ".angle", -1);
 			thingzheight = cfg.ReadSetting(path + ".zheight", int.MinValue);
 			thingaction = cfg.ReadSetting(path + ".action", -1);
-			for(int i = 0; i < Thing.NUM_ARGS; i++)
-				thingargs[i] = cfg.ReadSetting(path + ".arg" + i.ToString(CultureInfo.InvariantCulture), -1);
 			thingtag = cfg.ReadSetting(path + ".tag", -1);
 			
 			// Read flags
@@ -176,8 +169,6 @@ namespace CodeImp.DoomBuilder.Editing
 			thingangle = -1;
 			thingzheight = int.MinValue;
 			thingaction = -1;
-			thingargs = new int[Thing.NUM_ARGS];
-			for(int i = 0 ; i < Thing.NUM_ARGS; i++) thingargs[i] = -1;
 			thingtag = -1;
 			name = "Unnamed filter";
 			
@@ -214,10 +205,6 @@ namespace CodeImp.DoomBuilder.Editing
 				if(!General.Map.FormatInterface.HasThingHeight) thingzheight = int.MinValue;
 				if(!General.Map.FormatInterface.HasThingAction) thingaction = -1;
 				if(!General.Map.FormatInterface.HasThingTag) thingtag = -1;
-				if(!General.Map.FormatInterface.HasActionArgs)
-				{
-					for(int i = 0; i < Thing.NUM_ARGS; i++) thingargs[i] = -1;
-				}
 				if(!General.Map.FormatInterface.HasCustomFields) customfields.Clear();
 			}
 		}
@@ -240,8 +227,6 @@ namespace CodeImp.DoomBuilder.Editing
 			cfg.WriteSetting(path + ".angle", thingangle);
 			cfg.WriteSetting(path + ".zheight", thingzheight);
 			cfg.WriteSetting(path + ".action", thingaction);
-			for(int i = 0; i < Thing.NUM_ARGS; i++)
-				cfg.WriteSetting(path + ".arg" + i.ToString(CultureInfo.InvariantCulture), thingargs[i]);
 			cfg.WriteSetting(path + ".tag", thingtag);
 			
 			// Write required fields to config
@@ -300,8 +285,6 @@ namespace CodeImp.DoomBuilder.Editing
 				qualifies &= (thingzheight == int.MinValue) || ((int)(t.Position.z) == thingzheight);
 				qualifies &= (thingaction == -1) || (t.Action == thingaction);
 				qualifies &= (thingtag == -1) || (t.Tag == thingtag);
-				for(int i = 0; i < Thing.NUM_ARGS; i++)
-					qualifies &= (thingargs[i] == -1) || (t.Args[i] == thingargs[i]);
 				
 				// Still qualifies?
 				if(qualifies)

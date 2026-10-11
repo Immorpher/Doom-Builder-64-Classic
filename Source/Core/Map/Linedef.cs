@@ -37,7 +37,6 @@ namespace CodeImp.DoomBuilder.Map
 		#region ================== Constants
 
 		public const float SIDE_POINT_DISTANCE = 0.01f;
-		public const int NUM_ARGS = 5;
 		
 		#endregion
 
@@ -83,7 +82,6 @@ namespace CodeImp.DoomBuilder.Map
 		private int activate;
         private int switchmask; // villsa 9/12/11
 		private int tag;
-		private int[] args;
 		private bool frontinterior;		// for drawing only
 
 		// Clone
@@ -110,7 +108,6 @@ namespace CodeImp.DoomBuilder.Map
 		public float Angle { get { return angle; } }
 		public int AngleDeg { get { return (int)(angle * Angle2D.PIDEG); } }
 		public RectangleF Rect { get { return rect; } }
-		public int[] Args { get { return args; } }
 		internal int SerializedIndex { get { return serializedindex; } set { serializedindex = value; } }
 		internal bool FrontInterior { get { return frontinterior; } set { frontinterior = value; } }
 		internal bool ImpassableFlag { get { return impassableflag; } }
@@ -137,7 +134,6 @@ namespace CodeImp.DoomBuilder.Map
 			this.map = map;
 			this.listindex = listindex;
 			this.updateneeded = true;
-			this.args = new int[NUM_ARGS];
 			this.flags = new Dictionary<string, bool>();
 			
 			// Attach to vertices
@@ -240,7 +236,6 @@ namespace CodeImp.DoomBuilder.Map
 			s.rwInt(ref action);
 			s.rwInt(ref activate);
 			s.rwInt(ref tag);
-			for(int i = 0; i < NUM_ARGS; i++) s.rwInt(ref args[i]);
 		}
 
 		// This sets new start vertex
@@ -297,7 +292,6 @@ namespace CodeImp.DoomBuilder.Map
 			
 			// Copy properties
 			l.action = action;
-			l.args = (int[])args.Clone();
 			l.flags = new Dictionary<string, bool>(flags);
 			l.tag = tag;
 			l.updateneeded = true;
@@ -1083,7 +1077,7 @@ namespace CodeImp.DoomBuilder.Map
 		#region ================== Changes
 		
 		// This updates all properties
-		public void Update(Dictionary<string, bool> flags, int activate, int tag, int action, int mask, int[] args)
+		public void Update(Dictionary<string, bool> flags, int activate, int tag, int action, int mask)
 		{
 			BeforePropsChange();
 			
@@ -1093,8 +1087,6 @@ namespace CodeImp.DoomBuilder.Map
 			this.activate = activate;
 			this.action = action;
             this.switchmask = mask; // villsa 9/12/11
-			this.args = new int[NUM_ARGS];
-			args.CopyTo(this.args, 0);
 			this.updateneeded = true;
 		}
 

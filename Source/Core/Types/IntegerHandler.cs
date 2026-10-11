@@ -76,11 +76,6 @@ namespace CodeImp.DoomBuilder.Types
 					this.value = 0;
 				}
 			}
-
-			if(forargument)
-			{
-				this.value = General.Clamp(this.value, General.Map.FormatInterface.MinArgument, General.Map.FormatInterface.MaxArgument);
-			}
 		}
 
 		public override object GetValue()

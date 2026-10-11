@@ -70,7 +70,6 @@ namespace CodeImp.DoomBuilder.Config
 		private int errorcheck;
 		private bool fixedsize;
 		private ThingCategory category;
-		private ArgumentInfo[] args;
 		private bool isknown;
 		private bool absolutez;
 		private SizeF spritescale;
@@ -94,7 +93,6 @@ namespace CodeImp.DoomBuilder.Config
 		public int ErrorCheck { get { return errorcheck; } }
 		public bool FixedSize { get { return fixedsize; } }
 		public ThingCategory Category { get { return category; } }
-		public ArgumentInfo[] Args { get { return args; } }
 		public bool IsKnown { get { return isknown; } }
 		public bool IsNull { get { return (index == 0); } }
 		public bool AbsoluteZ { get { return absolutez; } }
@@ -142,7 +140,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.spritescale = new SizeF(1.0f, 1.0f);
 			this.fixedsize = false;
 			this.spritelongname = long.MaxValue;
-			this.args = new ArgumentInfo[Linedef.NUM_ARGS];
 			this.isknown = false;
 			this.absolutez = false;
             this.palindex = 0;  // villsa
@@ -159,7 +156,6 @@ namespace CodeImp.DoomBuilder.Config
 			// Initialize
 			this.index = index;
 			this.category = cat;
-			this.args = new ArgumentInfo[Linedef.NUM_ARGS];
 			this.isknown = true;
 
             // Read properties
@@ -176,10 +172,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.absolutez = cfg.ReadSetting("thingtypes." + cat.Name + "." + key + ".absolutez", cat.AbsoluteZ);
 			float sscale = cfg.ReadSetting("thingtypes." + cat.Name + "." + key + ".spritescale", cat.SpriteScale);
             this.palindex = cfg.ReadSetting("thingtypes." + cat.Name + "." + key + ".palindex", cat.PalIndex);  // villsa
-			
-			// Read the args
-			for(int i = 0; i < Linedef.NUM_ARGS; i++)
-				this.args[i] = new ArgumentInfo(cfg, "thingtypes." + cat.Name + "." + key, i, enums);
 			
 			// Safety
 			if(this.radius < 4f) this.radius = 8f;
@@ -204,8 +196,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.category = cat;
 			this.title = title;
             this.isknown = true;
-			this.args = new ArgumentInfo[Linedef.NUM_ARGS];
-			for(int i = 0; i < Linedef.NUM_ARGS; i++) this.args[i] = new ArgumentInfo(i);
 			
 			// Read properties
 			this.sprite = cat.Sprite;

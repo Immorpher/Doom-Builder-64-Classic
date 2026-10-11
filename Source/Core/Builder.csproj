@@ -69,7 +69,6 @@
   -->
   <ItemGroup>
     <Compile Include="Compilers\NodesCompiler.cs" />
-    <Compile Include="Config\ArgumentInfo.cs" />
     <Compile Include="Config\MapLumpInfo.cs" />
     <Compile Include="Config\ScriptConfiguration.cs" />
     <Compile Include="Config\DefinedTextureSet.cs" />
@@ -99,12 +98,6 @@
     <Compile Include="Actions\EndActionAttribute.cs" />
     <Compile Include="Actions\KeyControl.cs" />
     <Compile Include="Actions\MouseInput.cs" />
-    <Compile Include="Controls\ArgumentBox.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\ArgumentBox.Designer.cs">
-      <DependentUpon>ArgumentBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="Controls\ColorControlSector.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -887,10 +880,6 @@
     <EmbeddedResource Include="Controls\AngleControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>AngleControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\ArgumentBox.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>ArgumentBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\ButtonsNumericTextbox.resx">
       <SubType>Designer</SubType>

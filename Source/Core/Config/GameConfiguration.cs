@@ -74,7 +74,6 @@ namespace CodeImp.DoomBuilder.Config
 		private bool testshortpaths;
 		private string makedoortrack;
 		private int makedooraction;
-		private int[] makedoorargs;
 		private bool linetagindicatesectors;
         private string skyflatname;
 		private int maxtexturenamelength;
@@ -178,7 +177,6 @@ namespace CodeImp.DoomBuilder.Config
 		public bool TestShortPaths { get { return testshortpaths; } }
 		public string MakeDoorTrack { get { return makedoortrack; } }
 		public int MakeDoorAction { get { return makedooraction; } }
-		public int[] MakeDoorArgs { get { return makedoorargs; } }
 		public bool LineTagIndicatesSectors { get { return linetagindicatesectors ; } }
         public string SkyFlatName { get { return skyflatname; } }
 		public int MaxTextureNamelength { get { return maxtexturenamelength; } }
@@ -276,7 +274,6 @@ namespace CodeImp.DoomBuilder.Config
             this.d64textureindex = new List<TextureIndexInfo>();    // villsa
             this.thingpalettes = new List<TextureIndexInfo>();  // villsa
 			this.texturesets = new List<DefinedTextureSet>();
-			this.makedoorargs = new int[Linedef.NUM_ARGS];
 			this.maplumps = new Dictionary<string, MapLumpInfo>();
 			this.thingflagstranslation = new List<FlagTranslation>();
 			this.linedefflagstranslation = new List<FlagTranslation>();
@@ -311,7 +308,6 @@ namespace CodeImp.DoomBuilder.Config
 			topboundary = cfg.ReadSetting("topboundary", 32767);
 			bottomboundary = cfg.ReadSetting("bottomboundary", -32768);
 			doomlightlevels = cfg.ReadSetting("doomlightlevels", true);
-			for(int i = 0; i < Linedef.NUM_ARGS; i++) makedoorargs[i] = cfg.ReadSetting("makedoorarg" + i.ToString(CultureInfo.InvariantCulture), 0);
 			
 			// Flags have special (invariant culture) conversion
 			// because they are allowed to be written as integers in the configs

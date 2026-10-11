@@ -19,7 +19,7 @@ specified, this will indicate the map to load from the specified wad file. Use i
 combination with -cfg to provide the required information to skip the map-options dialog.
 
 - cfg
-Where 'configname' is a game configuration filename, for example, "ZDoom_DoomHexen.cfg".
+Where 'configname' is a game configuration filename, for example, "Doom64.cfg".
 Do NOT include the path, all game configurations must be in the Configurations subfolder.
 When used in combination with -map this will provide the required information to load a
 map directly and skip the map-options dialog.

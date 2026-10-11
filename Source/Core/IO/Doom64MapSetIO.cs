@@ -73,9 +73,7 @@ namespace CodeImp.DoomBuilder.IO
 		public override bool HasThingAction { get { return false; } }
 		public override bool HasCustomFields { get { return false; } }
 		public override bool HasThingHeight { get { return true; } }
-		public override bool HasActionArgs { get { return false; } }
 		public override bool HasMixedActivations { get { return false; } }
-		public override bool HasPresetActivations { get { return false; } }
         public override bool HasBuiltInActivations { get { return false; } }
 		public override bool HasNumericLinedefFlags { get { return true; } }
 		public override bool HasNumericThingFlags { get { return true; } }
@@ -84,8 +82,6 @@ namespace CodeImp.DoomBuilder.IO
 		public override int MinTag { get { return short.MinValue; } }
         public override int MaxAction { get { return 511; } }
         public override int MinAction { get { return ushort.MinValue; } }
-        public override int MaxArgument { get { return 0; } }
-        public override int MinArgument { get { return 0; } }
 		public override int MaxEffect { get { return ushort.MaxValue; } }
 		public override int MinEffect { get { return ushort.MinValue; } }
 		public override int MaxBrightness { get { return short.MaxValue; } }
@@ -432,7 +428,7 @@ namespace CodeImp.DoomBuilder.IO
 				
 				// Create new item
 				t = map.CreateThing();
-                t.Update(type, x, y, z, angle, stringflags, tag, 0, new int[Thing.NUM_ARGS]);
+                t.Update(type, x, y, z, angle, stringflags, tag, 0);
 			}
 
 			// Done
@@ -665,7 +661,7 @@ namespace CodeImp.DoomBuilder.IO
 					if(Vector2D.ManhattanDistance(vertexlink[v1].Position, vertexlink[v2].Position) > 0.0001f)
 					{
 						l = map.CreateLinedef(vertexlink[v1], vertexlink[v2]);
-                        l.Update(stringflags, action & ~511, tag, action & 511, switchmask, new int[Linedef.NUM_ARGS]);
+                        l.Update(stringflags, action & ~511, tag, action & 511, switchmask);
 						l.UpdateCache();
 
 						// Line has a front side?

@@ -58,15 +58,6 @@ namespace CodeImp.DoomBuilder.Types
 
 		#region ================== Constructor
 
-		// When set up for an argument
-		public override void SetupArgument(TypeHandlerAttribute attr, ArgumentInfo arginfo)
-		{
-			base.SetupArgument(attr, arginfo);
-
-			// Keep enum list reference
-			list = arginfo.Enum;
-		}
-
 		#endregion
 		
 		#region ================== Methods

@@ -56,7 +56,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// Highlighted item
 		private Thing highlighted;
-		private Association[] association = new Association[Thing.NUM_ARGS];
+		private Association association = new Association();
 		private Association highlightasso = new Association();
 
 		// Interface
@@ -145,7 +145,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			{
 				renderer.PlotLinedefSet(General.Map.Map.Linedefs);
 				renderer.PlotVerticesSet(General.Map.Map.Vertices);
-				for(int i = 0; i < Thing.NUM_ARGS; i++) BuilderPlug.Me.PlotAssociations(renderer, association[i]);
+				BuilderPlug.Me.PlotAssociations(renderer, association);
 				if((highlighted != null) && !highlighted.IsDisposed) BuilderPlug.Me.PlotReverseAssociations(renderer, highlightasso);
 				renderer.Finish();
 			}
@@ -155,12 +155,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			{
 				renderer.RenderThingSet(General.Map.ThingsFilter.HiddenThings, Presentation.THINGS_HIDDEN_ALPHA);
 				renderer.RenderThingSet(General.Map.ThingsFilter.VisibleThings, 1.0f);
-				for(int i = 0; i < Thing.NUM_ARGS; i++) BuilderPlug.Me.RenderAssociations(renderer, association[i]);
+				BuilderPlug.Me.RenderAssociations(renderer, association);
 				if((highlighted != null) && !highlighted.IsDisposed)
-				{
-					BuilderPlug.Me.RenderReverseAssociations(renderer, highlightasso);
 					renderer.RenderThing(highlighted, General.Colors.Highlight, 1.0f);
-				}
 				renderer.Finish();
 			}
 
@@ -182,7 +179,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		protected void Highlight(Thing t)
 		{
 			bool completeredraw = false;
-			LinedefActionInfo action = null;
 
 			// Often we can get away by simply undrawing the previous
 			// highlight and drawing the new highlight. But if associations
@@ -200,40 +196,27 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// New association highlights something?
 			if((t != null) && (t.Tag > 0)) completeredraw = true;
 
-			if(t != null)
-			{
-				// Check if we can find the linedefs action
-				if((t.Action > 0) && General.Map.Config.LinedefActions.ContainsKey(t.Action))
-					action = General.Map.Config.LinedefActions[t.Action];
-			}
-			
 			// In Doom 64 the tag of a linedef refers to things, so a tagged thing
 			// is associated with the linedefs that have the same tag
 			bool linetagmode = (t != null) && (t.Tag > 0) &&
 							   General.Map.Config.LineTagIndicatesSectors &&
 							   General.Map.FormatInterface.InDoom64Mode;
 			
-			// Determine linedef associations
-			for(int i = 0; i < Thing.NUM_ARGS; i++)
-			{
-				// Previous association highlights something?
-				if((association[i].type == UniversalType.SectorTag) ||
-				   (association[i].type == UniversalType.LinedefTag) ||
-				   (association[i].type == UniversalType.ThingTag)) completeredraw = true;
-				
-				// Make new association
-				if(linetagmode && (i == 0))
-					association[i].Set(t.Position, t.Tag, UniversalType.LinedefTag);
-				else if(action != null)
-					association[i].Set(t.Position, t.Args[i], action.Args[i].Type);
-				else
-					association[i].Set(new Vector2D(), 0, 0);
-				
-				// New association highlights something?
-				if((association[i].type == UniversalType.SectorTag) ||
-				   (association[i].type == UniversalType.LinedefTag) ||
-				   (association[i].type == UniversalType.ThingTag)) completeredraw = true;
-			}
+			// Previous association highlights something?
+			if((association.type == UniversalType.SectorTag) ||
+			   (association.type == UniversalType.LinedefTag) ||
+			   (association.type == UniversalType.ThingTag)) completeredraw = true;
+			
+			// Make new association
+			if(linetagmode)
+				association.Set(t.Position, t.Tag, UniversalType.LinedefTag);
+			else
+				association.Set(new Vector2D(), 0, 0);
+			
+			// New association highlights something?
+			if((association.type == UniversalType.SectorTag) ||
+			   (association.type == UniversalType.LinedefTag) ||
+			   (association.type == UniversalType.ThingTag)) completeredraw = true;
 			
 			// If we're changing associations, then we
 			// need to redraw the entire display

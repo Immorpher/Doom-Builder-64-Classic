@@ -1363,7 +1363,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.configlabel.Font = new System.Drawing.Font("Verdana", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.configlabel.Name = "configlabel";
             this.configlabel.Size = new System.Drawing.Size(280, 18);
-            this.configlabel.Text = "ZDoom (Doom in Hexen Format)";
+            this.configlabel.Text = "Doom 64";
             this.configlabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.configlabel.ToolTipText = "Current Game Configuration";
             // 

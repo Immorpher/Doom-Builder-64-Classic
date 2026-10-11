@@ -158,7 +158,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private int activate;
         private int switchmask; // villsa 9/12/11
 		private int tag;
-		private int[] args;
 		private UniFields fields;
 
 		public LinedefProperties(Linedef l)
@@ -178,7 +177,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
             switchmask = l.SwitchMask;  // villsa 9/12/11
 			activate = l.Activate;
 			tag = l.Tag;
-			args = (int[])(l.Args.Clone());
 			fields = new UniFields(l.Fields);
 		}
 		
@@ -193,8 +191,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			l.Activate = activate;
             l.SwitchMask = switchmask;  // villsa 9/12/11
 			l.Tag = tag;
-			for(int i = 0; i < l.Args.Length; i++)
-				l.Args[i] = args[i];
 			l.Fields.BeforeFieldsChange();
 			l.Fields.Clear();
 			foreach(KeyValuePair<string, UniValue> v in fields)
@@ -210,7 +206,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private Dictionary<string, bool> flags;
 		private int tag;
 		private int action;
-		private int[] args;
 		private UniFields fields;
 		
 		public ThingProperties(Thing t)
@@ -220,7 +215,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			flags = t.GetFlags();
 			tag = t.Tag;
 			action = t.Action;       
-			args = (int[])(t.Args.Clone());
 			fields = new UniFields(t.Fields);
 		}
 		
@@ -233,8 +227,6 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				t.SetFlag(f.Key, f.Value);
 			t.Tag = tag;
 			t.Action = action;
-			for(int i = 0; i < t.Args.Length; i++)
-				t.Args[i] = args[i];
 			t.Fields.BeforeFieldsChange();
 			t.Fields.Clear();
 			foreach(KeyValuePair<string, UniValue> v in fields)
