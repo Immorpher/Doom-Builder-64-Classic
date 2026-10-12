@@ -312,6 +312,7 @@ namespace CodeImp.DoomBuilder.Data
 			
 			// Load stuff
 			texcount = LoadTextures(texturesonly);
+			CheckKexSwitchResources();
 			flatcount = LoadFlats(flatsonly);
 			colormapcount = LoadColormaps(colormapsonly);
             // Thing palettes must be available before any palette-swapped sprite is created/loaded
@@ -499,6 +500,66 @@ namespace CodeImp.DoomBuilder.Data
 			return changed;
 		}
 		
+		#region ================== KEX Doom 64 switch textures
+
+		// Returns the texture names of each WAD resource in load order (the first one is the stock IWAD, if any)
+		private List<List<string>> GetKexTextureSources(out List<string> stock)
+		{
+			List<List<string>> sources = new List<List<string>>();
+			stock = null;
+			foreach(DataReader dr in containers)
+			{
+				WADReader wr = dr as WADReader;
+				if(wr == null) continue;
+				List<string> names = wr.GetTextureNamesInOrder();
+				if((stock == null) && wr.IsIWAD) stock = names;
+				sources.Add(names);
+			}
+			return sources;
+		}
+
+		// 
+		// This returns the texture list as the KEX Doom 64 game builds it when it loads the same resources:
+		// the stock textures not replaced by name, followed by the textures of each following WAD.
+		// The position in this list is the texture's load index. Returns null when there is no IWAD resource.
+		// 
+		public List<string> GetKexTextureOrder()
+		{
+			List<string> stock;
+			List<List<string>> sources = GetKexTextureSources(out stock);
+			if(stock == null) return null;
+
+			// The IWAD must be merged first
+			sources.Remove(stock);
+			sources.Insert(0, stock);
+			return KexSwitchRules.Merge(sources);
+		}
+
+		// This warns when the loaded WADs break the stock Doom 64 switches in KEX Doom 64
+		private void CheckKexSwitchResources()
+		{
+			try
+			{
+				if((General.Map == null) || (General.Map.FormatInterface == null) || !General.Map.FormatInterface.InDoom64Mode) return;
+
+				List<string> stock;
+				List<List<string>> sources = GetKexTextureSources(out stock);
+				if(stock == null) return;
+				sources.Remove(stock);
+				sources.Insert(0, stock);
+
+				foreach(string message in KexSwitchRules.CheckStockSwitches(stock, KexSwitchRules.Merge(sources)))
+					General.ErrorLogger.Add(ErrorType.Warning, message);
+			}
+			catch(Exception e)
+			{
+				// This check must never prevent resources from loading
+				General.WriteLogLine("Unable to check the KEX Doom 64 switch textures: " + e.Message);
+			}
+		}
+
+		#endregion
+
 		// This suspends data resources
 		internal void Suspend()
 		{

@@ -244,10 +244,12 @@
     <Compile Include="ErrorChecks\CheckMissingTextures.cs" />
     <Compile Include="ErrorChecks\CheckUnknownFlats.cs" />
     <Compile Include="ErrorChecks\CheckUnknownTextures.cs" />
+    <Compile Include="ErrorChecks\CheckKexSwitchTextures.cs" />
     <Compile Include="ErrorChecks\ResultNoErrors.cs" />
     <Compile Include="ErrorChecks\ResultTextureMissing.cs" />
     <Compile Include="ErrorChecks\ResultUnknownFlat.cs" />
     <Compile Include="ErrorChecks\ResultUnknownTexture.cs" />
+    <Compile Include="ErrorChecks\ResultKexSwitchTexture.cs" />
 	<Compile Include="FindReplace\FindThingAngle.cs" />
     <Compile Include="FindReplace\FindAnyTextureFlat.cs" />
     <Compile Include="FindReplace\FindThingTag.cs" />

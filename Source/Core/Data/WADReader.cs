@@ -336,6 +336,25 @@ namespace CodeImp.DoomBuilder.Data
             return hash % 65536;
         }
 
+		// This returns the names of the textures of this WAD in the order the KEX Doom 64 game loads them:
+		// the T_START..T_END ranges when present, otherwise the TT_START..TT_END ranges.
+		internal List<string> GetTextureNamesInOrder()
+		{
+			List<string> names = new List<string>();
+			if(issuspended) return names;
+
+			List<LumpRange> use = new List<LumpRange>();
+			foreach(LumpRange range in textureranges)
+				if(string.Equals(file.Lumps[range.start].Name, "T_START", StringComparison.OrdinalIgnoreCase)) use.Add(range);
+			if(use.Count == 0) use = textureranges;
+
+			foreach(LumpRange range in use)
+				for(int i = range.start + 1; i < range.end; i++)
+					if(file.Lumps[i].Length > 0) names.Add(file.Lumps[i].Name);
+
+			return names;
+		}
+
 		// This loads the textures
 		public override ICollection<ImageData> LoadTextures(PatchNames pnames)
 		{
