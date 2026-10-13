@@ -23,7 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
+using CodeImp.DoomBuilder.Geometry;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Editing;
@@ -43,10 +45,11 @@ namespace CodeImp.DoomBuilder.AutomapMode
 	{
 		#region ================== Enums
 
-		internal enum ColorPreset
+		// How the automap is drawn
+		internal enum AutomapType
 		{
-			DOOM,
-			DOOM64,
+			LINES,		// Only the lines
+			FLOORS,		// The floor textures (tinted by the floor colors) below the lines, like the Doom 64 textured automap
 		}
 
 		#endregion
@@ -57,27 +60,45 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		private List<Linedef> validlinedefs;
 		private HashSet<Sector> secretsectors;
 
+		// The view mode and full brightness setting that were active before this mode started, so they can be restored
+		private ViewMode previousviewmode;
+		private bool previousfullbrightness;
+		private bool previouslighteffects;
+		private bool viewmodesaved;
+
+		// True while this mode changes the view mode itself (the redraws that this causes are ignored)
+		private bool changingview;
+
 		// Highlighted item
 		private Linedef highlighted;
+		private Sector highlightedsector;	// Floors type: the sector under the mouse
 
 		// UI
 		private MenusForm menusform;
 
 		// Colors
-		private PixelColor ColorSingleSided;
-		private PixelColor ColorSecret;
-		private PixelColor ColorSpecial;
-		private PixelColor ColorFloorDiff;
-		private PixelColor ColorCeilDiff;
-		private PixelColor ColorMatchingHeight;
-		private PixelColor ColorHiddenFlag;
-		private PixelColor ColorBackground;
+		// Doom 64 automap palette
+		private static readonly PixelColor ColorSingleSided = new PixelColor(255, 0xE5, 0x00, 0x00);	// #e50000
+		private static readonly PixelColor ColorSecret = new PixelColor(255, 255, 0, 255);
+		private static readonly PixelColor ColorTwoSided = new PixelColor(255, 0xC0, 0x80, 0x43);		// #c08043
+		private static readonly PixelColor ColorSpecial = new PixelColor(255, 0xFF, 0xFF, 0x00);		// #ffff00
+		private static readonly PixelColor ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
+		private static readonly PixelColor ColorBackground = new PixelColor(255, 0, 0, 0);
+
+		// Sector flag "Hide on Automap" (the floor is not drawn on the textured automap)
+		private const string SECTOR_HIDE_FLAG = "512";
+
+		// Thing flag "Count Secret on Pickup"
+		private const string THING_SECRET_FLAG = "256";
+
+		// Radius of the thing triangles of the Doom 64 automap, in map units
+		private const float THING_TRIANGLE_RADIUS = 32.0f;
 
 		#endregion
 
 		#region ================== Properties
 
-		public override object HighlightedObject { get { return highlighted; } }
+		public override object HighlightedObject { get { if(menusform.Type == AutomapType.FLOORS) return highlightedsector; else return highlighted; } }
 
 		#endregion
 
@@ -89,20 +110,10 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			menusform = new MenusForm();
 			menusform.ShowHiddenLines = General.Settings.ReadPluginSetting("automapmode.showhiddenlines", false);
 			menusform.ShowSecretSectors = General.Settings.ReadPluginSetting("automapmode.showsecretsectors", false);
-			// The preset list used to be Doom, Hexen, Strife, Doom 64 (stored in "automapmode.colorpreset").
-			// Migrate: only the old Doom 64 entry (3) carries over, anything else falls back to Doom.
-			int legacypreset = General.Settings.ReadPluginSetting("automapmode.colorpreset", 0);
-			int presetindex = General.Settings.ReadPluginSetting("automapmode.colorpresetindex", (legacypreset == 3) ? (int)ColorPreset.DOOM64 : (int)ColorPreset.DOOM);
-			if((presetindex < 0) || (presetindex > (int)ColorPreset.DOOM64)) presetindex = (int)ColorPreset.DOOM;
-			menusform.ColorPreset = (ColorPreset)presetindex;
-
-			// Doom 64 maps default to the Doom 64 preset the first time this map is opened
-			if(General.Map != null && General.Map.FormatInterface.InDoom64Mode &&
-			   General.Settings.ReadPluginSetting("automapmode.colorpreset64set", 0) == 0)
-			{
-				menusform.ColorPreset = ColorPreset.DOOM64;
-				General.Settings.WritePluginSetting("automapmode.colorpreset64set", 1);
-			}
+			// The type list is stored by index (the old "automapmode.colorpreset" settings are not used anymore)
+			int typeindex = General.Settings.ReadPluginSetting("automapmode.type", (int)AutomapType.LINES);
+			if((typeindex < 0) || (typeindex > (int)AutomapType.FLOORS)) typeindex = (int)AutomapType.LINES;
+			menusform.Type = (AutomapType)typeindex;
 
 			// Handle events
 			menusform.OnShowHiddenLinesChanged += delegate
@@ -113,14 +124,21 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 			menusform.OnShowSecretSectorsChanged += delegate { General.Interface.RedrawDisplay(); };
 
-			menusform.OnColorPresetChanged += delegate
+			menusform.OnTypeChanged += delegate
 			{
-				ApplyColorPreset(menusform.ColorPreset);
+				// Store right away, so a new instance of this mode (after Cancel) starts with the same type
+				General.Settings.WritePluginSetting("automapmode.type", (int)menusform.Type);
+
+				// Not engaged yet (or anymore): the type is applied when the mode engages
+				if(!viewmodesaved) return;
+
+				highlighted = null;
+				highlightedsector = null;
+				General.Interface.HideInfo();
+
+				ApplyType();
 				General.Interface.RedrawDisplay();
 			};
-
-			// Apply color preset
-			ApplyColorPreset(menusform.ColorPreset);
 		}
 
 		#endregion
@@ -161,6 +179,49 @@ namespace CodeImp.DoomBuilder.AutomapMode
 				General.Interface.HideInfo();
 		}
 
+		// This returns the corners of the triangle that the Doom 64 automap draws for a thing: the tip points in the
+		// direction the thing is facing, the other corners are at 225 and 135 degrees from there (AM_DrawThings)
+		private static Vector2D[] ThingTriangle(Thing t)
+		{
+			float[] offsets = new float[] { 0.0f, Angle2D.PI * 1.25f, Angle2D.PI * 0.75f };
+			Vector2D[] corners = new Vector2D[3];
+			for(int i = 0; i < 3; i++)
+			{
+				float a = t.Angle + offsets[i];
+				corners[i] = new Vector2D(t.Position.x + (float)Math.Cos(a) * THING_TRIANGLE_RADIUS,
+										  t.Position.y + (float)Math.Sin(a) * THING_TRIANGLE_RADIUS);
+			}
+			return corners;
+		}
+
+		// Floors type: this plots the outline of a sector
+		private void PlotSectorOutline(Sector s, PixelColor c)
+		{
+			foreach(Sidedef sd in s.Sidedefs)
+				renderer.PlotLine(sd.Line.Start.Position, sd.Line.End.Position, c);
+		}
+
+		// Floors type: this highlights a sector
+		private void HighlightSector(Sector s)
+		{
+			highlightedsector = s;
+
+			// The plotter only contains the highlight in this type
+			if(renderer.StartPlotter(true))
+			{
+				if((highlightedsector != null) && !highlightedsector.IsDisposed)
+					PlotSectorOutline(highlightedsector, General.Colors.Highlight);
+
+				renderer.Finish();
+				renderer.Present();
+			}
+
+			if((highlightedsector != null) && !highlightedsector.IsDisposed)
+				General.Interface.ShowSectorInfo(highlightedsector);
+			else
+				General.Interface.HideInfo();
+		}
+
 		// This rebuilds the list of linedefs that are visible on the automap
 		internal void UpdateValidLinedefs()
 		{
@@ -193,13 +254,11 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			if(ld.IsFlagSet(BuilderPlug.Me.HiddenFlag)) return ColorHiddenFlag;
 			if(ld.Back == null || ld.Front == null || ld.IsFlagSet(BuilderPlug.Me.SecretFlag)) return ColorSingleSided;
 
-			// Doom 64: two-sided lines with an action are drawn in the special color
+			// Two-sided lines with an action are drawn in the special color
 			if(LinedefIsSpecial(ld)) return ColorSpecial;
-			if(ld.Front.Sector.FloorHeight != ld.Back.Sector.FloorHeight) return ColorFloorDiff;
-			if(ld.Front.Sector.CeilHeight != ld.Back.Sector.CeilHeight) return ColorCeilDiff;
 
-			// Two-sided with matching floor and ceiling heights
-			return ColorMatchingHeight;
+			// All other two-sided lines have the same color
+			return ColorTwoSided;
 		}
 
 		private bool LinedefIsValid(Linedef ld)
@@ -247,32 +306,170 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			return (s.Effect == 9);
 		}
 
-		private void ApplyColorPreset(ColorPreset preset)
+		// This applies the selected automap type: which layers are shown and the view mode that draws the floors
+		private void ApplyType()
 		{
-			switch(preset)
+			// Presentation (no grid layer, the game's automap has none). The floors are drawn on the surface layer (and the hidden ones are covered on the things layer).
+			automappresentation = new CustomPresentation();
+			automappresentation.AddLayer(new PresentLayer(RendererLayer.Overlay, BlendingMode.Mask));
+			if(menusform.Type == AutomapType.FLOORS)
 			{
-				case ColorPreset.DOOM:
-					ColorSingleSided = new PixelColor(255, 252, 0, 0);
-					ColorSecret = new PixelColor(255, 255, 0, 255);
-					ColorFloorDiff = new PixelColor(255, 188, 120, 72);
-					ColorCeilDiff = new PixelColor(255, 252, 252, 0);
-					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorMatchingHeight = new PixelColor(255, 108, 108, 108);
-					ColorBackground = new PixelColor(255, 0, 0, 0);
-					break;
-
-				case ColorPreset.DOOM64:
-					// Doom 64 automap palette
-					ColorSingleSided = new PixelColor(255, 0xE5, 0x00, 0x00);		// #e50000
-					ColorSecret = new PixelColor(255, 255, 0, 255);
-					ColorFloorDiff = new PixelColor(255, 0xC0, 0x80, 0x43);			// #c08043 (two-sided)
-					ColorCeilDiff = new PixelColor(255, 0xC0, 0x80, 0x43);			// #c08043 (two-sided)
-					ColorMatchingHeight = new PixelColor(255, 0xC0, 0x80, 0x43);	// #c08043 (two-sided)
-					ColorSpecial = new PixelColor(255, 0xFF, 0xFF, 0x00);			// #ffff00
-					ColorHiddenFlag = new PixelColor(255, 192, 192, 192);
-					ColorBackground = new PixelColor(255, 0, 0, 0);
-					break;
+				automappresentation.AddLayer(new PresentLayer(RendererLayer.Surface, BlendingMode.Mask));
+				automappresentation.AddLayer(new PresentLayer(RendererLayer.Things, BlendingMode.Alpha, 1f, false));
 			}
+			automappresentation.AddLayer(new PresentLayer(RendererLayer.Geometry, BlendingMode.Alpha, 1f, true));
+			renderer.SetPresentation(automappresentation);
+
+			EnsureViewMode();
+		}
+
+		// The renderer settings that are not exposed to plugins
+		private static PropertyInfo FullBrightnessProperty()
+		{
+			Type t = typeof(General).Assembly.GetType("CodeImp.DoomBuilder.Rendering.Renderer");
+			return (t != null) ? t.GetProperty("FullBrightness", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) : null;
+		}
+
+		private static PropertyInfo LightEffectsProperty()
+		{
+			Type t = typeof(General).Assembly.GetType("CodeImp.DoomBuilder.Map.SectorGlow");
+			return (t != null) ? t.GetProperty("Enabled", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static) : null;
+		}
+
+		// Sector light effects (flicker, strobe, glow, ...). The game's automap does not show them.
+		private static bool GetLightEffects()
+		{
+			try
+			{
+				PropertyInfo pi = LightEffectsProperty();
+				if(pi != null) return (bool)pi.GetValue(null, null);
+			}
+			catch(Exception) { }
+			return true;
+		}
+
+		private static void SetLightEffects(bool enabled)
+		{
+			try
+			{
+				PropertyInfo pi = LightEffectsProperty();
+				if(pi != null) pi.SetValue(null, enabled, null);
+			}
+			catch(Exception) { }
+		}
+
+		private static bool GetFullBrightness()
+		{
+			try
+			{
+				PropertyInfo pi = FullBrightnessProperty();
+				if(pi != null) return (bool)pi.GetValue(null, null);
+			}
+			catch(Exception) { }
+			return false;
+		}
+
+		// This makes sure the renderer uses the view mode that belongs to the automap type. Lines only needs the
+		// normal view mode. Floors needs the floor textures view mode, with the floor colors (full brightness
+		// would replace the floor colors by the sector brightness). Returns true when something was changed.
+		private bool EnsureViewMode()
+		{
+			if((General.Map == null) || changingview) return false;
+
+			bool floors = (menusform.Type == AutomapType.FLOORS);
+			ViewMode wanted = floors ? ViewMode.FloorTextures : ViewMode.Normal;
+			bool changed = false;
+
+			changingview = true;
+			try
+			{
+				if(floors && GetFullBrightness())
+				{
+					// This toggles the setting, updates the sectors and redraws
+					General.Actions.InvokeAction("builder_togglefullbrightness");
+					changed = true;
+				}
+
+				if(General.Map.Renderer2D.ViewMode != wanted)
+				{
+					ApplyViewMode(wanted);
+					changed = true;
+				}
+			}
+			finally
+			{
+				changingview = false;
+			}
+
+			return changed;
+		}
+
+		// This changes the view mode of the renderer
+		private void ApplyViewMode(ViewMode mode)
+		{
+			switch(mode)
+			{
+				case ViewMode.FloorTextures: ViewModeFloors(); break;
+				case ViewMode.CeilingTextures: ViewModeCeilings(); break;
+				case ViewMode.FloorColor: ViewModeFloorColor(); break;
+				case ViewMode.CeilingColor: ViewModeCeilingColor(); break;
+				case ViewMode.ThingColor: ViewModeThingColor(); break;
+				default: ViewModeNormal(); break;
+			}
+		}
+
+		// This covers the floors that are not drawn on the automap with the background color (and draws the solid secret
+		// thing triangles on the same layer). The floors that are covered are the
+		// sectors with the "Hide on Automap" flag (unless "Show hidden" is on, Ctrl inverts it like for the
+		// lines) and the sectors without a floor texture.
+		private void RenderHiddenFloors()
+		{
+			if(!renderer.StartThings(true)) return;
+
+			bool showhidden = menusform.ShowHiddenLines ^ General.Interface.CtrlState;
+
+			List<FlatVertex> verts = new List<FlatVertex>();
+			int color = ColorBackground.ToInt();
+
+			foreach(Sector s in General.Map.Map.Sectors)
+			{
+				if(s.IsDisposed || (s.Triangles == null)) continue;
+				if((showhidden || !s.IsFlagSet(SECTOR_HIDE_FLAG)) && (s.FloorTexture != "-")) continue;
+
+				foreach(Vector2D v in s.Triangles.Vertices)
+				{
+					FlatVertex fv = new FlatVertex();
+					fv.x = v.x;
+					fv.y = v.y;
+					fv.z = 1.0f;
+					fv.c = color;
+					verts.Add(fv);
+				}
+			}
+
+			// Show secrets: solid triangles for the things that count as a secret
+			if(menusform.ShowSecretSectors)
+			{
+				int secretcolor = ColorSecret.ToInt();
+				foreach(Thing t in General.Map.Map.Things)
+				{
+					if(!t.IsFlagSet(THING_SECRET_FLAG)) continue;
+
+					foreach(Vector2D v in ThingTriangle(t))
+					{
+						FlatVertex fv = new FlatVertex();
+						fv.x = v.x;
+						fv.y = v.y;
+						fv.z = 1.0f;
+						fv.c = secretcolor;
+						verts.Add(fv);
+					}
+				}
+			}
+
+			if(verts.Count > 0) renderer.RenderGeometry(verts.ToArray(), null, true);
+
+			renderer.Finish();
 		}
 
 		#endregion
@@ -293,15 +490,20 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		{
 			base.OnEngage();
 
-			// Automap presentation without the surfaces
-			automappresentation = new CustomPresentation();
-			automappresentation.AddLayer(new PresentLayer(RendererLayer.Overlay, BlendingMode.Mask));
-			automappresentation.AddLayer(new PresentLayer(RendererLayer.Grid, BlendingMode.Mask));
-			automappresentation.AddLayer(new PresentLayer(RendererLayer.Geometry, BlendingMode.Alpha, 1f, true));
-			renderer.SetPresentation(automappresentation);
-
 			UpdateSectorFlags();
 			UpdateValidLinedefs();
+
+			// Remember the view mode, so it can be restored when leaving this mode
+			previousviewmode = General.Map.Renderer2D.ViewMode;
+			previousfullbrightness = GetFullBrightness();
+			previouslighteffects = GetLightEffects();
+			viewmodesaved = true;
+
+			// No sector light effects on the automap (they stay in the other modes)
+			SetLightEffects(false);
+
+			// Automap presentation and view mode of the selected type
+			ApplyType();
 
 			// Show UI
 			menusform.Register();
@@ -315,7 +517,27 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			// Store settings
 			General.Settings.WritePluginSetting("automapmode.showhiddenlines", menusform.ShowHiddenLines);
 			General.Settings.WritePluginSetting("automapmode.showsecretsectors", menusform.ShowSecretSectors);
-			General.Settings.WritePluginSetting("automapmode.colorpresetindex", (int)menusform.ColorPreset);
+			General.Settings.WritePluginSetting("automapmode.type", (int)menusform.Type);
+
+			// Restore the view mode and the full brightness setting
+			if(viewmodesaved && (General.Map != null))
+			{
+				viewmodesaved = false;
+				SetLightEffects(previouslighteffects);
+				changingview = true;
+				try
+				{
+					if(GetFullBrightness() != previousfullbrightness)
+						General.Actions.InvokeAction("builder_togglefullbrightness");
+
+					if(General.Map.Renderer2D.ViewMode != previousviewmode)
+						ApplyViewMode(previousviewmode);
+				}
+				finally
+				{
+					changingview = false;
+				}
+			}
 
 			// Hide UI
 			menusform.Unregister();
@@ -343,20 +565,51 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		// This redraws the display
 		public override void OnRedrawDisplay()
 		{
+			// Ignore the redraws that are caused by changing the view mode here, and
+			// make sure the view mode is right (it can be changed from the toolbar)
+			if(changingview || !viewmodesaved) return;
+			EnsureViewMode();
+
+			// Floors: the textured sectors, tinted by the floor colors
 			renderer.RedrawSurface();
 
-			// Render lines
+			// Floors: cover the sectors that are hidden on the automap
+			if(menusform.Type == AutomapType.FLOORS) RenderHiddenFloors();
+
+			// Render lines (not in the Floors type, which only shows the highlighted sector)
 			if(renderer.StartPlotter(true))
 			{
-				foreach(Linedef ld in General.Map.Map.Linedefs)
+				if(menusform.Type == AutomapType.FLOORS)
 				{
-					if(LinedefIsValid(ld))
-						renderer.PlotLine(ld.Start.Position, ld.End.Position, DetermineLinedefColor(ld));
+					if((highlightedsector != null) && !highlightedsector.IsDisposed)
+						PlotSectorOutline(highlightedsector, General.Colors.Highlight);
 				}
-
-				if((highlighted != null) && !highlighted.IsDisposed && LinedefIsValid(highlighted))
+				else
 				{
-					renderer.PlotLine(highlighted.Start.Position, highlighted.End.Position, General.Colors.Highlight);
+					foreach(Linedef ld in General.Map.Map.Linedefs)
+					{
+						if(LinedefIsValid(ld))
+							renderer.PlotLine(ld.Start.Position, ld.End.Position, DetermineLinedefColor(ld));
+					}
+
+					// Show secrets: lined triangles for the things that count as a secret
+					if(menusform.ShowSecretSectors)
+					{
+						foreach(Thing t in General.Map.Map.Things)
+						{
+							if(!t.IsFlagSet(THING_SECRET_FLAG)) continue;
+
+							Vector2D[] c = ThingTriangle(t);
+							renderer.PlotLine(c[0], c[1], ColorSecret);
+							renderer.PlotLine(c[1], c[2], ColorSecret);
+							renderer.PlotLine(c[2], c[0], ColorSecret);
+						}
+					}
+
+					if((highlighted != null) && !highlighted.IsDisposed && LinedefIsValid(highlighted))
+					{
+						renderer.PlotLine(highlighted.Start.Position, highlighted.End.Position, General.Colors.Highlight);
+					}
 				}
 
 				renderer.Finish();
@@ -375,6 +628,13 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 		protected override void OnSelectEnd()
 		{
+			// Floors type: nothing to toggle with the left mouse button
+			if(menusform.Type == AutomapType.FLOORS)
+			{
+				base.OnSelectEnd();
+				return;
+			}
+
 			// Item highlighted?
 			if((highlighted != null) && !highlighted.IsDisposed)
 			{
@@ -391,6 +651,20 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 		protected override void OnEditEnd()
 		{
+			// Floors type: toggle the "Hide on Automap" sector flag
+			if(menusform.Type == AutomapType.FLOORS)
+			{
+				if((highlightedsector != null) && !highlightedsector.IsDisposed)
+				{
+					General.Map.UndoRedo.CreateUndo("Toggle \"Hide on Automap\" sector flag");
+					highlightedsector.SetFlag(SECTOR_HIDE_FLAG, !highlightedsector.IsFlagSet(SECTOR_HIDE_FLAG));
+					General.Interface.RedrawDisplay();
+				}
+
+				base.OnEditEnd();
+				return;
+			}
+
 			// Item highlighted?
 			if((highlighted != null) && !highlighted.IsDisposed)
 			{
@@ -413,6 +687,21 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			// Not holding any buttons?
 			if(e.Button == MouseButtons.None)
 			{
+				// Floors type: highlight the sector under the mouse
+				if(menusform.Type == AutomapType.FLOORS)
+				{
+					Sector sec = null;
+					Linedef nl = General.Map.Map.NearestLinedef(mousemappos);
+					if(nl != null)
+					{
+						Sidedef sd = (nl.SideOfLine(mousemappos) > 0) ? nl.Back : nl.Front;
+						if(sd != null) sec = sd.Sector;
+					}
+
+					if(sec != highlightedsector) HighlightSector(sec);
+					return;
+				}
+
 				// Find the nearest linedef within highlight range
 				Linedef l = MapSet.NearestLinedefRange(validlinedefs, mousemappos, BuilderPlug.Me.HighlightRange / renderer.Scale);
 
@@ -427,7 +716,10 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			base.OnMouseLeave(e);
 
 			// Highlight nothing
-			Highlight(null);
+			if(menusform.Type == AutomapType.FLOORS)
+				HighlightSector(null);
+			else
+				Highlight(null);
 		}
 
 		public override void OnKeyDown(KeyEventArgs e)

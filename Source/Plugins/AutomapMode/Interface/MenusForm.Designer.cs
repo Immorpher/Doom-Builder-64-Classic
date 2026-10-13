@@ -29,9 +29,9 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		private void InitializeComponent()
 		{
 			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-			this.colorpresetseparator = new System.Windows.Forms.ToolStripSeparator();
-			this.colorpresetlabel = new System.Windows.Forms.ToolStripLabel();
-			this.colorpreset = new System.Windows.Forms.ToolStripComboBox();
+			this.typeseparator = new System.Windows.Forms.ToolStripSeparator();
+			this.typelabel = new System.Windows.Forms.ToolStripLabel();
+			this.automaptype = new System.Windows.Forms.ToolStripComboBox();
 			this.showhiddenlines = new System.Windows.Forms.ToolStripButton();
 			this.showsecretsectors = new System.Windows.Forms.ToolStripButton();
 			this.toolStrip1.SuspendLayout();
@@ -42,36 +42,36 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showhiddenlines,
             this.showsecretsectors,
-            this.colorpresetseparator,
-            this.colorpresetlabel,
-            this.colorpreset});
+            this.typeseparator,
+            this.typelabel,
+            this.automaptype});
 			this.toolStrip1.Location = new System.Drawing.Point(0, 0);
 			this.toolStrip1.Name = "toolStrip1";
 			this.toolStrip1.Size = new System.Drawing.Size(731, 25);
 			this.toolStrip1.TabIndex = 0;
 			this.toolStrip1.Text = "toolStrip1";
 			// 
-			// colorpresetseparator
+			// typeseparator
 			// 
-			this.colorpresetseparator.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-			this.colorpresetseparator.Name = "colorpresetseparator";
-			this.colorpresetseparator.Size = new System.Drawing.Size(6, 25);
+			this.typeseparator.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+			this.typeseparator.Name = "typeseparator";
+			this.typeseparator.Size = new System.Drawing.Size(6, 25);
 			// 
-			// colorpresetlabel
+			// typelabel
 			// 
-			this.colorpresetlabel.Name = "colorpresetlabel";
-			this.colorpresetlabel.Size = new System.Drawing.Size(74, 22);
-			this.colorpresetlabel.Text = "Color preset:";
+			this.typelabel.Name = "typelabel";
+			this.typelabel.Size = new System.Drawing.Size(34, 22);
+			this.typelabel.Text = "Type:";
 			// 
-			// colorpreset
+			// automaptype
 			// 
-			this.colorpreset.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.colorpreset.Items.AddRange(new object[] {
-            "Doom",
-            "Doom 64"});
-			this.colorpreset.Name = "colorpreset";
-			this.colorpreset.Size = new System.Drawing.Size(75, 25);
-			this.colorpreset.SelectedIndexChanged += new System.EventHandler(this.colorpreset_SelectedIndexChanged);
+			this.automaptype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.automaptype.Items.AddRange(new object[] {
+            "Lines",
+            "Floors"});
+			this.automaptype.Name = "automaptype";
+			this.automaptype.Size = new System.Drawing.Size(80, 25);
+			this.automaptype.SelectedIndexChanged += new System.EventHandler(this.automaptype_SelectedIndexChanged);
 			// 
 			// showhiddenlines
 			// 
@@ -80,8 +80,8 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			this.showhiddenlines.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.showhiddenlines.Margin = new System.Windows.Forms.Padding(0, 1, 2, 2);
 			this.showhiddenlines.Name = "showhiddenlines";
-			this.showhiddenlines.Size = new System.Drawing.Size(123, 22);
-			this.showhiddenlines.Text = "Show hidden lines";
+			this.showhiddenlines.Size = new System.Drawing.Size(88, 22);
+			this.showhiddenlines.Text = "Show hidden";
 			this.showhiddenlines.CheckedChanged += new System.EventHandler(this.showhiddenlines_CheckedChanged);
 			// 
 			// showsecretsectors
@@ -114,8 +114,8 @@ namespace CodeImp.DoomBuilder.AutomapMode
 		private System.Windows.Forms.ToolStrip toolStrip1;
 		private System.Windows.Forms.ToolStripButton showhiddenlines;
 		private System.Windows.Forms.ToolStripButton showsecretsectors;
-		private System.Windows.Forms.ToolStripSeparator colorpresetseparator;
-		private System.Windows.Forms.ToolStripLabel colorpresetlabel;
-		private System.Windows.Forms.ToolStripComboBox colorpreset;
+		private System.Windows.Forms.ToolStripSeparator typeseparator;
+		private System.Windows.Forms.ToolStripLabel typelabel;
+		private System.Windows.Forms.ToolStripComboBox automaptype;
 	}
 }
