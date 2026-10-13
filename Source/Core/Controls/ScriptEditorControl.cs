@@ -66,6 +66,8 @@ namespace CodeImp.DoomBuilder.Controls
 		public event OpenScriptBrowserDelegate OnOpenScriptBrowser;
 		public event OpenFindReplaceDelegate OnOpenFindAndReplace;
 		public event FindNextDelegate OnFindNext;
+		public delegate void ContentChangedDelegate();
+		public event ContentChangedDelegate OnContentChanged;
 
 		#endregion
 
@@ -87,6 +89,9 @@ namespace CodeImp.DoomBuilder.Controls
 		
 		// Status
 		private bool changed;
+		
+		// True while the text is replaced by code (loading, restyling). That is not an edit by the user.
+		private bool suppresschange;
 		
 		#endregion
 
@@ -197,6 +202,10 @@ namespace CodeImp.DoomBuilder.Controls
 			newtext.Append(text.Substring(scriptedit.SelectionEnd));
 			
 			SetText(encoder.GetBytes(newtext.ToString()));
+			
+			// This is a real edit
+			changed = true;
+			if(OnContentChanged != null) OnContentChanged();
 			
 			// Adjust selection
 			scriptedit.SelectionStart = selectionstart;
@@ -394,7 +403,9 @@ namespace CodeImp.DoomBuilder.Controls
 
 			// Rearrange the layout
 			scriptedit.ClearDocumentStyle();
-			scriptedit.SetText(scriptedit.GetText(scriptedit.TextSize));
+			suppresschange = true;
+			try { scriptedit.SetText(scriptedit.GetText(scriptedit.TextSize)); }
+			finally { suppresschange = false; }
 			this.PerformLayout();
 		}
 		
@@ -629,9 +640,12 @@ namespace CodeImp.DoomBuilder.Controls
 			return scriptedit.GetText(scriptedit.TextSize);
 		}
 
+		// Replaces the text without marking the script as changed
 		public void SetText(byte[] text)
 		{
-			scriptedit.SetText(text);
+			suppresschange = true;
+			try { scriptedit.SetText(text); }
+			finally { suppresschange = false; }
 		}
 
 		#endregion
@@ -659,7 +673,14 @@ namespace CodeImp.DoomBuilder.Controls
 		// Script modified
 		private void scriptedit_Modified(ScintillaControl pSender, int position, int modificationType, string text, int length, int linesAdded, int line, int foldLevelNow, int foldLevelPrev)
 		{
+			// Only changes to the text count. Style, fold and marker changes (which also
+			// happen when merely opening a script) are not changes to the script.
+			if(suppresschange) return;
+			int textflags = (int)ScriptModificationFlags.InsertText | (int)ScriptModificationFlags.DeleteText;
+			if((modificationType & textflags) == 0) return;
+			
 			changed = true;
+			if(OnContentChanged != null) OnContentChanged();
 		}
 		
 		// Key pressed down

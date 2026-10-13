@@ -385,6 +385,9 @@ namespace CodeImp.DoomBuilder.Controls
 		// Call this to save the lumps before disposing the panel!
 		public void ImplicitSave()
 		{
+			// Saving resets the changed state of the tabs, so remember it first
+			if(General.Map != null) General.Map.ApplyScriptChanged();
+			
 			// Save all scripts
 			foreach(ScriptDocumentTab t in AllTabs)
 			{

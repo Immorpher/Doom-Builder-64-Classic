@@ -1485,6 +1485,9 @@ namespace CodeImp.DoomBuilder
                 scriptwindow.Focus();
             //}
 			Cursor.Current = Cursors.Default;
+			
+			// Scripts (like decompiled macros) may have been loaded as changed
+			General.MainWindow.UpdateMapChangedStatus();
 		}
 		
 		// Some maps have compiled macros (MACROS lump) but lack the source script (SCRIPTS lump).

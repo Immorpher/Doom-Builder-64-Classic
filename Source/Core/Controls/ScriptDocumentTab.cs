@@ -92,6 +92,7 @@ namespace CodeImp.DoomBuilder.Controls
 			// Bind events
 			editor.OnOpenFindAndReplace += panel.OpenFindAndReplace;
 			editor.OnFindNext += panel.FindNext;
+			editor.OnContentChanged += editor_OnContentChanged;
 		}
 		
 		// Disposer
@@ -100,8 +101,15 @@ namespace CodeImp.DoomBuilder.Controls
 			// Remove events
 			editor.OnOpenFindAndReplace -= panel.OpenFindAndReplace;
 			editor.OnFindNext -= panel.FindNext;
+			editor.OnContentChanged -= editor_OnContentChanged;
 			
 			base.Dispose(disposing);
+		}
+		
+		// The text was edited: update the changed indicator of the map
+		private void editor_OnContentChanged()
+		{
+			if(General.Map != null) General.MainWindow.UpdateMapChangedStatus();
 		}
 		
 		#endregion
