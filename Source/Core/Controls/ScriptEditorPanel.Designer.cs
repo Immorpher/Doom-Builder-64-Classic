@@ -32,11 +32,6 @@ namespace CodeImp.DoomBuilder.Controls
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScriptEditorPanel));
 			this.tabs = new System.Windows.Forms.TabControl();
 			this.toolbar = new System.Windows.Forms.ToolStrip();
-			this.buttonnew = new System.Windows.Forms.ToolStripDropDownButton();
-			this.buttonopen = new System.Windows.Forms.ToolStripButton();
-			this.buttonsave = new System.Windows.Forms.ToolStripButton();
-			this.buttonsaveall = new System.Windows.Forms.ToolStripButton();
-			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.buttonundo = new System.Windows.Forms.ToolStripButton();
 			this.buttonredo = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -44,13 +39,8 @@ namespace CodeImp.DoomBuilder.Controls
 			this.buttoncopy = new System.Windows.Forms.ToolStripButton();
 			this.buttonpaste = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-			this.buttonscriptconfig = new System.Windows.Forms.ToolStripDropDownButton();
 			this.buttoncompile = new System.Windows.Forms.ToolStripButton();
-			this.buttonclose = new System.Windows.Forms.ToolStripButton();
 			this.buttonkeywordhelp = new System.Windows.Forms.ToolStripButton();
-			this.lumptypecombo = new System.Windows.Forms.ToolStripComboBox();
-			this.openfile = new System.Windows.Forms.OpenFileDialog();
-			this.savefile = new System.Windows.Forms.SaveFileDialog();
 			this.splitter = new System.Windows.Forms.SplitContainer();
 			this.label1 = new System.Windows.Forms.Label();
 			this.errorlist = new System.Windows.Forms.ListView();
@@ -85,11 +75,6 @@ namespace CodeImp.DoomBuilder.Controls
 			this.toolbar.AllowMerge = false;
 			this.toolbar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
 			this.toolbar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.buttonnew,
-            this.buttonopen,
-            this.buttonsave,
-            this.buttonsaveall,
-            this.toolStripSeparator1,
             this.buttonundo,
             this.buttonredo,
             this.toolStripSeparator2,
@@ -97,72 +82,19 @@ namespace CodeImp.DoomBuilder.Controls
             this.buttoncopy,
             this.buttonpaste,
             this.toolStripSeparator3,
-            this.buttonscriptconfig,
             this.buttoncompile,
-            this.buttonclose,
-            this.buttonkeywordhelp,
-            this.lumptypecombo});
+            this.buttonkeywordhelp});
 			this.toolbar.Location = new System.Drawing.Point(0, 0);
 			this.toolbar.Name = "toolbar";
 			this.toolbar.Size = new System.Drawing.Size(726, 25);
 			this.toolbar.TabIndex = 1;
-			// 
-			// buttonnew
-			// 
-			this.buttonnew.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonnew.Image = global::CodeImp.DoomBuilder.Properties.Resources.NewScript;
-			this.buttonnew.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-			this.buttonnew.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonnew.Margin = new System.Windows.Forms.Padding(6, 1, 0, 2);
-			this.buttonnew.Name = "buttonnew";
-			this.buttonnew.Size = new System.Drawing.Size(29, 22);
-			this.buttonnew.Text = "New File";
-			// 
-			// buttonopen
-			// 
-			this.buttonopen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonopen.Image = global::CodeImp.DoomBuilder.Properties.Resources.OpenScript;
-			this.buttonopen.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-			this.buttonopen.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonopen.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
-			this.buttonopen.Name = "buttonopen";
-			this.buttonopen.Size = new System.Drawing.Size(23, 22);
-			this.buttonopen.Text = "Open File";
-			this.buttonopen.Click += new System.EventHandler(this.buttonopen_Click);
-			// 
-			// buttonsave
-			// 
-			this.buttonsave.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonsave.Enabled = false;
-			this.buttonsave.Image = global::CodeImp.DoomBuilder.Properties.Resources.SaveScript;
-			this.buttonsave.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonsave.Name = "buttonsave";
-			this.buttonsave.Size = new System.Drawing.Size(23, 22);
-			this.buttonsave.Text = "Save File";
-			this.buttonsave.Click += new System.EventHandler(this.buttonsave_Click);
-			// 
-			// buttonsaveall
-			// 
-			this.buttonsaveall.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonsaveall.Enabled = false;
-			this.buttonsaveall.Image = global::CodeImp.DoomBuilder.Properties.Resources.SaveAll;
-			this.buttonsaveall.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonsaveall.Name = "buttonsaveall";
-			this.buttonsaveall.Size = new System.Drawing.Size(23, 22);
-			this.buttonsaveall.Text = "Save All Files";
-			this.buttonsaveall.Click += new System.EventHandler(this.buttonsaveall_Click);
-			// 
-			// toolStripSeparator1
-			// 
-			this.toolStripSeparator1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
 			// 
 			// buttonundo
 			// 
 			this.buttonundo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.buttonundo.Image = global::CodeImp.DoomBuilder.Properties.Resources.Undo;
 			this.buttonundo.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.buttonundo.Margin = new System.Windows.Forms.Padding(6, 1, 0, 2);
 			this.buttonundo.Name = "buttonundo";
 			this.buttonundo.Size = new System.Drawing.Size(23, 22);
 			this.buttonundo.Text = "Undo";
@@ -220,16 +152,6 @@ namespace CodeImp.DoomBuilder.Controls
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
 			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
 			// 
-			// buttonscriptconfig
-			// 
-			this.buttonscriptconfig.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonscriptconfig.Enabled = false;
-			this.buttonscriptconfig.Image = global::CodeImp.DoomBuilder.Properties.Resources.ScriptPalette;
-			this.buttonscriptconfig.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonscriptconfig.Name = "buttonscriptconfig";
-			this.buttonscriptconfig.Size = new System.Drawing.Size(29, 22);
-			this.buttonscriptconfig.Text = "Change Script Type";
-			// 
 			// buttoncompile
 			// 
 			this.buttoncompile.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -241,18 +163,6 @@ namespace CodeImp.DoomBuilder.Controls
 			this.buttoncompile.Text = "Compile Script";
 			this.buttoncompile.Click += new System.EventHandler(this.buttoncompile_Click);
 			// 
-			// buttonclose
-			// 
-			this.buttonclose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			this.buttonclose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.buttonclose.Image = global::CodeImp.DoomBuilder.Properties.Resources.Close;
-			this.buttonclose.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-			this.buttonclose.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.buttonclose.Name = "buttonclose";
-			this.buttonclose.Size = new System.Drawing.Size(23, 22);
-			this.buttonclose.Text = "Close File";
-			this.buttonclose.Click += new System.EventHandler(this.buttonclose_Click);
-			// 
 			// buttonkeywordhelp
 			// 
 			this.buttonkeywordhelp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -263,23 +173,6 @@ namespace CodeImp.DoomBuilder.Controls
 			this.buttonkeywordhelp.Size = new System.Drawing.Size(23, 22);
 			this.buttonkeywordhelp.Text = "Keyword Help";
 			this.buttonkeywordhelp.Click += new System.EventHandler(this.buttonkeywordhelp_Click);
-			// 
-			// lumptypecombo
-			// 
-			this.lumptypecombo.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-			this.lumptypecombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.lumptypecombo.Name = "lumptypecombo";
-			this.lumptypecombo.Size = new System.Drawing.Size(110, 25);
-			this.lumptypecombo.ToolTipText = "Script lump to edit";
-			this.lumptypecombo.SelectedIndexChanged += new System.EventHandler(this.lumptypecombo_SelectedIndexChanged);
-			// 
-			// openfile
-			// 
-			this.openfile.Title = "Open Script";
-			// 
-			// savefile
-			// 
-			this.savefile.Title = "Save Script As";
 			// 
 			// splitter
 			// 
@@ -386,13 +279,6 @@ namespace CodeImp.DoomBuilder.Controls
 
 		private System.Windows.Forms.TabControl tabs;
 		private System.Windows.Forms.ToolStrip toolbar;
-		private System.Windows.Forms.ToolStripButton buttonopen;
-		private System.Windows.Forms.ToolStripDropDownButton buttonnew;
-		private System.Windows.Forms.OpenFileDialog openfile;
-		private System.Windows.Forms.SaveFileDialog savefile;
-		private System.Windows.Forms.ToolStripButton buttonsave;
-		private System.Windows.Forms.ToolStripButton buttonsaveall;
-		private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
 		private System.Windows.Forms.ToolStripButton buttoncompile;
 		private System.Windows.Forms.ToolStripButton buttonundo;
 		private System.Windows.Forms.ToolStripButton buttonredo;
@@ -401,9 +287,6 @@ namespace CodeImp.DoomBuilder.Controls
 		private System.Windows.Forms.ToolStripButton buttoncopy;
 		private System.Windows.Forms.ToolStripButton buttonpaste;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-		private System.Windows.Forms.ToolStripDropDownButton buttonscriptconfig;
-		private System.Windows.Forms.ToolStripButton buttonclose;
-		private System.Windows.Forms.ToolStripComboBox lumptypecombo;
 		private System.Windows.Forms.SplitContainer splitter;
 		private System.Windows.Forms.ListView errorlist;
 		private System.Windows.Forms.Label label1;

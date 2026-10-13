@@ -70,16 +70,12 @@ namespace CodeImp.DoomBuilder.Windows
 		
 		#region ================== Methods
 		
-		// This asks to save files and returns the result
-		// Also does implicit saves
-		// Returns false when cancelled by the user
+		// This saves all the scripts and returns the result
+		// (the script lumps are saved implicitly, so this never cancels)
 		public bool AskSaveAll()
 		{
-			// Implicit-save the script lumps
 			editor.ImplicitSave();
-			
-			// Save other scripts
-			return editor.AskSaveAll();
+			return true;
 		}
 		
 		// Close the window

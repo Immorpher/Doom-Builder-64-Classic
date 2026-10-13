@@ -51,10 +51,6 @@ namespace CodeImp.DoomBuilder.Controls
 		
 		#region ================== Properties
 		
-		public override bool ExplicitSave { get { return false; } }
-		public override bool IsSaveAsRequired { get { return false; } }
-		public override bool IsClosable { get { return false; } }
-		public override bool IsReconfigurable { get { return false; } }
 		
 		#endregion
 		

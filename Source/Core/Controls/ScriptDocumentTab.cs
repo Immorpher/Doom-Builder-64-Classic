@@ -62,11 +62,6 @@ namespace CodeImp.DoomBuilder.Controls
 
 		#region ================== Properties
 
-		public virtual bool ExplicitSave { get { return true; } }
-		public virtual bool IsSaveAsRequired { get { return true; } }
-		public virtual bool IsClosable { get { return true; } }
-		public virtual bool IsReconfigurable { get { return true; } }
-		public virtual string Filename { get { return null; } }
 		public ScriptEditorPanel Panel { get { return panel; } }
 		public virtual bool IsChanged { get { return editor.IsChanged; } }
 		public int SelectionStart { get { return editor.SelectionStart; } set { editor.SelectionStart = value; } }
@@ -95,8 +90,6 @@ namespace CodeImp.DoomBuilder.Controls
 			this.Controls.Add(editor);
 
 			// Bind events
-			editor.OnExplicitSaveTab += panel.ExplicitSaveCurrentTab;
-			editor.OnOpenScriptBrowser += panel.OpenBrowseScript;
 			editor.OnOpenFindAndReplace += panel.OpenFindAndReplace;
 			editor.OnFindNext += panel.FindNext;
 		}
@@ -105,8 +98,6 @@ namespace CodeImp.DoomBuilder.Controls
 		protected override void Dispose(bool disposing)
 		{
 			// Remove events
-			editor.OnExplicitSaveTab -= panel.ExplicitSaveCurrentTab;
-			editor.OnOpenScriptBrowser -= panel.OpenBrowseScript;
 			editor.OnOpenFindAndReplace -= panel.OpenFindAndReplace;
 			editor.OnFindNext -= panel.FindNext;
 			
@@ -169,25 +160,13 @@ namespace CodeImp.DoomBuilder.Controls
 		{
 		}
 
-		// This saves the document (used for both explicit and implicit)
+		// This saves the document 
 		// Return true when successfully saved
 		public virtual bool Save()
 		{
 			return false;
 		}
 		
-		// This saves the document to a new file
-		// Return true when successfully saved
-		public virtual bool SaveAs(string filename)
-		{
-			return false;
-		}
-		
-		// This changes the script configurations
-		public virtual void ChangeScriptConfig(ScriptConfiguration newconfig)
-		{
-		}
-
 		// Call this to set the tab title
 		protected void SetTitle(string title)
 		{

@@ -123,9 +123,6 @@
     <Compile Include="Controls\ScriptEditorPanel.Designer.cs">
       <DependentUpon>ScriptEditorPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\ScriptFileDocumentTab.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\ScriptGlobalLumpDocumentTab.cs">
       <SubType>Component</SubType>
     </Compile>

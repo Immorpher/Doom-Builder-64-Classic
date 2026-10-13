@@ -55,7 +55,7 @@ namespace CodeImp.DoomBuilder
 		internal const string LUMP_MAPINFO = "MAPINFO";
 		internal const string LUMP_ANIMDEFS = "ANIMDEFS";
 		internal const string LUMP_SKYDEFS = "SKYDEFS";
-		internal static readonly string[] GLOBAL_SCRIPT_LUMPS = new string[] { LUMP_ANIMDEFS, LUMP_MAPINFO, LUMP_SKYDEFS };
+		internal static readonly string[] GLOBAL_SCRIPT_LUMPS = new string[] { LUMP_MAPINFO, LUMP_ANIMDEFS, LUMP_SKYDEFS };
 
 		#endregion
 
@@ -536,7 +536,7 @@ namespace CodeImp.DoomBuilder
 			if(IsScriptsWindowOpen)
 			{
 				scriptwindow.Editor.ImplicitSave();
-				scriptwindow.Editor.WriteOpenFilesToConfiguration();
+				scriptwindow.Editor.WriteOpenTabToConfiguration();
 			}
 			
 			// Only recompile scripts when the scripts have changed
@@ -1570,7 +1570,7 @@ namespace CodeImp.DoomBuilder
 				if(!scriptwindow.IsDisposed)
 				{
 					// Remember what files were open
-					scriptwindow.Editor.WriteOpenFilesToConfiguration();
+					scriptwindow.Editor.WriteOpenTabToConfiguration();
 					
 					// Close now
 					if(!closing) scriptwindow.Close();
@@ -1884,7 +1884,7 @@ namespace CodeImp.DoomBuilder
 			oldcursor = Cursor.Current;
 			
 			// The script editor starts with the SCRIPTS again
-			options.ScriptEditorLumpType = "";
+			if(options.ScriptEditorTab.StartsWith("global:", StringComparison.Ordinal)) options.ScriptEditorTab = "";
 			
 			// Show status
 			General.MainWindow.DisplayStatus(StatusType.Busy, "Reloading data resources...");

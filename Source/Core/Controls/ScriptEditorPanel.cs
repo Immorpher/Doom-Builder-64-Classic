@@ -41,23 +41,15 @@ namespace CodeImp.DoomBuilder.Controls
 	internal partial class ScriptEditorPanel : UserControl
 	{
 		#region ================== Constants
-		
-		// The kinds of script lumps that can be edited. SCRIPTS are the scripts of the map (the
-		// document tabs in 'tabs'). The others are global lumps that are not part of a map.
-		private const string LUMPTYPE_SCRIPTS = "SCRIPTS";
-		
+
+		// The tabs of the script lumps that are not part of a map and are always shown, in this order.
+		// The first tab is the SCRIPTS lump of the map.
+		private static readonly string[] GLOBAL_LUMP_TABS = MapManager.GLOBAL_SCRIPT_LUMPS;
+
 		#endregion
-		
+
 		#region ================== Variables
-		
-		// The tab control that is currently shown. This is 'tabs' for SCRIPTS,
-		// or one of the tab controls in globaltabs for ANIMDEFS, MAPINFO and SKYDEFS.
-		private TabControl activetabs;
-		private string activelumptype = LUMPTYPE_SCRIPTS;
-		private Dictionary<string, TabControl> globaltabs = new Dictionary<string, TabControl>();
-		private bool syncinglumptype;
-		
-		private List<ScriptConfiguration> scriptconfigs;
+
 		private List<CompilerError> compilererrors;
 
 		// Find/Replace
@@ -68,9 +60,9 @@ namespace CodeImp.DoomBuilder.Controls
 		
 		#region ================== Properties
 		
-		public ScriptDocumentTab ActiveTab { get { return (activetabs.SelectedTab as ScriptDocumentTab); } }
-		
-		// All the document tabs of all lump types, also those that are not currently shown
+		public ScriptDocumentTab ActiveTab { get { return (tabs.SelectedTab as ScriptDocumentTab); } }
+
+		// All the document tabs
 		private List<ScriptDocumentTab> AllTabs
 		{
 			get
@@ -78,13 +70,10 @@ namespace CodeImp.DoomBuilder.Controls
 				List<ScriptDocumentTab> all = new List<ScriptDocumentTab>();
 				foreach(TabPage page in tabs.TabPages)
 					if(page is ScriptDocumentTab) all.Add((ScriptDocumentTab)page);
-				foreach(TabControl tc in globaltabs.Values)
-					foreach(TabPage page in tc.TabPages)
-						if(page is ScriptDocumentTab) all.Add((ScriptDocumentTab)page);
 				return all;
 			}
 		}
-		
+
 		#endregion
 		
 		#region ================== Constructor
@@ -93,53 +82,11 @@ namespace CodeImp.DoomBuilder.Controls
 		public ScriptEditorPanel()
 		{
 			InitializeComponent();
-			activetabs = tabs;
 		}
 		
 		// This initializes the control
 		public void Initialize()
 		{
-			ToolStripMenuItem item;
-			
-			// Make list of script configs
-			scriptconfigs = new List<ScriptConfiguration>(General.ScriptConfigs.Values);
-			scriptconfigs.Add(new ScriptConfiguration());
-			scriptconfigs.Sort();
-			
-			// Fill the list of new document types
-			foreach(ScriptConfiguration cfg in scriptconfigs)
-			{
-				// Button for new script menu
-				item = new ToolStripMenuItem(cfg.Description);
-				//item.Image = buttonnew.Image;
-				item.Tag = cfg;
-				item.Click += new EventHandler(buttonnew_Click);
-				buttonnew.DropDownItems.Add(item);
-				
-				// Button for script type menu
-				item = new ToolStripMenuItem(cfg.Description);
-				//item.Image = buttonnew.Image;
-				item.Tag = cfg;
-				item.Click += new EventHandler(buttonscriptconfig_Click);
-				buttonscriptconfig.DropDownItems.Add(item);
-			}
-			
-			// Setup supported extensions
-			string filterall = "";
-			string filterseperate = "";
-			foreach(ScriptConfiguration cfg in scriptconfigs)
-			{
-				if(cfg.Extensions.Length > 0)
-				{
-					string exts = "*." + string.Join(";*.", cfg.Extensions);
-					if(filterseperate.Length > 0) filterseperate += "|";
-					filterseperate += cfg.Description + "|" + exts;
-					if(filterall.Length > 0) filterall += ";";
-					filterall += exts;
-				}
-			}
-			openfile.Filter = "Script files|" + filterall + "|" + filterseperate + "|All files|*.*";
-			
 			// Load the script lumps
 			foreach(MapLumpInfo maplumpinfo in General.Map.Config.MapLumps.Values)
 			{
@@ -152,28 +99,14 @@ namespace CodeImp.DoomBuilder.Controls
 				}
 			}
 
-			// Load the files that were previously opened for this map
-			foreach(String filename in General.Map.Options.ScriptFiles)
-			{
-				// Does this file exist?
-				if(File.Exists(filename))
-				{
-					// Load this!
-					OpenFile(filename);
-				}
-			}
+			// The global script lumps always have their own tab after the SCRIPTS
+			foreach(string lumpname in GLOBAL_LUMP_TABS)
+				tabs.TabPages.Add(CreateGlobalLumpTab(lumpname));
 
 			// Select the first tab
 			if(tabs.TabPages.Count > 0) tabs.SelectedIndex = 0;
 			
-			// Fill the list of script lump types that can be edited
-			syncinglumptype = true;
-			lumptypecombo.Items.Add(LUMPTYPE_SCRIPTS);
-			foreach(string lumptype in MapManager.GLOBAL_SCRIPT_LUMPS) lumptypecombo.Items.Add(lumptype);
-			lumptypecombo.SelectedIndex = 0;
-			syncinglumptype = false;
-			
-			// Return to the script that was being edited when the script editor was closed
+			// Return to the tab that was being edited when the script editor was closed
 			RestoreLastScript();
 			
 			// If the map has remembered any compile errors, then show them
@@ -397,110 +330,45 @@ namespace CodeImp.DoomBuilder.Controls
 			splitter.Panel2Collapsed = (errorlist.Items.Count == 0);
 		}
 		
-		// This returns a key that identifies a SCRIPTS tab, to find it again later (or null when it can't be identified)
+		// This returns a key that identifies a tab, to find it again later (or null when it can't be identified)
 		private static string GetTabKey(ScriptDocumentTab t)
 		{
 			if(t is ScriptLumpDocumentTab) return "lump:" + t.Text;
-			if(!string.IsNullOrEmpty(t.Filename)) return "file:" + t.Filename;
+			if(t is ScriptGlobalLumpDocumentTab) return "global:" + (t as ScriptGlobalLumpDocumentTab).LumpName;
 			return null;
 		}
 		
-		// This selects the script (and lump type) that was being edited when the script editor was last closed
+		// This selects the tab that was being edited when the script editor was last closed
 		private void RestoreLastScript()
 		{
-			string lumptype = General.Map.Options.ScriptEditorLumpType;
 			string tabkey = General.Map.Options.ScriptEditorTab;
-			
-			// Select the tab of the scripts
-			if(tabkey.Length > 0)
+			if(tabkey.Length == 0) return;
+
+			foreach(TabPage page in tabs.TabPages)
 			{
-				foreach(TabPage page in tabs.TabPages)
+				ScriptDocumentTab t = (page as ScriptDocumentTab);
+				if((t != null) && (GetTabKey(t) == tabkey))
 				{
-					ScriptDocumentTab t = (page as ScriptDocumentTab);
-					if((t != null) && (GetTabKey(t) == tabkey))
-					{
-						tabs.SelectedTab = t;
-						break;
-					}
-				}
-			}
-			
-			// Select the lump type
-			foreach(string item in lumptypecombo.Items)
-			{
-				if(item == lumptype)
-				{
-					SelectLumpType(item);
+					tabs.SelectedTab = t;
 					break;
 				}
 			}
 		}
 		
-		// This writes all explicitly opened files to the configuration
-		// Also remembers what the script editor is showing, to show that again when it is opened again
-		public void WriteOpenFilesToConfiguration()
+		// This remembers which tab the script editor is showing, to show that again when it is opened again
+		public void WriteOpenTabToConfiguration()
 		{
-			General.Map.Options.ScriptEditorLumpType = activelumptype;
 			ScriptDocumentTab selected = (tabs.SelectedTab as ScriptDocumentTab);
 			General.Map.Options.ScriptEditorTab = (selected != null) ? (GetTabKey(selected) ?? "") : "";
-
-			List<string> files = new List<string>();
-			foreach(ScriptDocumentTab t in AllTabs)
-			{
-				if(t.ExplicitSave) files.Add(t.Filename);
-			}
-			General.Map.Options.ScriptFiles = files;
 		}
 		
-		// This asks to save files and returns the result
-		public bool AskSaveAll()
-		{
-			foreach(ScriptDocumentTab t in AllTabs)
-			{
-				if(t.ExplicitSave)
-				{
-					if(!CloseScript(t, true)) return false;
-				}
-			}
-			
-			return true;
-		}
-		
-		// This closes a script and returns true when closed
-		private bool CloseScript(ScriptDocumentTab t, bool saveonly)
-		{
-			if(t.IsChanged)
-			{
-				// Ask to save
-				DialogResult result = MessageBox.Show(this.ParentForm, "Do you want to save changes to " + t.Text + "?", "Close File", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-				if(result == DialogResult.Yes)
-				{
-					// Save file
-					if(!SaveScript(t)) return false;
-				}
-				else if(result == DialogResult.Cancel)
-				{
-					// Cancel
-					return false;
-				}
-			}
-			
-			if(!saveonly)
-			{
-				// Close file
-				tabs.TabPages.Remove(t);
-				t.Dispose();
-			}
-			return true;
-		}
-		
-		// This returns true when any of the implicit-save scripts are changed
+		// This returns true when any of the scripts are changed
 		public bool CheckImplicitChanges()
 		{
 			bool changes = false;
 			foreach(ScriptDocumentTab t in AllTabs)
 			{
-				if(!t.ExplicitSave && t.IsChanged) changes = true;
+				if(t.IsChanged) changes = true;
 			}
 			return changes;
 		}
@@ -509,7 +377,7 @@ namespace CodeImp.DoomBuilder.Controls
 		public void ForceFocus()
 		{
 			ScriptDocumentTab t = ActiveTab;
-			activetabs.Focus();
+			tabs.Focus();
 			if(t != null) t.Focus();
 		}
 		
@@ -520,7 +388,7 @@ namespace CodeImp.DoomBuilder.Controls
 			// Save all scripts
 			foreach(ScriptDocumentTab t in AllTabs)
 			{
-				if(!t.ExplicitSave) t.Save();
+				t.Save();
 			}
 			
 			UpdateToolbar(false);
@@ -529,170 +397,38 @@ namespace CodeImp.DoomBuilder.Controls
 		// This updates the toolbar for the current status
 		private void UpdateToolbar(bool focuseditor)
 		{
-			int numscriptsopen = activetabs.TabPages.Count;
-			int explicitsavescripts = 0;
+			int numscriptsopen = tabs.TabPages.Count;
 			ScriptDocumentTab t = null;
-			
-			// Any explicit save scripts?
-			foreach(ScriptDocumentTab dt in AllTabs)
-				if(dt.ExplicitSave) explicitsavescripts++;
 			
 			// Get current script, if any are open
 			if(numscriptsopen > 0)
 				t = ActiveTab;
 			
 			// Enable/disable buttons
-			buttonsave.Enabled = (t != null) && t.ExplicitSave;
-			buttonsaveall.Enabled = (explicitsavescripts > 0);
 			buttoncompile.Enabled = (t != null) && (t.Config.Compiler != null);
 			buttonkeywordhelp.Enabled = (t != null) && !string.IsNullOrEmpty(t.Config.KeywordHelp);
-			buttonscriptconfig.Enabled = (t != null) && t.IsReconfigurable;
 			buttonundo.Enabled = (t != null);
 			buttonredo.Enabled = (t != null);
 			buttoncopy.Enabled = (t != null);
 			buttoncut.Enabled = (t != null);
 			buttonpaste.Enabled = (t != null);
-			buttonclose.Enabled = (t != null) && t.IsClosable;
 			
 			if(t != null)
 			{
-				// Check the according script config in menu
-				foreach(ToolStripMenuItem item in buttonscriptconfig.DropDownItems)
-				{
-					ScriptConfiguration config = (item.Tag as ScriptConfiguration);
-					item.Checked = (config == t.Config);
-				}
-				
 				// Focus to script editor
 				if(focuseditor) ForceFocus();
 			}
 		}
 
-		// This opens the given file, returns null when failed
-		public ScriptFileDocumentTab OpenFile(string filename)
-		{
-			ScriptConfiguration foundconfig = new ScriptConfiguration();
-
-			// Script files are shown with the SCRIPTS
-			SelectLumpType(LUMPTYPE_SCRIPTS);
-
-			// Find the most suitable script configuration to use
-			foreach(ScriptConfiguration cfg in scriptconfigs)
-			{
-				foreach(string ext in cfg.Extensions)
-				{
-					// Use this configuration if the extension matches
-					if(filename.EndsWith("." + ext, true, CultureInfo.InvariantCulture))
-					{
-						foundconfig = cfg;
-						break;
-					}
-				}
-			}
-
-			// Create new document
-			ScriptFileDocumentTab t = new ScriptFileDocumentTab(this, foundconfig);
-			if(t.Open(filename))
-			{
-				// Mark any errors this script may have
-				if(compilererrors != null)
-					t.MarkScriptErrors(compilererrors);
-
-				// Add to tabs
-				tabs.TabPages.Add(t);
-				tabs.SelectedTab = t;
-
-				// Done
-				UpdateToolbar(true);
-				return t;
-			}
-			else
-			{
-				// Failed
-				return null;
-			}
-		}
-
-		// This saves the current open script
-		public void ExplicitSaveCurrentTab()
-		{
-			ScriptDocumentTab t = ActiveTab;
-			if((t != null) && t.ExplicitSave)
-			{
-				buttonsave_Click(this, EventArgs.Empty);
-			}
-			else
-			{
-				General.MessageBeep(MessageBeepType.Default);
-			}
-		}
-		
-		// This shows the editor for the given lump type: SCRIPTS (the scripts of the map)
-		// or one of the global lumps (ANIMDEFS, MAPINFO, SKYDEFS).
-		// The tab controls are hidden and shown instead of tabs being removed and added again,
-		// so that the text and undo history of all tabs are always kept.
-		private void SelectLumpType(string lumptype)
-		{
-			if(lumptype == activelumptype) return;
-			
-			TabControl next;
-			if(lumptype == LUMPTYPE_SCRIPTS)
-			{
-				next = tabs;
-			}
-			else if(!globaltabs.TryGetValue(lumptype, out next))
-			{
-				// First time this global lump is shown. Create a tab control with a tab for it.
-				next = CreateGlobalLumpTabs(lumptype);
-			}
-			
-			// Switch
-			activetabs.Visible = false;
-			next.Visible = true;
-			activetabs = next;
-			activelumptype = lumptype;
-			
-			// Keep the drop down list in sync (this may have been called from elsewhere)
-			syncinglumptype = true;
-			lumptypecombo.SelectedItem = lumptype;
-			syncinglumptype = false;
-			
-			UpdateToolbar(true);
-		}
-		
-		// This creates a tab control, shaped like 'tabs', with the one tab for a global lump
-		private TabControl CreateGlobalLumpTabs(string lumpname)
+		// This creates the tab for a global script lump (ANIMDEFS, MAPINFO or SKYDEFS)
+		private ScriptGlobalLumpDocumentTab CreateGlobalLumpTab(string lumpname)
 		{
 			// Find the script configuration for highlighting
 			ScriptConfiguration config;
 			if(!General.ScriptConfigs.TryGetValue("doom64_" + lumpname.ToLowerInvariant() + ".cfg", out config))
 				config = new ScriptConfiguration();
 			
-			TabControl tc = new TabControl();
-			tc.Name = "tabs" + lumpname.ToLowerInvariant();
-			tc.Anchor = tabs.Anchor;
-			tc.Margin = tabs.Margin;
-			tc.Padding = tabs.Padding;
-			tc.Location = tabs.Location;
-			tc.Size = tabs.Size;
-			tc.TabStop = false;
-			tc.ShowToolTips = true;
-			tc.Visible = false;
-			tc.Selecting += new TabControlCancelEventHandler(tabs_Selecting);
-			tc.MouseUp += new MouseEventHandler(tabs_MouseUp);
-			tabs.Parent.Controls.Add(tc);
-			
-			ScriptGlobalLumpDocumentTab t = new ScriptGlobalLumpDocumentTab(this, lumpname, config);
-			tc.TabPages.Add(t);
-			
-			globaltabs.Add(lumpname, tc);
-			return tc;
-		}
-		
-		// This opens a script
-		public void OpenBrowseScript()
-		{
-			buttonopen_Click(this, EventArgs.Empty);
+			return new ScriptGlobalLumpDocumentTab(this, lumpname, config);
 		}
 		
 		#endregion
@@ -714,122 +450,9 @@ namespace CodeImp.DoomBuilder.Controls
 			t.LaunchKeywordHelp();
 		}
 
-		// When the user changes the script configuration
-		private void buttonscriptconfig_Click(object sender, EventArgs e)
-		{
-			// Get the tab and new script config
-			ScriptDocumentTab t = ActiveTab;
-			ScriptConfiguration scriptconfig = ((sender as ToolStripMenuItem).Tag as ScriptConfiguration);
-			
-			// Change script config
-			t.ChangeScriptConfig(scriptconfig);
-
-			// Done
-			UpdateToolbar(true);
-		}
-		
-		// When new script is clicked
-		private void buttonnew_Click(object sender, EventArgs e)
-		{
-			// Get the script config to use
-			ScriptConfiguration scriptconfig = ((sender as ToolStripMenuItem).Tag as ScriptConfiguration);
-			
-			// New documents are shown with the SCRIPTS
-			SelectLumpType(LUMPTYPE_SCRIPTS);
-			
-			// Create new document
-			ScriptFileDocumentTab t = new ScriptFileDocumentTab(this, scriptconfig);
-			tabs.TabPages.Add(t);
-			tabs.SelectedTab = t;
-			
-			// Done
-			UpdateToolbar(true);
-		}
-		
-		// Open script clicked
-		private void buttonopen_Click(object sender, EventArgs e)
-		{
-			// Show open file dialog
-			if(openfile.ShowDialog(this.ParentForm) == DialogResult.OK)
-			{
-				// TODO: Make multi-select possible
-				OpenFile(openfile.FileName);
-			}
-		}
-
-		// Save script clicked
-		private void buttonsave_Click(object sender, EventArgs e)
-		{
-			// Save the current script
-			ScriptDocumentTab t = ActiveTab;
-			SaveScript(t);
-			UpdateToolbar(true);
-		}
-
-		// Save All clicked
-		private void buttonsaveall_Click(object sender, EventArgs e)
-		{
-			// Save all scripts
-			foreach(ScriptDocumentTab t in AllTabs)
-			{
-				// Use explicit save for this script?
-				if(t.ExplicitSave)
-				{
-					if(!SaveScript(t)) break;
-				}
-			}
-			
-			UpdateToolbar(true);
-		}
-
-		// This is called by Save and Save All to save a script
-		// Returns false when cancelled by the user
-		private bool SaveScript(ScriptDocumentTab t)
-		{
-			// Do we have to do a save as?
-			if(t.IsSaveAsRequired)
-			{
-				// Setup save dialog
-				string scriptfilter = t.Config.Description + "|*." + string.Join(";*.", t.Config.Extensions);
-				savefile.Filter = scriptfilter + "|All files|*.*";
-				if(savefile.ShowDialog(this.ParentForm) == DialogResult.OK)
-				{
-					// Save to new filename
-					t.SaveAs(savefile.FileName);
-					return true;
-				}
-				else
-				{
-					// Cancelled
-					return false;
-				}
-			}
-			else
-			{
-				// Save to same filename
-				t.Save();
-				return true;
-			}
-		}
-		
-		// The user chooses another script lump type in the drop down list
-		private void lumptypecombo_SelectedIndexChanged(object sender, EventArgs e)
-		{
-			if(syncinglumptype || (lumptypecombo.SelectedItem == null)) return;
-			SelectLumpType(lumptypecombo.SelectedItem.ToString());
-		}
-		
 		// A tab is selected
 		private void tabs_Selecting(object sender, TabControlCancelEventArgs e)
 		{
-			UpdateToolbar(true);
-		}
-		
-		// This closes the current file
-		private void buttonclose_Click(object sender, EventArgs e)
-		{
-			ScriptDocumentTab t = ActiveTab;
-			CloseScript(t, false);
 			UpdateToolbar(true);
 		}
 		
@@ -841,28 +464,6 @@ namespace CodeImp.DoomBuilder.Controls
 			
 			// Get script
 			ScriptDocumentTab t = ActiveTab;
-
-			// Check if it must be saved as a new file
-			if(t.ExplicitSave && t.IsSaveAsRequired)
-			{
-				// Save the script first!
-				if(MessageBox.Show(this.ParentForm, "You must save your script before you can compile it. Do you want to save your script now?", "Compile Script", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
-				{
-					if(!SaveScript(t)) return;
-				}
-				else
-				{
-					return;
-				}
-			}
-			else
-			{
-				if(t.ExplicitSave && t.IsChanged)
-				{
-					// We can only compile when the script is saved
-					if(!SaveScript(t)) return;
-				}
-			}
 
 			// Compile now
 			General.MainWindow.DisplayStatus(StatusType.Busy, "Compiling script " + t.Text + "...");
@@ -935,26 +536,16 @@ namespace CodeImp.DoomBuilder.Controls
 				CompilerError err = (CompilerError)errorlist.SelectedItems[0].Tag;
 				
 				// Show the tab with the script that matches
-				bool foundscript = false;
 				foreach(ScriptDocumentTab t in AllTabs)
 				{
 					if(t.VerifyErrorForScript(err))
 					{
-						SelectLumpType(LUMPTYPE_SCRIPTS);
 						tabs.SelectedTab = t;
 						t.MoveToLine(err.linenumber);
-						foundscript = true;
 						break;
 					}
 				}
 
-				// If we don't have the script opened, see if we can find the file and open the script
-				if(!foundscript && File.Exists(err.filename))
-				{
-					ScriptDocumentTab t = OpenFile(err.filename);
-					if(t != null) t.MoveToLine(err.linenumber);
-				}
-				
 				ForceFocus();
 			}
 		}
