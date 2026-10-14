@@ -79,9 +79,6 @@ namespace CodeImp.DoomBuilder.Windows
                 brightness.Hide();
                 label9.Hide();
                 groupeffect.Height = 64;
-                groupaction.Top = groupeffect.Bottom + groupeffect.Margin.Bottom + groupaction.Margin.Top;
-                settingsgroup.Top = groupaction.Bottom + groupaction.Margin.Bottom + settingsgroup.Margin.Top;
-                this.Height = settingsgroup.Bottom + settingsgroup.Margin.Bottom + 120;
             }
 			
 			// Fill universal fields list
@@ -95,15 +92,36 @@ namespace CodeImp.DoomBuilder.Windows
 			brightness.StepValues = General.Map.Config.BrightnessLevels;
 
 			// Custom fields?
-			if(!General.Map.FormatInterface.HasCustomFields)
-				tabs.TabPages.Remove(tabcustom);
+			bool hascustomfields = General.Map.FormatInterface.HasCustomFields;
+			customgroup.Visible = hascustomfields;
 
             // villsa
-            if (!General.Map.FormatInterface.InDoom64Mode)
-                tabs.TabPages.Remove(tabLights);
-			
+            bool hascolors = General.Map.FormatInterface.InDoom64Mode;
+            groupBox1.Visible = hascolors;
+            groupBox3.Visible = hascolors;
+
 			// Initialize custom fields editor
 			fieldslist.Setup("sector");
+
+			// Arrange the single-screen layout.
+			int gap = 6;
+			groupeffect.Top = groupfloorceiling.Bottom + gap;
+			int rightbottom = groupeffect.Bottom;
+			if(hascolors)
+			{
+				groupBox1.Top = groupBox3.Top = rightbottom + gap;
+				rightbottom = groupBox1.Bottom;
+			}
+			if(hascustomfields)
+			{
+				customgroup.Top = rightbottom + gap;
+				rightbottom = customgroup.Bottom;
+			}
+			groupaction.Top = rightbottom - groupaction.Height;
+			settingsgroup.Height = Math.Max(groupaction.Top - gap - settingsgroup.Top, 100);
+			flags.Height = settingsgroup.Height - flags.Top - 8;
+			this.ClientSize = new Size(this.ClientSize.Width, rightbottom + 10 + cancel.Height + 10);
+			cancel.Top = apply.Top = this.ClientSize.Height - 10 - cancel.Height;
 		}
 		
 		// This sets up the form to edit the given sectors
