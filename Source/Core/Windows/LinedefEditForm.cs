@@ -71,41 +71,65 @@ namespace CodeImp.DoomBuilder.Windows
 			
 			
 			// Custom fields?
-			if(!General.Map.FormatInterface.HasCustomFields)
-				tabs.TabPages.Remove(tabcustom);
-
-            // villsa
-            //if (!General.Map.FormatInterface.InDoom64Mode)
-                tabs.TabPages.Remove(tabmacros);
+			// (Note: Control.Visible reads as false for every control until the form is shown,
+			// so the layout below works from these flags instead of reading Visible back)
+			bool hascustomfields = General.Map.FormatInterface.HasCustomFields;
+			bool hasidgroup = General.Map.FormatInterface.HasLinedefTag;
+			customgroup.Visible = hascustomfields;
 
 			customfrontbutton.Visible = General.Map.FormatInterface.HasCustomFields;
 			custombackbutton.Visible = General.Map.FormatInterface.HasCustomFields;
 			
 			// Arrange panels
-            if (!General.Map.FormatInterface.HasMixedActivations)
-            {
-                actiongroup.Height = action.Bottom + action.Top + (actiongroup.Width - actiongroup.ClientRectangle.Width);
-                this.Height = heightpanel2.Height;
-            }
+			if(!General.Map.FormatInterface.HasMixedActivations)
+				actiongroup.Height = Math.Max(action.Bottom, browseaction.Bottom) + 10 + (actiongroup.Width - actiongroup.ClientRectangle.Width);
 			
 			// Tag?
-			if(General.Map.FormatInterface.HasLinedefTag)
-			{
-				// Match position after the action group
-				idgroup.Top = actiongroup.Bottom + actiongroup.Margin.Bottom + idgroup.Margin.Top;
-			}
-			else
-			{
+			if(!hasidgroup)
 				idgroup.Visible = false;
+
+			// Settings group: the flags checkboxes are laid out column by column, so make the
+			// group just tall enough for them to be split evenly over the columns
+			if(flags.Checkboxes.Count > 0)
+			{
+				int boxheight = 0;
+				foreach(CheckBox c in flags.Checkboxes) boxheight = Math.Max(boxheight, c.Height);
+				int rows = (int)Math.Ceiling((float)flags.Checkboxes.Count / (float)flags.Columns);
+				int flagsheight = rows * (boxheight + 1) + 2;
+				int padding = settingsgroup.Height - (flags.Top + flags.Height);
+				settingsgroup.Height = flags.Top + flagsheight + padding;
+				flags.Height = flagsheight;
 			}
 
-            // villsa
-            if (General.Map.FormatInterface.InDoom64Mode)
-            {
-                this.activationtype.Show();
-                activationtype.Top = idgroup.Bottom + idgroup.Margin.Bottom + activationtype.Margin.Top;
-                this.Height = heightpanel3.Height;
-            }
+			// Left column (properties): settings on top, then action, then identification
+			int gap = settingsgroup.Margin.Bottom + actiongroup.Margin.Top;
+			actiongroup.Top = settingsgroup.Bottom + gap;
+			if(hasidgroup) idgroup.Top = actiongroup.Bottom + gap;
+			int leftbottom = hasidgroup ? idgroup.Bottom : actiongroup.Bottom;
+
+			// Right column (sidedefs) stacks switch setup, activation type (Doom 64) and custom fields
+			int rightbottom = switchsetupbox.Bottom;
+			
+			// villsa
+			if(General.Map.FormatInterface.InDoom64Mode)
+			{
+				this.activationtype.Show();
+				activationtype.Top = rightbottom + switchsetupbox.Margin.Bottom + activationtype.Margin.Top;
+				rightbottom = activationtype.Bottom;
+			}
+			
+			if(hascustomfields)
+			{
+				customgroup.Top = rightbottom + switchsetupbox.Margin.Bottom + customgroup.Margin.Top;
+				customgroup.Height = Math.Max(200, leftbottom - customgroup.Top);
+				rightbottom = customgroup.Bottom;
+			}
+
+			// Size the dialog to fit the taller column (first, since the buttons are
+			// anchored to the bottom) and then place the buttons below the columns
+			int contentbottom = Math.Max(leftbottom, rightbottom);
+			this.ClientSize = new Size(this.ClientSize.Width, contentbottom + 10 + cancel.Height + 10);
+			cancel.Top = apply.Top = this.ClientSize.Height - 10 - cancel.Height;
 		}
 
         // villsa 9/12/11 (rewritten styd: corrected against DOOM64-RE - see
