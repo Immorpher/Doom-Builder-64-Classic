@@ -71,13 +71,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 			}
 		}
 
-		// Doom 64 only: linedef flag 256 = "Show on Automap". Returns null when unsupported.
-		public string AlwaysShowFlag
-		{
-			get { return General.Map.FormatInterface.InDoom64Mode ? "256" : null; }
-		}
-
-		// Doom 64 only: linedef flag 33554432 = "Hide Special on Automap"
+		// Linedef flag 33554432 = "Hide Special on Automap"
 		public string HideSpecialFlag
 		{
 			get { return "33554432"; }

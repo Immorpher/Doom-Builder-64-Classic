@@ -56,7 +56,6 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 		#region ================== Variables
 
-		private CustomPresentation automappresentation;
 		private List<Linedef> validlinedefs;
 		private HashSet<Sector> secretsectors;
 
@@ -87,6 +86,9 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 		// Sector flag "Hide on Automap" (the floor is not drawn on the textured automap)
 		private const string SECTOR_HIDE_FLAG = "512";
+
+		// Sector flag "Secret"
+		private const string SECTOR_SECRET_FLAG = "32";
 
 		// Thing flag "Count Secret on Pickup"
 		private const string THING_SECRET_FLAG = "256";
@@ -240,7 +242,7 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 			foreach(Sector s in General.Map.Map.Sectors)
 			{
-				if(SectorIsSecret(s)) secretsectors.Add(s);
+				if(s.IsFlagSet(SECTOR_SECRET_FLAG)) secretsectors.Add(s);
 			}
 		}
 
@@ -263,54 +265,27 @@ namespace CodeImp.DoomBuilder.AutomapMode
 
 		private bool LinedefIsValid(Linedef ld)
 		{
-			// Ctrl temporarily inverts the "show hidden lines" toggle
+			// Ctrl temporarily inverts the "show hidden" toggle
 			if(menusform.ShowHiddenLines ^ General.Interface.CtrlState) return true;
 
-			// "Hide on Automap" linedef flag always wins
-			if(ld.IsFlagSet(BuilderPlug.Me.HiddenFlag)) return false;
-
-			// Doom 64: "Show on Automap" forces the line to be drawn
-			if(BuilderPlug.Me.AlwaysShowFlag != null && ld.IsFlagSet(BuilderPlug.Me.AlwaysShowFlag)) return true;
-
-			// One-sided lines and lines drawn as one-sided are always shown
-			if(ld.Back == null || ld.Front == null || ld.IsFlagSet(BuilderPlug.Me.SecretFlag)) return true;
-
-			// Doom 64: lines with an action are shown unless "Hide Special on Automap" is set
-			if(LinedefIsSpecial(ld)) return true;
-
-			// In Doom 64 every remaining two-sided line is drawn
-			if(General.Map.FormatInterface.InDoom64Mode) return true;
-
-			// Two-sided lines are only shown when there's a height difference
-			if(ld.Front.Sector.FloorHeight != ld.Back.Sector.FloorHeight ||
-			   ld.Front.Sector.CeilHeight != ld.Back.Sector.CeilHeight) return true;
-
-			return false;
+			// Every line is drawn, except the ones with the "Hide on Automap" linedef flag
+			// (the "Show on Automap" flag does not change anything here, because all other lines are drawn anyway)
+			return !ld.IsFlagSet(BuilderPlug.Me.HiddenFlag);
 		}
 
-		// Doom 64: a line with an action is drawn as a special line unless
+		// A line with an action is drawn as a special line unless
 		// the "Hide Special on Automap" flag (33554432) is set
 		private bool LinedefIsSpecial(Linedef ld)
 		{
-			if(!General.Map.FormatInterface.InDoom64Mode) return false;
 			if(ld.Action == 0) return false;
 			return !ld.IsFlagSet(BuilderPlug.Me.HideSpecialFlag);
-		}
-
-		private static bool SectorIsSecret(Sector s)
-		{
-			// Doom 64 stores "secret" as a sector flag instead of a sector effect
-			if(General.Map.FormatInterface.InDoom64Mode) return s.IsFlagSet("32");
-
-			// Everything else: sector effect 9
-			return (s.Effect == 9);
 		}
 
 		// This applies the selected automap type: which layers are shown and the view mode that draws the floors
 		private void ApplyType()
 		{
 			// Presentation (no grid layer, the game's automap has none). The floors are drawn on the surface layer (and the hidden ones are covered on the things layer).
-			automappresentation = new CustomPresentation();
+			CustomPresentation automappresentation = new CustomPresentation();
 			automappresentation.AddLayer(new PresentLayer(RendererLayer.Overlay, BlendingMode.Mask));
 			if(menusform.Type == AutomapType.FLOORS)
 			{
