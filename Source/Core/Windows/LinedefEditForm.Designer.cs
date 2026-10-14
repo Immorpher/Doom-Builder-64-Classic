@@ -154,7 +154,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // label3
             // 
-            label3.Location = new System.Drawing.Point(252, 18);
+            label3.Location = new System.Drawing.Point(224, 18);
             label3.Name = "label3";
             label3.Size = new System.Drawing.Size(83, 16);
             label3.TabIndex = 3;
@@ -163,7 +163,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // label4
             // 
-            label4.Location = new System.Drawing.Point(343, 18);
+            label4.Location = new System.Drawing.Point(315, 18);
             label4.Name = "label4";
             label4.Size = new System.Drawing.Size(83, 16);
             label4.TabIndex = 4;
@@ -172,7 +172,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // label5
             // 
-            label5.Location = new System.Drawing.Point(434, 18);
+            label5.Location = new System.Drawing.Point(406, 18);
             label5.Name = "label5";
             label5.Size = new System.Drawing.Size(83, 16);
             label5.TabIndex = 5;
@@ -182,24 +182,24 @@ namespace CodeImp.DoomBuilder.Windows
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new System.Drawing.Point(16, 79);
+            label6.Location = new System.Drawing.Point(10, 79);
             label6.Name = "label6";
             label6.Size = new System.Drawing.Size(80, 14);
             label6.TabIndex = 7;
-            label6.Text = "Texture Offset:";
+            label6.Text = "Offset:";
             // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new System.Drawing.Point(16, 79);
+            label7.Location = new System.Drawing.Point(10, 79);
             label7.Name = "label7";
             label7.Size = new System.Drawing.Size(80, 14);
             label7.TabIndex = 7;
-            label7.Text = "Texture Offset:";
+            label7.Text = "Offset:";
             // 
             // label8
             // 
-            label8.Location = new System.Drawing.Point(437, 18);
+            label8.Location = new System.Drawing.Point(409, 18);
             label8.Name = "label8";
             label8.Size = new System.Drawing.Size(83, 16);
             label8.TabIndex = 5;
@@ -208,7 +208,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // label9
             // 
-            label9.Location = new System.Drawing.Point(346, 18);
+            label9.Location = new System.Drawing.Point(318, 18);
             label9.Name = "label9";
             label9.Size = new System.Drawing.Size(83, 16);
             label9.TabIndex = 4;
@@ -217,7 +217,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // label10
             // 
-            label10.Location = new System.Drawing.Point(255, 18);
+            label10.Location = new System.Drawing.Point(227, 18);
             label10.Name = "label10";
             label10.Size = new System.Drawing.Size(83, 16);
             label10.TabIndex = 3;
@@ -227,7 +227,7 @@ namespace CodeImp.DoomBuilder.Windows
             // label11
             // 
             label11.AutoSize = true;
-            label11.Location = new System.Drawing.Point(26, 40);
+            label11.Location = new System.Drawing.Point(10, 40);
             label11.Name = "label11";
             label11.Size = new System.Drawing.Size(71, 14);
             label11.TabIndex = 13;
@@ -236,7 +236,7 @@ namespace CodeImp.DoomBuilder.Windows
             // label12
             // 
             label12.AutoSize = true;
-            label12.Location = new System.Drawing.Point(26, 40);
+            label12.Location = new System.Drawing.Point(10, 40);
             label12.Name = "label12";
             label12.Size = new System.Drawing.Size(71, 14);
             label12.TabIndex = 16;
@@ -346,7 +346,7 @@ namespace CodeImp.DoomBuilder.Windows
             // switchtexturelbl
             // 
             switchtexturelbl.AutoSize = true;
-            switchtexturelbl.Location = new System.Drawing.Point(12, 56);
+            switchtexturelbl.Location = new System.Drawing.Point(12, 45);
             switchtexturelbl.Name = "switchtexturelbl";
             switchtexturelbl.Size = new System.Drawing.Size(83, 14);
             switchtexturelbl.TabIndex = 20;
@@ -355,7 +355,7 @@ namespace CodeImp.DoomBuilder.Windows
             // displayswitchlbl
             // 
             displayswitchlbl.AutoSize = true;
-            displayswitchlbl.Location = new System.Drawing.Point(12, 34);
+            displayswitchlbl.Location = new System.Drawing.Point(12, 22);
             displayswitchlbl.Name = "displayswitchlbl";
             displayswitchlbl.Size = new System.Drawing.Size(82, 14);
             displayswitchlbl.TabIndex = 19;
@@ -365,7 +365,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancel.Location = new System.Drawing.Point(848, 665);
+            this.cancel.Location = new System.Drawing.Point(771, 665);
             this.cancel.Name = "cancel";
             this.cancel.Size = new System.Drawing.Size(112, 25);
             this.cancel.TabIndex = 2;
@@ -376,7 +376,7 @@ namespace CodeImp.DoomBuilder.Windows
             // apply
             // 
             this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.apply.Location = new System.Drawing.Point(729, 665);
+            this.apply.Location = new System.Drawing.Point(652, 665);
             this.apply.Name = "apply";
             this.apply.Size = new System.Drawing.Size(112, 25);
             this.apply.TabIndex = 1;
@@ -392,9 +392,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.actiongroup.Controls.Add(this.action);
             this.actiongroup.Controls.Add(this.browseaction);
             this.actiongroup.Controls.Add(this.udmfpanel);
-            this.actiongroup.Location = new System.Drawing.Point(10, 236);
+            this.actiongroup.Location = new System.Drawing.Point(378, 352);
             this.actiongroup.Name = "actiongroup";
-            this.actiongroup.Size = new System.Drawing.Size(400, 281);
+            this.actiongroup.Size = new System.Drawing.Size(505, 281);
             this.actiongroup.TabIndex = 1;
             this.actiongroup.TabStop = false;
             this.actiongroup.Text = " Action ";
@@ -408,7 +408,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.action.Location = new System.Drawing.Point(62, 27);
             this.action.Macro = false;
             this.action.Name = "action";
-            this.action.Size = new System.Drawing.Size(300, 21);
+            this.action.Size = new System.Drawing.Size(405, 21);
             this.action.TabIndex = 0;
             this.action.Value = 402;
             // 
@@ -416,7 +416,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.browseaction.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.browseaction.Image = global::CodeImp.DoomBuilder.Properties.Resources.List;
-            this.browseaction.Location = new System.Drawing.Point(368, 25);
+            this.browseaction.Location = new System.Drawing.Point(473, 25);
             this.browseaction.Name = "browseaction";
             this.browseaction.Padding = new System.Windows.Forms.Padding(0, 0, 1, 3);
             this.browseaction.Size = new System.Drawing.Size(28, 25);
@@ -463,7 +463,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.settingsgroup.Controls.Add(this.flags);
             this.settingsgroup.Location = new System.Drawing.Point(10, 10);
             this.settingsgroup.Name = "settingsgroup";
-            this.settingsgroup.Size = new System.Drawing.Size(400, 220);
+            this.settingsgroup.Size = new System.Drawing.Size(357, 220);
             this.settingsgroup.TabIndex = 0;
             this.settingsgroup.TabStop = false;
             this.settingsgroup.Text = " Settings ";
@@ -477,7 +477,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.flags.Columns = 2;
             this.flags.Location = new System.Drawing.Point(18, 26);
             this.flags.Name = "flags";
-            this.flags.Size = new System.Drawing.Size(376, 182);
+            this.flags.Size = new System.Drawing.Size(333, 182);
             this.flags.TabIndex = 0;
             // 
             // checkBox1
@@ -499,9 +499,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.switchsetupbox.Controls.Add(this.chkSwitchDisplayUpper);
             this.switchsetupbox.Controls.Add(switchtexturelbl);
             this.switchsetupbox.Controls.Add(displayswitchlbl);
-            this.switchsetupbox.Location = new System.Drawing.Point(421, 352);
+            this.switchsetupbox.Location = new System.Drawing.Point(10, 236);
             this.switchsetupbox.Name = "switchsetupbox";
-            this.switchsetupbox.Size = new System.Drawing.Size(533, 94);
+            this.switchsetupbox.Size = new System.Drawing.Size(357, 72);
             this.switchsetupbox.TabIndex = 32;
             this.switchsetupbox.TabStop = false;
             this.switchsetupbox.Text = "Switch Setup";
@@ -509,7 +509,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchTextureLower
             // 
             this.chkSwitchTextureLower.AutoSize = true;
-            this.chkSwitchTextureLower.Location = new System.Drawing.Point(240, 55);
+            this.chkSwitchTextureLower.Location = new System.Drawing.Point(240, 44);
             this.chkSwitchTextureLower.Name = "chkSwitchTextureLower";
             this.chkSwitchTextureLower.Size = new System.Drawing.Size(58, 18);
             this.chkSwitchTextureLower.TabIndex = 26;
@@ -520,7 +520,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchDisplayLower
             // 
             this.chkSwitchDisplayLower.AutoSize = true;
-            this.chkSwitchDisplayLower.Location = new System.Drawing.Point(240, 33);
+            this.chkSwitchDisplayLower.Location = new System.Drawing.Point(240, 21);
             this.chkSwitchDisplayLower.Name = "chkSwitchDisplayLower";
             this.chkSwitchDisplayLower.Size = new System.Drawing.Size(58, 18);
             this.chkSwitchDisplayLower.TabIndex = 25;
@@ -531,7 +531,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchTextureMiddle
             // 
             this.chkSwitchTextureMiddle.AutoSize = true;
-            this.chkSwitchTextureMiddle.Location = new System.Drawing.Point(179, 55);
+            this.chkSwitchTextureMiddle.Location = new System.Drawing.Point(179, 44);
             this.chkSwitchTextureMiddle.Name = "chkSwitchTextureMiddle";
             this.chkSwitchTextureMiddle.Size = new System.Drawing.Size(56, 18);
             this.chkSwitchTextureMiddle.TabIndex = 24;
@@ -542,7 +542,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchDisplayMiddle
             // 
             this.chkSwitchDisplayMiddle.AutoSize = true;
-            this.chkSwitchDisplayMiddle.Location = new System.Drawing.Point(178, 33);
+            this.chkSwitchDisplayMiddle.Location = new System.Drawing.Point(178, 21);
             this.chkSwitchDisplayMiddle.Name = "chkSwitchDisplayMiddle";
             this.chkSwitchDisplayMiddle.Size = new System.Drawing.Size(56, 18);
             this.chkSwitchDisplayMiddle.TabIndex = 23;
@@ -553,7 +553,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchTextureUpper
             // 
             this.chkSwitchTextureUpper.AutoSize = true;
-            this.chkSwitchTextureUpper.Location = new System.Drawing.Point(118, 55);
+            this.chkSwitchTextureUpper.Location = new System.Drawing.Point(118, 44);
             this.chkSwitchTextureUpper.Name = "chkSwitchTextureUpper";
             this.chkSwitchTextureUpper.Size = new System.Drawing.Size(55, 18);
             this.chkSwitchTextureUpper.TabIndex = 22;
@@ -564,7 +564,7 @@ namespace CodeImp.DoomBuilder.Windows
             // chkSwitchDisplayUpper
             // 
             this.chkSwitchDisplayUpper.AutoSize = true;
-            this.chkSwitchDisplayUpper.Location = new System.Drawing.Point(118, 33);
+            this.chkSwitchDisplayUpper.Location = new System.Drawing.Point(118, 21);
             this.chkSwitchDisplayUpper.Name = "chkSwitchDisplayUpper";
             this.chkSwitchDisplayUpper.Size = new System.Drawing.Size(55, 18);
             this.chkSwitchDisplayUpper.TabIndex = 21;
@@ -581,9 +581,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.activationtype.Controls.Add(this.activationtypeshoot);
             this.activationtype.Controls.Add(this.activationtypecross);
             this.activationtype.Controls.Add(this.activationtypeuse);
-            this.activationtype.Location = new System.Drawing.Point(421, 452);
+            this.activationtype.Location = new System.Drawing.Point(10, 314);
             this.activationtype.Name = "activationtype";
-            this.activationtype.Size = new System.Drawing.Size(533, 72);
+            this.activationtype.Size = new System.Drawing.Size(357, 72);
             this.activationtype.TabIndex = 31;
             this.activationtype.TabStop = false;
             this.activationtype.Text = "Activation Type";
@@ -666,9 +666,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.idgroup.Controls.Add(this.tag);
             this.idgroup.Controls.Add(taglabel);
             this.idgroup.Controls.Add(this.newtag);
-            this.idgroup.Location = new System.Drawing.Point(10, 523);
+            this.idgroup.Location = new System.Drawing.Point(378, 415);
             this.idgroup.Name = "idgroup";
-            this.idgroup.Size = new System.Drawing.Size(400, 66);
+            this.idgroup.Size = new System.Drawing.Size(505, 66);
             this.idgroup.TabIndex = 2;
             this.idgroup.TabStop = false;
             this.idgroup.Text = " Identification ";
@@ -690,7 +690,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.splitter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitter.IsSplitterFixed = true;
-            this.splitter.Location = new System.Drawing.Point(418, 10);
+            this.splitter.Location = new System.Drawing.Point(375, 10);
             this.splitter.Name = "splitter";
             this.splitter.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -703,7 +703,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.splitter.Panel2.Controls.Add(this.backside);
             this.splitter.Panel2.Controls.Add(this.backgroup);
-            this.splitter.Size = new System.Drawing.Size(539, 336);
+            this.splitter.Size = new System.Drawing.Size(511, 336);
             this.splitter.SplitterDistance = 166;
             this.splitter.TabIndex = 3;
             // 
@@ -738,7 +738,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontgroup.Enabled = false;
             this.frontgroup.Location = new System.Drawing.Point(3, 3);
             this.frontgroup.Name = "frontgroup";
-            this.frontgroup.Size = new System.Drawing.Size(533, 160);
+            this.frontgroup.Size = new System.Drawing.Size(505, 160);
             this.frontgroup.TabIndex = 1;
             this.frontgroup.TabStop = false;
             this.frontgroup.Text = "     ";
@@ -749,9 +749,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontoffsety.AllowNegative = true;
             this.frontoffsety.AllowRelative = true;
             this.frontoffsety.ButtonStep = 1;
-            this.frontoffsety.Location = new System.Drawing.Point(171, 74);
+            this.frontoffsety.Location = new System.Drawing.Point(153, 74);
             this.frontoffsety.Name = "frontoffsety";
-            this.frontoffsety.Size = new System.Drawing.Size(62, 24);
+            this.frontoffsety.Size = new System.Drawing.Size(57, 24);
             this.frontoffsety.StepValues = null;
             this.frontoffsety.TabIndex = 16;
             // 
@@ -761,9 +761,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontoffsetx.AllowNegative = true;
             this.frontoffsetx.AllowRelative = true;
             this.frontoffsetx.ButtonStep = 1;
-            this.frontoffsetx.Location = new System.Drawing.Point(103, 74);
+            this.frontoffsetx.Location = new System.Drawing.Point(88, 74);
             this.frontoffsetx.Name = "frontoffsetx";
-            this.frontoffsetx.Size = new System.Drawing.Size(62, 24);
+            this.frontoffsetx.Size = new System.Drawing.Size(57, 24);
             this.frontoffsetx.StepValues = null;
             this.frontoffsetx.TabIndex = 15;
             // 
@@ -773,15 +773,15 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontsector.AllowNegative = false;
             this.frontsector.AllowRelative = false;
             this.frontsector.ButtonStep = 1;
-            this.frontsector.Location = new System.Drawing.Point(103, 35);
+            this.frontsector.Location = new System.Drawing.Point(88, 35);
             this.frontsector.Name = "frontsector";
-            this.frontsector.Size = new System.Drawing.Size(130, 24);
+            this.frontsector.Size = new System.Drawing.Size(122, 24);
             this.frontsector.StepValues = null;
             this.frontsector.TabIndex = 14;
             // 
             // customfrontbutton
             // 
-            this.customfrontbutton.Location = new System.Drawing.Point(103, 124);
+            this.customfrontbutton.Location = new System.Drawing.Point(88, 124);
             this.customfrontbutton.Name = "customfrontbutton";
             this.customfrontbutton.Size = new System.Drawing.Size(115, 25);
             this.customfrontbutton.TabIndex = 3;
@@ -792,7 +792,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // frontlow
             // 
-            this.frontlow.Location = new System.Drawing.Point(434, 37);
+            this.frontlow.Location = new System.Drawing.Point(406, 37);
             this.frontlow.Name = "frontlow";
             this.frontlow.Required = false;
             this.frontlow.Size = new System.Drawing.Size(83, 112);
@@ -801,7 +801,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // frontmid
             // 
-            this.frontmid.Location = new System.Drawing.Point(343, 37);
+            this.frontmid.Location = new System.Drawing.Point(315, 37);
             this.frontmid.Name = "frontmid";
             this.frontmid.Required = false;
             this.frontmid.Size = new System.Drawing.Size(83, 112);
@@ -810,7 +810,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // fronthigh
             // 
-            this.fronthigh.Location = new System.Drawing.Point(252, 37);
+            this.fronthigh.Location = new System.Drawing.Point(224, 37);
             this.fronthigh.Name = "fronthigh";
             this.fronthigh.Required = false;
             this.fronthigh.Size = new System.Drawing.Size(83, 112);
@@ -848,7 +848,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.backgroup.Enabled = false;
             this.backgroup.Location = new System.Drawing.Point(3, 3);
             this.backgroup.Name = "backgroup";
-            this.backgroup.Size = new System.Drawing.Size(535, 160);
+            this.backgroup.Size = new System.Drawing.Size(505, 160);
             this.backgroup.TabIndex = 1;
             this.backgroup.TabStop = false;
             this.backgroup.Text = "     ";
@@ -859,9 +859,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.backoffsety.AllowNegative = true;
             this.backoffsety.AllowRelative = true;
             this.backoffsety.ButtonStep = 1;
-            this.backoffsety.Location = new System.Drawing.Point(171, 74);
+            this.backoffsety.Location = new System.Drawing.Point(153, 74);
             this.backoffsety.Name = "backoffsety";
-            this.backoffsety.Size = new System.Drawing.Size(62, 24);
+            this.backoffsety.Size = new System.Drawing.Size(57, 24);
             this.backoffsety.StepValues = null;
             this.backoffsety.TabIndex = 19;
             // 
@@ -871,9 +871,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.backoffsetx.AllowNegative = true;
             this.backoffsetx.AllowRelative = true;
             this.backoffsetx.ButtonStep = 1;
-            this.backoffsetx.Location = new System.Drawing.Point(103, 74);
+            this.backoffsetx.Location = new System.Drawing.Point(88, 74);
             this.backoffsetx.Name = "backoffsetx";
-            this.backoffsetx.Size = new System.Drawing.Size(62, 24);
+            this.backoffsetx.Size = new System.Drawing.Size(57, 24);
             this.backoffsetx.StepValues = null;
             this.backoffsetx.TabIndex = 18;
             // 
@@ -883,15 +883,15 @@ namespace CodeImp.DoomBuilder.Windows
             this.backsector.AllowNegative = false;
             this.backsector.AllowRelative = false;
             this.backsector.ButtonStep = 1;
-            this.backsector.Location = new System.Drawing.Point(103, 35);
+            this.backsector.Location = new System.Drawing.Point(88, 35);
             this.backsector.Name = "backsector";
-            this.backsector.Size = new System.Drawing.Size(130, 24);
+            this.backsector.Size = new System.Drawing.Size(122, 24);
             this.backsector.StepValues = null;
             this.backsector.TabIndex = 17;
             // 
             // custombackbutton
             // 
-            this.custombackbutton.Location = new System.Drawing.Point(103, 124);
+            this.custombackbutton.Location = new System.Drawing.Point(88, 124);
             this.custombackbutton.Name = "custombackbutton";
             this.custombackbutton.Size = new System.Drawing.Size(115, 25);
             this.custombackbutton.TabIndex = 3;
@@ -902,7 +902,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // backlow
             // 
-            this.backlow.Location = new System.Drawing.Point(437, 37);
+            this.backlow.Location = new System.Drawing.Point(409, 37);
             this.backlow.Name = "backlow";
             this.backlow.Required = false;
             this.backlow.Size = new System.Drawing.Size(83, 112);
@@ -911,7 +911,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // backmid
             // 
-            this.backmid.Location = new System.Drawing.Point(346, 37);
+            this.backmid.Location = new System.Drawing.Point(318, 37);
             this.backmid.Name = "backmid";
             this.backmid.Required = false;
             this.backmid.Size = new System.Drawing.Size(83, 112);
@@ -920,7 +920,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             // backhigh
             // 
-            this.backhigh.Location = new System.Drawing.Point(255, 37);
+            this.backhigh.Location = new System.Drawing.Point(227, 37);
             this.backhigh.Name = "backhigh";
             this.backhigh.Required = false;
             this.backhigh.Size = new System.Drawing.Size(83, 112);
@@ -930,9 +930,9 @@ namespace CodeImp.DoomBuilder.Windows
             // customgroup
             // 
             this.customgroup.Controls.Add(this.fieldslist);
-            this.customgroup.Location = new System.Drawing.Point(421, 458);
+            this.customgroup.Location = new System.Drawing.Point(378, 487);
             this.customgroup.Name = "customgroup";
-            this.customgroup.Size = new System.Drawing.Size(533, 200);
+            this.customgroup.Size = new System.Drawing.Size(505, 200);
             this.customgroup.TabIndex = 5;
             this.customgroup.TabStop = false;
             this.customgroup.Text = " Custom Fields ";
@@ -970,7 +970,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.cancel;
-            this.ClientSize = new System.Drawing.Size(970, 700);
+            this.ClientSize = new System.Drawing.Size(893, 700);
             this.Controls.Add(this.customgroup);
             this.Controls.Add(this.switchsetupbox);
             this.Controls.Add(this.splitter);

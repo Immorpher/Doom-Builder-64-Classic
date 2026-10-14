@@ -101,26 +101,31 @@ namespace CodeImp.DoomBuilder.Windows
 				flags.Height = flagsheight;
 			}
 
-			// Left column (properties): settings on top, then action, then identification
-			int gap = settingsgroup.Margin.Bottom + actiongroup.Margin.Top;
-			actiongroup.Top = settingsgroup.Bottom + gap;
-			if(hasidgroup) idgroup.Top = actiongroup.Bottom + gap;
-			int leftbottom = hasidgroup ? idgroup.Bottom : actiongroup.Bottom;
+			// Left column: settings on top, then switch setup, then activation type (Doom 64)
+			int gap = settingsgroup.Margin.Bottom + switchsetupbox.Margin.Top;
+			switchsetupbox.Top = settingsgroup.Bottom + gap;
+			int leftbottom = switchsetupbox.Bottom;
 
-			// Right column (sidedefs) stacks switch setup, activation type (Doom 64) and custom fields
-			int rightbottom = switchsetupbox.Bottom;
-			
 			// villsa
 			if(General.Map.FormatInterface.InDoom64Mode)
 			{
 				this.activationtype.Show();
-				activationtype.Top = rightbottom + switchsetupbox.Margin.Bottom + activationtype.Margin.Top;
-				rightbottom = activationtype.Bottom;
+				activationtype.Top = leftbottom + gap;
+				leftbottom = activationtype.Bottom;
 			}
-			
+
+			// Right column: sidedefs on top, then action, identification and custom fields
+			actiongroup.Top = splitter.Bottom + gap;
+			int rightbottom = actiongroup.Bottom;
+			if(hasidgroup)
+			{
+				idgroup.Top = rightbottom + gap;
+				rightbottom = idgroup.Bottom;
+			}
+
 			if(hascustomfields)
 			{
-				customgroup.Top = rightbottom + switchsetupbox.Margin.Bottom + customgroup.Margin.Top;
+				customgroup.Top = rightbottom + gap;
 				customgroup.Height = Math.Max(200, leftbottom - customgroup.Top);
 				rightbottom = customgroup.Bottom;
 			}
