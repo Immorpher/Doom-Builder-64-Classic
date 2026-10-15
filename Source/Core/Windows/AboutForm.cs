@@ -38,30 +38,12 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			// Initialize
 			InitializeComponent();
-
-			// Show version
-			string postfix = "";
-			if(General.DebugBuild) postfix = "(debug)";
-			version.Text = Application.ProductName + " version " + Application.ProductVersion + " " + postfix;
 		}
 
-		// Launch Doom Builder website
+		// Launch the Doom 64 website
 		private void builderlink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
 		{
-			General.OpenWebsite("http://" + builderlink.Text);
-		}
-
-		// Launch CodeImp website
-		private void codeimplink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-		{
-			General.OpenWebsite("http://" + codeimplink.Text);
-		}
-
-		// This copies the version number to clipboard
-		private void copyversion_Click(object sender, EventArgs e)
-		{
-			Clipboard.Clear();
-			Clipboard.SetText(Application.ProductVersion);
+			General.OpenWebsite("https://www.doom64.com/");
 		}
 	}
 }

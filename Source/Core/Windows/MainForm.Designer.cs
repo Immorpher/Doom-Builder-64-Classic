@@ -949,7 +949,7 @@ namespace CodeImp.DoomBuilder.Windows
             // 
             this.itemhelpabout.Name = "itemhelpabout";
             this.itemhelpabout.Size = new System.Drawing.Size(203, 22);
-            this.itemhelpabout.Text = "About Doom Builder...";
+            this.itemhelpabout.Text = "About...";
             this.itemhelpabout.Click += new System.EventHandler(this.itemhelpabout_Click);
             // 
             // toolbar

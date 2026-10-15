@@ -32,10 +32,7 @@ namespace CodeImp.DoomBuilder.Windows
 			System.Windows.Forms.PictureBox pictureBox1;
 			this.close = new System.Windows.Forms.Button();
 			this.builderlink = new System.Windows.Forms.LinkLabel();
-			this.version = new System.Windows.Forms.Label();
-			this.copyversion = new System.Windows.Forms.Button();
 			this.pictureBox2 = new System.Windows.Forms.PictureBox();
-			this.codeimplink = new System.Windows.Forms.LinkLabel();
 			label1 = new System.Windows.Forms.Label();
 			pictureBox1 = new System.Windows.Forms.PictureBox();
 			((System.ComponentModel.ISupportInitialize)(pictureBox1)).BeginInit();
@@ -47,13 +44,11 @@ namespace CodeImp.DoomBuilder.Windows
 			label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			label1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			label1.Location = new System.Drawing.Point(15, 161);
+			label1.Location = new System.Drawing.Point(15, 108);
 			label1.Name = "label1";
-			label1.Size = new System.Drawing.Size(349, 50);
+			label1.Size = new System.Drawing.Size(363, 84);
 			label1.TabIndex = 2;
-			label1.Text = "Doom Builder is designed and programmed by Pascal vd Heiden.\r\nSeveral game config" +
-				"urations were written by various members of the Doom community. See the website " +
-				"for a complete list of credits.";
+			label1.Text = "This is a continuation of the classic Doom Builder 64 by Samuel Villarreal (Kaiser) which was based on Pascal van der Heiden's (CodeImp) Doom Builder 2. This contains updates from Styd's Doom Builder 64 Enhanced, Kovic's Doom Builder 64, and iori's Doom Builder 64. It also implements a few updates from boris' GZDoom Builder.";
 			// 
 			// pictureBox1
 			// 
@@ -69,7 +64,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// 
 			this.close.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.close.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.close.Location = new System.Drawing.Point(265, 243);
+			this.close.Location = new System.Drawing.Point(265, 220);
 			this.close.Name = "close";
 			this.close.Size = new System.Drawing.Size(116, 25);
 			this.close.TabIndex = 5;
@@ -82,35 +77,14 @@ namespace CodeImp.DoomBuilder.Windows
 			this.builderlink.AutoSize = true;
 			this.builderlink.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
 			this.builderlink.LinkColor = System.Drawing.Color.Firebrick;
-			this.builderlink.Location = new System.Drawing.Point(12, 219);
+			this.builderlink.Location = new System.Drawing.Point(12, 198);
 			this.builderlink.Name = "builderlink";
-			this.builderlink.Size = new System.Drawing.Size(121, 14);
+			this.builderlink.Size = new System.Drawing.Size(97, 14);
 			this.builderlink.TabIndex = 3;
 			this.builderlink.TabStop = true;
-			this.builderlink.Text = "www.doombuilder.com";
+			this.builderlink.Text = "www.doom64.com";
 			this.builderlink.VisitedLinkColor = System.Drawing.Color.Firebrick;
 			this.builderlink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.builderlink_LinkClicked);
-			// 
-			// version
-			// 
-			this.version.AutoSize = true;
-			this.version.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.version.Location = new System.Drawing.Point(15, 118);
-			this.version.Name = "version";
-			this.version.Size = new System.Drawing.Size(138, 14);
-			this.version.TabIndex = 0;
-			this.version.Text = "Doom Builder some version";
-			// 
-			// copyversion
-			// 
-			this.copyversion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-			this.copyversion.Location = new System.Drawing.Point(265, 113);
-			this.copyversion.Name = "copyversion";
-			this.copyversion.Size = new System.Drawing.Size(116, 25);
-			this.copyversion.TabIndex = 1;
-			this.copyversion.Text = "Copy Version";
-			this.copyversion.UseVisualStyleBackColor = true;
-			this.copyversion.Click += new System.EventHandler(this.copyversion_Click);
 			// 
 			// pictureBox2
 			// 
@@ -122,32 +96,14 @@ namespace CodeImp.DoomBuilder.Windows
 			this.pictureBox2.TabIndex = 10;
 			this.pictureBox2.TabStop = false;
 			// 
-			// codeimplink
-			// 
-			this.codeimplink.ActiveLinkColor = System.Drawing.Color.Firebrick;
-			this.codeimplink.AutoSize = true;
-			this.codeimplink.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-			this.codeimplink.LinkColor = System.Drawing.Color.Firebrick;
-			this.codeimplink.Location = new System.Drawing.Point(12, 239);
-			this.codeimplink.Name = "codeimplink";
-			this.codeimplink.Size = new System.Drawing.Size(103, 14);
-			this.codeimplink.TabIndex = 4;
-			this.codeimplink.TabStop = true;
-			this.codeimplink.Text = "www.codeimp.com";
-			this.codeimplink.VisitedLinkColor = System.Drawing.Color.Firebrick;
-			this.codeimplink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.codeimplink_LinkClicked);
-			// 
 			// AboutForm
 			// 
 			this.AcceptButton = this.close;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.CancelButton = this.close;
-			this.ClientSize = new System.Drawing.Size(393, 280);
-			this.Controls.Add(this.codeimplink);
+			this.ClientSize = new System.Drawing.Size(393, 257);
 			this.Controls.Add(this.pictureBox2);
-			this.Controls.Add(this.copyversion);
-			this.Controls.Add(this.version);
 			this.Controls.Add(this.builderlink);
 			this.Controls.Add(this.close);
 			this.Controls.Add(label1);
@@ -161,7 +117,7 @@ namespace CodeImp.DoomBuilder.Windows
 			this.ShowIcon = false;
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "About Doom Builder";
+			this.Text = "About Doom Builder 64 Classic";
 			((System.ComponentModel.ISupportInitialize)(pictureBox1)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
 			this.ResumeLayout(false);
@@ -173,9 +129,6 @@ namespace CodeImp.DoomBuilder.Windows
 
 		private System.Windows.Forms.Button close;
 		private System.Windows.Forms.LinkLabel builderlink;
-		private System.Windows.Forms.Label version;
-		private System.Windows.Forms.Button copyversion;
 		private System.Windows.Forms.PictureBox pictureBox2;
-		private System.Windows.Forms.LinkLabel codeimplink;
 	}
 }
