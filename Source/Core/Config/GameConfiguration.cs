@@ -69,7 +69,6 @@ namespace CodeImp.DoomBuilder.Config
 		private bool mixtexturesflats;
 		private bool generalizedactions;
 		private bool generalizedeffects;
-		private int linedefactivationsfilter;
 		private string testparameters;
 		private bool testshortpaths;
 		private string makedoortrack;
@@ -116,7 +115,6 @@ namespace CodeImp.DoomBuilder.Config
 		private Dictionary<int, LinedefActionInfo> linedefactions;
 		private List<LinedefActionInfo> sortedlinedefactions;
 		private List<LinedefActionCategory> actioncategories;
-		private List<LinedefActivateInfo> linedefactivates;
 		private List<GeneralizedCategory> genactioncategories;
 		private List<FlagTranslation> linedefflagstranslation;
 		
@@ -172,7 +170,6 @@ namespace CodeImp.DoomBuilder.Config
 		public bool MixTexturesFlats { get { return mixtexturesflats; } }
 		public bool GeneralizedActions { get { return generalizedactions; } }
 		public bool GeneralizedEffects { get { return generalizedeffects; } }
-		public int LinedefActivationsFilter { get { return linedefactivationsfilter; } }
 		public string TestParameters { get { return testparameters; } }
 		public bool TestShortPaths { get { return testshortpaths; } }
 		public string MakeDoorTrack { get { return makedoortrack; } }
@@ -217,7 +214,6 @@ namespace CodeImp.DoomBuilder.Config
 		public IDictionary<int, LinedefActionInfo> LinedefActions { get { return linedefactions; } }
 		public List<LinedefActionInfo> SortedLinedefActions { get { return sortedlinedefactions; } }
 		public List<LinedefActionCategory> ActionCategories { get { return actioncategories; } }
-		public List<LinedefActivateInfo> LinedefActivates { get { return linedefactivates; } }
 		public List<GeneralizedCategory> GenActionCategories { get { return genactioncategories; } }
 		public List<FlagTranslation> LinedefFlagsTranslation { get { return linedefflagstranslation; } }
 
@@ -264,7 +260,6 @@ namespace CodeImp.DoomBuilder.Config
 			this.linedefactions = new Dictionary<int, LinedefActionInfo>();
 			this.actioncategories = new List<LinedefActionCategory>();
 			this.sortedlinedefactions = new List<LinedefActionInfo>();
-			this.linedefactivates = new List<LinedefActivateInfo>();
 			this.genactioncategories = new List<GeneralizedCategory>();
 			this.sectoreffects = new Dictionary<int, SectorEffectInfo>();
 			this.sortedsectoreffects = new List<SectorEffectInfo>();
@@ -295,7 +290,6 @@ namespace CodeImp.DoomBuilder.Config
 			mixtexturesflats = cfg.ReadSetting("mixtexturesflats", false);
 			generalizedactions = cfg.ReadSetting("generalizedlinedefs", false);
 			generalizedeffects = cfg.ReadSetting("generalizedsectors", false);
-			linedefactivationsfilter = cfg.ReadSetting("linedefactivationsfilter", 0);
 			testparameters = cfg.ReadSetting("testparameters", "");
 			testshortpaths = cfg.ReadSetting("testshortpaths", false);
 			makedoortrack = cfg.ReadSetting("makedoortrack", "-");
@@ -372,7 +366,6 @@ namespace CodeImp.DoomBuilder.Config
 			// Linedefs
 			LoadLinedefFlags();
 			LoadLinedefActions();
-			LoadLinedefActivations();
 			LoadLinedefGeneralizedActions();
 
 			// Sectors
@@ -602,23 +595,6 @@ namespace CodeImp.DoomBuilder.Config
 
 			// Sort the categories list
 			actioncategories.Sort();
-		}
-
-		// Linedef activates
-		private void LoadLinedefActivations()
-		{
-			IDictionary dic;
-
-			// Get linedef activations
-			dic = cfg.ReadSetting("linedefactivations", new Hashtable());
-			foreach(DictionaryEntry de in dic)
-			{
-				// Add to the list
-				linedefactivates.Add(new LinedefActivateInfo(de.Key.ToString(), de.Value.ToString()));
-			}
-
-			// Sort the list
-			linedefactivates.Sort();
 		}
 
 		// Linedef generalized actions

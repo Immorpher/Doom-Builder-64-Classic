@@ -56,8 +56,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.actiongroup = new System.Windows.Forms.GroupBox();
             this.action = new CodeImp.DoomBuilder.Controls.ActionSelectorControl();
             this.browseaction = new System.Windows.Forms.Button();
-            this.udmfpanel = new System.Windows.Forms.Panel();
-            this.udmfactivates = new CodeImp.DoomBuilder.Controls.CheckboxArrayControl();
             this.newtag = new System.Windows.Forms.Button();
             this.settingsgroup = new System.Windows.Forms.GroupBox();
             this.flags = new CodeImp.DoomBuilder.Controls.CheckboxArrayControl();
@@ -120,7 +118,6 @@ namespace CodeImp.DoomBuilder.Windows
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             this.actiongroup.SuspendLayout();
-            this.udmfpanel.SuspendLayout();
             this.settingsgroup.SuspendLayout();
             this.switchsetupbox.SuspendLayout();
             this.activationtype.SuspendLayout();
@@ -391,7 +388,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.actiongroup.Controls.Add(label2);
             this.actiongroup.Controls.Add(this.action);
             this.actiongroup.Controls.Add(this.browseaction);
-            this.actiongroup.Controls.Add(this.udmfpanel);
             this.actiongroup.Location = new System.Drawing.Point(378, 352);
             this.actiongroup.Name = "actiongroup";
             this.actiongroup.Size = new System.Drawing.Size(505, 281);
@@ -424,27 +420,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.browseaction.Text = " ";
             this.browseaction.UseVisualStyleBackColor = true;
             this.browseaction.Click += new System.EventHandler(this.browseaction_Click);
-            // 
-            // udmfpanel
-            // 
-            this.udmfpanel.Controls.Add(this.udmfactivates);
-            this.udmfpanel.Location = new System.Drawing.Point(6, 143);
-            this.udmfpanel.Name = "udmfpanel";
-            this.udmfpanel.Size = new System.Drawing.Size(388, 132);
-            this.udmfpanel.TabIndex = 4;
-            this.udmfpanel.Visible = false;
-            // 
-            // udmfactivates
-            // 
-            this.udmfactivates.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.udmfactivates.AutoScroll = true;
-            this.udmfactivates.Columns = 2;
-            this.udmfactivates.Location = new System.Drawing.Point(56, 5);
-            this.udmfactivates.Name = "udmfactivates";
-            this.udmfactivates.Size = new System.Drawing.Size(320, 123);
-            this.udmfactivates.TabIndex = 0;
             // 
             // newtag
             // 
@@ -995,7 +970,6 @@ namespace CodeImp.DoomBuilder.Windows
             groupBox2.ResumeLayout(false);
             this.actiongroup.ResumeLayout(false);
             this.actiongroup.PerformLayout();
-            this.udmfpanel.ResumeLayout(false);
             this.settingsgroup.ResumeLayout(false);
             this.switchsetupbox.ResumeLayout(false);
             this.switchsetupbox.PerformLayout();
@@ -1040,10 +1014,8 @@ namespace CodeImp.DoomBuilder.Windows
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backlow;
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backmid;
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backhigh;
-		private System.Windows.Forms.Panel udmfpanel;
 		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.GroupBox idgroup;
-		private CodeImp.DoomBuilder.Controls.CheckboxArrayControl udmfactivates;
 		private System.Windows.Forms.SplitContainer splitter;
 		private System.Windows.Forms.Button customfrontbutton;
 		private System.Windows.Forms.Button custombackbutton;

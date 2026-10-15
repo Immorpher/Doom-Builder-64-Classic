@@ -48,9 +48,6 @@ namespace CodeImp.DoomBuilder.Windows
 			action.GeneralizedCategories = General.Map.Config.GenActionCategories;
 			action.AddInfo(General.Map.Config.SortedLinedefActions.ToArray());
 
-			// Fill activations list
-			foreach(LinedefActivateInfo ai in General.Map.Config.LinedefActivates) udmfactivates.Add(ai.Title, ai);
-			
 			// Fill universal fields list
 			fieldslist.ListFixedFields(General.Map.Config.LinedefFields);
 			
@@ -65,11 +62,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// Initialize custom fields editor
 			fieldslist.Setup("linedef");
 			
-			// Mixed activations? (UDMF)
-			if(General.Map.FormatInterface.HasMixedActivations)
-				udmfpanel.Visible = true;
-			
-			
 			// Custom fields?
 			// (Note: Control.Visible reads as false for every control until the form is shown,
 			// so the layout below works from these flags instead of reading Visible back)
@@ -81,8 +73,7 @@ namespace CodeImp.DoomBuilder.Windows
 			custombackbutton.Visible = General.Map.FormatInterface.HasCustomFields;
 			
 			// Arrange panels
-			if(!General.Map.FormatInterface.HasMixedActivations)
-				actiongroup.Height = Math.Max(action.Bottom, browseaction.Bottom) + 10 + (actiongroup.Width - actiongroup.ClientRectangle.Width);
+			actiongroup.Height = Math.Max(action.Bottom, browseaction.Bottom) + 10 + (actiongroup.Width - actiongroup.ClientRectangle.Width);
 			
 			// Tag?
 			if(!hasidgroup)
@@ -325,13 +316,6 @@ namespace CodeImp.DoomBuilder.Windows
 			foreach(CheckBox c in flags.Checkboxes)
 				if(fl.Flags.ContainsKey(c.Tag.ToString())) c.Checked = fl.Flags[c.Tag.ToString()];
 			
-			// UDMF Activations
-			foreach(CheckBox c in udmfactivates.Checkboxes)
-			{
-				LinedefActivateInfo ai = (c.Tag as LinedefActivateInfo);
-				if(fl.Flags.ContainsKey(ai.Key)) c.Checked = fl.Flags[ai.Key];
-			}
-
             // Action/tags
             action.Value = fl.Action;
             tag.Text = fl.Tag.ToString();
@@ -432,20 +416,6 @@ namespace CodeImp.DoomBuilder.Windows
                     CheckSwitchCheckboxState(chkSwitchDisplayLower, ldisplay == 2);
                     CheckSwitchCheckboxState(chkSwitchDisplayMiddle, ldisplay == 3);
                 }
-
-				// UDMF Activations
-				foreach(CheckBox c in udmfactivates.Checkboxes)
-				{
-					LinedefActivateInfo ai = (c.Tag as LinedefActivateInfo);
-					if(l.Flags.ContainsKey(ai.Key))
-					{
-						if(c.Checked != l.Flags[ai.Key])
-						{
-							c.ThreeState = true;
-							c.CheckState = CheckState.Indeterminate;
-						}
-					}
-				}
 
 				// Action/tags
 				if(l.Action != action.Value) action.Empty = true;
@@ -598,14 +568,6 @@ namespace CodeImp.DoomBuilder.Windows
                 SetActivationFlag(l, activationtyperepeat, 32768);
 
                 SetSwitchMask(l);
-				
-				// UDMF activations
-				foreach(CheckBox c in udmfactivates.Checkboxes)
-				{
-					LinedefActivateInfo ai = (c.Tag as LinedefActivateInfo);
-					if(c.CheckState == CheckState.Checked) l.SetFlag(ai.Key, true);
-					else if(c.CheckState == CheckState.Unchecked) l.SetFlag(ai.Key, false);
-				}
 				
 				// Action/tags
 				l.Tag = General.Clamp(tag.GetResult(l.Tag), General.Map.FormatInterface.MinTag, General.Map.FormatInterface.MaxTag);

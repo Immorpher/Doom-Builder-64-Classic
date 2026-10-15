@@ -73,7 +73,6 @@ namespace CodeImp.DoomBuilder.IO
 		public override bool HasThingAction { get { return false; } }
 		public override bool HasCustomFields { get { return false; } }
 		public override bool HasThingHeight { get { return true; } }
-		public override bool HasMixedActivations { get { return false; } }
         public override bool HasBuiltInActivations { get { return false; } }
 		public override bool HasNumericLinedefFlags { get { return true; } }
 		public override bool HasNumericThingFlags { get { return true; } }

@@ -62,7 +62,6 @@ namespace CodeImp.DoomBuilder.IO
 		public abstract bool HasThingAction { get; }
 		public abstract bool HasCustomFields { get; }
 		public abstract bool HasThingHeight { get; }
-		public abstract bool HasMixedActivations { get; }
 		public abstract bool HasBuiltInActivations { get; }
 		public abstract bool HasNumericLinedefFlags { get; }
 		public abstract bool HasNumericThingFlags { get; }

@@ -85,7 +85,6 @@
     <Compile Include="Config\INumberedTitle.cs" />
     <Compile Include="Config\LinedefActionCategory.cs" />
     <Compile Include="Config\LinedefActionInfo.cs" />
-    <Compile Include="Config\LinedefActivateInfo.cs" />
     <Compile Include="Config\ProgramConfiguration.cs" />
     <Compile Include="Config\SkillInfo.cs" />
     <Compile Include="Config\TagType.cs" />

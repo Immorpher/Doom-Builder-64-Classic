@@ -86,10 +86,6 @@ namespace CodeImp.DoomBuilder.IO
 					foreach(KeyValuePair<string, string> flag in General.Map.Config.LinedefFlags)
 						config.WriteSetting("managedfields.linedef." + flag.Key, true);
 
-					// Add linedef activations
-					foreach(LinedefActivateInfo activate in General.Map.Config.LinedefActivates)
-						config.WriteSetting("managedfields.linedef." + activate.Key, true);
-					
 					// Add linedef flag translations
 					foreach(FlagTranslation f in General.Map.Config.LinedefFlagsTranslation)
 					{
@@ -234,10 +230,6 @@ namespace CodeImp.DoomBuilder.IO
 					foreach(string field in ft.Fields)
 						stringflags[field] = GetCollectionEntry<bool>(lc, field, false, false, where);
 				}
-				
-				// Activations
-				foreach(LinedefActivateInfo activate in General.Map.Config.LinedefActivates)
-					stringflags[activate.Key] = GetCollectionEntry<bool>(lc, activate.Key, false, false, where);
 				
 				// Create new linedef
 				if(vertexlink.ContainsKey(v1) && vertexlink.ContainsKey(v2))
