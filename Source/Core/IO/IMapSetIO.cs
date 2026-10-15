@@ -43,13 +43,8 @@ namespace CodeImp.DoomBuilder.IO
 		int MaxTextureOffset { get; }
 		bool HasLinedefTag { get; }
 		bool HasThingTag { get; }
-		bool HasThingAction { get; }
 		bool HasCustomFields { get; }
 		bool HasThingHeight { get; }
-		bool HasBuiltInActivations { get; }
-		bool HasNumericLinedefFlags { get; }
-		bool HasNumericThingFlags { get; }
-		bool HasNumericLinedefActivations { get; }
 		int MaxTag { get; }
 		int MinTag { get; }
 		int MaxAction { get; }

@@ -67,8 +67,6 @@ namespace CodeImp.DoomBuilder.Config
 		private string upperunpeggedflag;
 		private string lowerunpeggedflag;
 		private bool mixtexturesflats;
-		private bool generalizedactions;
-		private bool generalizedeffects;
 		private string testparameters;
 		private bool testshortpaths;
 		private string makedoortrack;
@@ -115,7 +113,6 @@ namespace CodeImp.DoomBuilder.Config
 		private Dictionary<int, LinedefActionInfo> linedefactions;
 		private List<LinedefActionInfo> sortedlinedefactions;
 		private List<LinedefActionCategory> actioncategories;
-		private List<GeneralizedCategory> genactioncategories;
 		private List<FlagTranslation> linedefflagstranslation;
 		
 		// Sectors
@@ -124,7 +121,6 @@ namespace CodeImp.DoomBuilder.Config
         private List<FlagTranslation> sectorflagstranslation; // villsa
 		private Dictionary<int, SectorEffectInfo> sectoreffects;
 		private List<SectorEffectInfo> sortedsectoreffects;
-		private List<GeneralizedOption> geneffectoptions;
 		private StepsList brightnesslevels;
 
 		// Universal fields
@@ -168,8 +164,6 @@ namespace CodeImp.DoomBuilder.Config
 		public string UpperUnpeggedFlag { get { return upperunpeggedflag; } }
 		public string LowerUnpeggedFlag { get { return lowerunpeggedflag; } }
 		public bool MixTexturesFlats { get { return mixtexturesflats; } }
-		public bool GeneralizedActions { get { return generalizedactions; } }
-		public bool GeneralizedEffects { get { return generalizedeffects; } }
 		public string TestParameters { get { return testparameters; } }
 		public bool TestShortPaths { get { return testshortpaths; } }
 		public string MakeDoorTrack { get { return makedoortrack; } }
@@ -214,7 +208,6 @@ namespace CodeImp.DoomBuilder.Config
 		public IDictionary<int, LinedefActionInfo> LinedefActions { get { return linedefactions; } }
 		public List<LinedefActionInfo> SortedLinedefActions { get { return sortedlinedefactions; } }
 		public List<LinedefActionCategory> ActionCategories { get { return actioncategories; } }
-		public List<GeneralizedCategory> GenActionCategories { get { return genactioncategories; } }
 		public List<FlagTranslation> LinedefFlagsTranslation { get { return linedefflagstranslation; } }
 
 		// Sectors
@@ -223,7 +216,6 @@ namespace CodeImp.DoomBuilder.Config
         public List<FlagTranslation> SectorFlagsTranslation { get { return sectorflagstranslation; } } // villsa
 		public IDictionary<int, SectorEffectInfo> SectorEffects { get { return sectoreffects; } }
 		public List<SectorEffectInfo> SortedSectorEffects { get { return sortedsectoreffects; } }
-		public List<GeneralizedOption> GenEffectOptions { get { return geneffectoptions; } }
 		public StepsList BrightnessLevels { get { return brightnesslevels; } }
 
 		// Universal fields
@@ -260,10 +252,8 @@ namespace CodeImp.DoomBuilder.Config
 			this.linedefactions = new Dictionary<int, LinedefActionInfo>();
 			this.actioncategories = new List<LinedefActionCategory>();
 			this.sortedlinedefactions = new List<LinedefActionInfo>();
-			this.genactioncategories = new List<GeneralizedCategory>();
 			this.sectoreffects = new Dictionary<int, SectorEffectInfo>();
 			this.sortedsectoreffects = new List<SectorEffectInfo>();
-			this.geneffectoptions = new List<GeneralizedOption>();
 			this.enums = new Dictionary<string, EnumList>();
 			this.skills = new List<SkillInfo>();
             this.d64textureindex = new List<TextureIndexInfo>();    // villsa
@@ -288,8 +278,6 @@ namespace CodeImp.DoomBuilder.Config
 			scaledtextureoffsets = cfg.ReadSetting("scaledtextureoffsets", true);
 			formatinterface = cfg.ReadSetting("formatinterface", "");
 			mixtexturesflats = cfg.ReadSetting("mixtexturesflats", false);
-			generalizedactions = cfg.ReadSetting("generalizedlinedefs", false);
-			generalizedeffects = cfg.ReadSetting("generalizedsectors", false);
 			testparameters = cfg.ReadSetting("testparameters", "");
 			testshortpaths = cfg.ReadSetting("testshortpaths", false);
 			makedoortrack = cfg.ReadSetting("makedoortrack", "-");
@@ -366,13 +354,11 @@ namespace CodeImp.DoomBuilder.Config
 			// Linedefs
 			LoadLinedefFlags();
 			LoadLinedefActions();
-			LoadLinedefGeneralizedActions();
 
 			// Sectors
             LoadSectorFlags();  // villsa
 			LoadBrightnessLevels();
 			LoadSectorEffects();
-			LoadSectorGeneralizedEffects();
 			
 			// Universal fields
 			linedeffields = LoadUniversalFields("linedef");
@@ -503,9 +489,7 @@ namespace CodeImp.DoomBuilder.Config
 			foreach(DictionaryEntry de in dic)
 				linedefflagstranslation.Add(new FlagTranslation(de));
 			
-			// Sort flags?
-			MapSetIO io = MapSetIO.Create(formatinterface);
-			if(io.HasNumericLinedefFlags)
+			// Sort the numeric flags
 			{
 				// Make list for integers that we can sort
                 // villsa - change from int to uint for larger flag values (doom64)
@@ -597,28 +581,6 @@ namespace CodeImp.DoomBuilder.Config
 			actioncategories.Sort();
 		}
 
-		// Linedef generalized actions
-		private void LoadLinedefGeneralizedActions()
-		{
-			IDictionary dic;
-
-			// Get linedef activations
-			dic = cfg.ReadSetting("gen_linedeftypes", new Hashtable());
-			foreach(DictionaryEntry de in dic)
-			{
-				// Check for valid structure
-				if(de.Value is IDictionary)
-				{
-					// Add category
-					genactioncategories.Add(new GeneralizedCategory("gen_linedeftypes", de.Key.ToString(), cfg));
-				}
-				else
-				{
-					General.ErrorLogger.Add(ErrorType.Warning, "Structure 'gen_linedeftypes' contains invalid entries in game configuration '" + this.Name + "'");
-				}
-			}
-		}
-
         // villsa - sector flags
         private void LoadSectorFlags()
         {
@@ -673,7 +635,7 @@ namespace CodeImp.DoomBuilder.Config
 					CultureInfo.InvariantCulture, out actionnumber))
 				{
 					// Make effects
-					si = new SectorEffectInfo(actionnumber, de.Value.ToString(), true, false);
+					si = new SectorEffectInfo(actionnumber, de.Value.ToString(), true);
 					
 					// Add action to category and sorted list
 					sortedsectoreffects.Add(si);
@@ -714,28 +676,6 @@ namespace CodeImp.DoomBuilder.Config
 
 			// Sort the list
 			brightnesslevels.Sort();
-		}
-
-		// Sector generalized effects
-		private void LoadSectorGeneralizedEffects()
-		{
-			IDictionary dic;
-
-			// Get sector effects
-			dic = cfg.ReadSetting("gen_sectortypes", new Hashtable());
-			foreach(DictionaryEntry de in dic)
-			{
-				// Check for valid structure
-				if(de.Value is IDictionary)
-				{
-					// Add option
-					geneffectoptions.Add(new GeneralizedOption("gen_sectortypes", "", de.Key.ToString(), de.Value as IDictionary));
-				}
-				else
-				{
-					General.ErrorLogger.Add(ErrorType.Warning, "Structure 'gen_sectortypes' contains invalid entries in game configuration '" + this.Name + "'");
-				}
-			}
 		}
 
 		// Thing flags
@@ -893,42 +833,6 @@ namespace CodeImp.DoomBuilder.Config
 			return new Dictionary<int, ThingTypeInfo>(things);
 		}
 		
-		// This checks if an action is generalized or predefined
-		public static bool IsGeneralized(int action, List<GeneralizedCategory> categories)
-		{
-			// Only actions above 0
-			if(action > 0)
-			{
-				// Go for all categories
-				foreach(GeneralizedCategory ac in categories)
-				{
-					// Check if the action is within range of this category
-					if((action >= ac.Offset) && (action < (ac.Offset + ac.Length))) return true;
-				}
-			}
-
-			// Not generalized
-			return false;
-		}
-
-		// This gets the generalized action category from action number
-		public GeneralizedCategory GetGeneralizedActionCategory(int action)
-		{
-			// Only actions above 0
-			if(action > 0)
-			{
-				// Go for all categories
-				foreach(GeneralizedCategory ac in genactioncategories)
-				{
-					// Check if the action is within range of this category
-					if((action >= ac.Offset) && (action < (ac.Offset + ac.Length))) return ac;
-				}
-			}
-
-			// Not generalized
-			return null;
-		}
-		
 		// This checks if a specific edit mode class is listed
 		public bool IsEditModeSpecified(string classname)
 		{
@@ -945,11 +849,7 @@ namespace CodeImp.DoomBuilder.Config
 			}
 			else if(action == 0)
 			{
-				return new LinedefActionInfo(0, "None", true, false);
-			}
-			else if(IsGeneralized(action, genactioncategories))
-			{
-				return new LinedefActionInfo(action, "Generalized (" + GetGeneralizedActionCategory(action) + ")", true, true);
+				return new LinedefActionInfo(0, "None", true);
 			}
 			else
 			{
@@ -957,10 +857,10 @@ namespace CodeImp.DoomBuilder.Config
                 /*if (General.Map.FormatInterface.InDoom64Mode &&
                     (action >= 256 && action <= 511))
                 {
-                    return new LinedefActionInfo(action - 255, "Macro", false, false);
+                    return new LinedefActionInfo(action - 255, "Macro", false);
                 }*/
                 
-                return new LinedefActionInfo(action, "Unknown", false, false);
+                return new LinedefActionInfo(action, "Unknown", false);
 			}
 		}
 
@@ -974,11 +874,11 @@ namespace CodeImp.DoomBuilder.Config
 			}
 			else if(effect == 0)
 			{
-				return new SectorEffectInfo(0, "None", true, false);
+				return new SectorEffectInfo(0, "None", true);
 			}
 			else
 			{
-				return new SectorEffectInfo(effect, "Unknown", false, false);
+				return new SectorEffectInfo(effect, "Unknown", false);
 			}
 		}
 		

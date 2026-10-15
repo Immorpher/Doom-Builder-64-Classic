@@ -64,7 +64,6 @@ namespace CodeImp.DoomBuilder.Windows
 			filtercategory.Items.AddRange(General.Map.Data.ThingCategories.ToArray());
 			
 			// Fill actions list
-			filteraction.GeneralizedCategories = General.Map.Config.GenActionCategories;
 			filteraction.AddInfo(General.Map.Config.SortedLinedefActions.ToArray());
 			
 			// Initialize custom fields editor
@@ -104,7 +103,7 @@ namespace CodeImp.DoomBuilder.Windows
 			filtertag.Visible = General.Map.FormatInterface.HasThingTag;
 			if(!General.Map.FormatInterface.HasCustomFields)
 				tabs.TabPages.Remove(tabcustom);
-			if(!General.Map.FormatInterface.HasThingAction && !General.Map.FormatInterface.HasThingTag)
+			if(!General.Map.FormatInterface.HasThingTag)
 				tabs.TabPages.Remove(tabaction);
 			
 			// Done

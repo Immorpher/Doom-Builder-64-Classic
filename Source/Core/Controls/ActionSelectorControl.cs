@@ -36,7 +36,6 @@ namespace CodeImp.DoomBuilder.Controls
 		public event EventHandler ValueChanges;
 		
 		// Variables
-		private List<GeneralizedCategory> generalizedcategories;
 		private bool controlpressed = false;
         private bool isamacro = false;  // villsa
 		
@@ -47,7 +46,6 @@ namespace CodeImp.DoomBuilder.Controls
         public bool Macro { get { return isamacro; } set { isamacro = value; } } // villsa
 		public bool Empty { get { return (number.Text.Length == 0); } set { if(value) number.Text = ""; } }
 		public int Value { get { return GetValue(); } set { number.Text = value.ToString(); } }
-		public List<GeneralizedCategory> GeneralizedCategories { get { return generalizedcategories; } set { generalizedcategories = value; } }
 		
 		// Constructor
 		public ActionSelectorControl()
@@ -131,8 +129,6 @@ namespace CodeImp.DoomBuilder.Controls
                         displayname = "Macro";
                         number.Text = (intnumber - 255).ToString();
                     }*/
-                    else if ((generalizedcategories != null) && GameConfiguration.IsGeneralized(intnumber, generalizedcategories))
-                        displayname = "Generalized (" + General.Map.Config.GetGeneralizedActionCategory(intnumber) + ")";
                     else
                     {
                         displayname = "Unknown";

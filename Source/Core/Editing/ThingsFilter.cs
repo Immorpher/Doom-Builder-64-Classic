@@ -203,7 +203,7 @@ namespace CodeImp.DoomBuilder.Editing
 			{
 				// Adjust as needed for map format
 				if(!General.Map.FormatInterface.HasThingHeight) thingzheight = int.MinValue;
-				if(!General.Map.FormatInterface.HasThingAction) thingaction = -1;
+				thingaction = -1;
 				if(!General.Map.FormatInterface.HasThingTag) thingtag = -1;
 				if(!General.Map.FormatInterface.HasCustomFields) customfields.Clear();
 			}

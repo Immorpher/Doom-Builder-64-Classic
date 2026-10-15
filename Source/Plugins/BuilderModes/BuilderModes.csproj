@@ -260,7 +260,6 @@
     <Compile Include="FindReplace\FindSidedefTexture.cs" />
     <Compile Include="FindReplace\FindSectorNumber.cs" />
     <Compile Include="FindReplace\FindSidedefNumber.cs" />
-    <Compile Include="FindReplace\FindThingAction.cs" />
     <Compile Include="FindReplace\FindThingNumber.cs" />
     <Compile Include="FindReplace\FindThingType.cs" />
     <Compile Include="FindReplace\FindVertexNumber.cs" />

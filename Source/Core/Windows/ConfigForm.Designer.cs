@@ -374,7 +374,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.skill.BackColor = System.Drawing.Color.Transparent;
 			this.skill.Cursor = System.Windows.Forms.Cursors.Default;
 			this.skill.Empty = false;
-			this.skill.GeneralizedCategories = null;
 			this.skill.Location = new System.Drawing.Point(87, 94);
 			this.skill.Name = "skill";
 			this.skill.Size = new System.Drawing.Size(329, 21);

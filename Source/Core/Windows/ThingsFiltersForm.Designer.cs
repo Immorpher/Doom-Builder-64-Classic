@@ -237,7 +237,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.filtertype.BackColor = System.Drawing.Color.Transparent;
 			this.filtertype.Cursor = System.Windows.Forms.Cursors.Default;
 			this.filtertype.Empty = false;
-			this.filtertype.GeneralizedCategories = null;
 			this.filtertype.Location = new System.Drawing.Point(123, 76);
 			this.filtertype.Name = "filtertype";
 			this.filtertype.Size = new System.Drawing.Size(268, 21);
@@ -355,7 +354,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.filteraction.BackColor = System.Drawing.Color.Transparent;
 			this.filteraction.Cursor = System.Windows.Forms.Cursors.Default;
 			this.filteraction.Empty = false;
-			this.filteraction.GeneralizedCategories = null;
 			this.filteraction.Location = new System.Drawing.Point(122, 30);
 			this.filteraction.Name = "filteraction";
 			this.filteraction.Size = new System.Drawing.Size(268, 21);

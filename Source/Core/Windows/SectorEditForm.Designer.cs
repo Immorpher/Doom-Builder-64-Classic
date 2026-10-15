@@ -696,7 +696,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.effect.BackColor = System.Drawing.Color.Transparent;
             this.effect.Cursor = System.Windows.Forms.Cursors.Default;
             this.effect.Empty = false;
-            this.effect.GeneralizedCategories = null;
             this.effect.Location = new System.Drawing.Point(89, 28);
             this.effect.Macro = false;
             this.effect.Name = "effect";

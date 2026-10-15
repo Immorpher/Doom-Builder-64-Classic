@@ -400,7 +400,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.action.BackColor = System.Drawing.Color.Transparent;
             this.action.Cursor = System.Windows.Forms.Cursors.Default;
             this.action.Empty = false;
-            this.action.GeneralizedCategories = null;
             this.action.Location = new System.Drawing.Point(62, 27);
             this.action.Macro = false;
             this.action.Name = "action";

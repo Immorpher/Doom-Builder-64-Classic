@@ -45,7 +45,6 @@ namespace CodeImp.DoomBuilder.Windows
 				flags.Add(lf.Value, lf.Key);
 
 			// Fill actions list
-			action.GeneralizedCategories = General.Map.Config.GenActionCategories;
 			action.AddInfo(General.Map.Config.SortedLinedefActions.ToArray());
 
 			// Fill universal fields list

@@ -78,16 +78,12 @@
     <Compile Include="Config\MatchingTextureSet.cs" />
     <Compile Include="Config\ResourceTextureSet.cs" />
     <Compile Include="Config\SectorEffectInfo.cs" />
-    <Compile Include="Config\GeneralizedBit.cs" />
-    <Compile Include="Config\GeneralizedOption.cs" />
     <Compile Include="Config\GameConfiguration.cs" />
-    <Compile Include="Config\GeneralizedCategory.cs" />
     <Compile Include="Config\INumberedTitle.cs" />
     <Compile Include="Config\LinedefActionCategory.cs" />
     <Compile Include="Config\LinedefActionInfo.cs" />
     <Compile Include="Config\ProgramConfiguration.cs" />
     <Compile Include="Config\SkillInfo.cs" />
-    <Compile Include="Config\TagType.cs" />
     <Compile Include="Config\TextureSet.cs" />
     <Compile Include="Config\ThingCategory.cs" />
     <Compile Include="Config\ThingTypeInfo.cs" />
@@ -473,7 +469,6 @@
     <Compile Include="Rendering\Presentation.cs" />
     <Compile Include="Rendering\Display2DShader.cs" />
     <Compile Include="Rendering\ColorCollection.cs" />
-    <Compile Include="Rendering\ColorSetting.cs" />
     <Compile Include="Rendering\D3DDevice.cs" />
     <Compile Include="Data\ImageData.cs" />
     <Compile Include="Rendering\D3DShader.cs" />
@@ -488,7 +483,6 @@
     <Compile Include="Rendering\TextLabel.cs" />
     <Compile Include="VisualModes\VisualGeometry.cs" />
     <Compile Include="Rendering\PixelColor.cs" />
-    <Compile Include="Rendering\PixelColorBlock.cs" />
     <Compile Include="Rendering\Plotter.cs" />
     <Compile Include="Rendering\Renderer.cs" />
     <Compile Include="Rendering\Renderer2D.cs" />
@@ -698,7 +692,6 @@
     </Compile>
     <Compile Include="Data\ColorImage.cs" />
     <Compile Include="Data\ColormapImage.cs" />
-    <Compile Include="Editing\CustomThingsFilter.cs" />
     <Compile Include="General\CRC.cs" />
     <Compile Include="General\ErrorItem.cs" />
     <Compile Include="General\ErrorLogger.cs" />
@@ -813,7 +806,6 @@
     <Compile Include="Types\ThingTagHandler.cs" />
     <Compile Include="VisualModes\IVisualPickable.cs" />
     <Compile Include="General\BinaryHeap.cs" />
-    <Compile Include="Geometry\Plane.cs" />
     <Compile Include="Geometry\ProjectedFrustum2D.cs" />
     <Compile Include="IO\DeserializerStream.cs" />
     <Compile Include="IO\IReadWriteStream.cs" />

@@ -70,13 +70,8 @@ namespace CodeImp.DoomBuilder.IO
 		public override string DecimalsFormat { get { return "0"; } }
 		public override bool HasLinedefTag { get { return true; } }
 		public override bool HasThingTag { get { return true; } }
-		public override bool HasThingAction { get { return false; } }
 		public override bool HasCustomFields { get { return false; } }
 		public override bool HasThingHeight { get { return true; } }
-        public override bool HasBuiltInActivations { get { return false; } }
-		public override bool HasNumericLinedefFlags { get { return true; } }
-		public override bool HasNumericThingFlags { get { return true; } }
-		public override bool HasNumericLinedefActivations { get { return true; } }
 		public override int MaxTag { get { return short.MaxValue; } }
 		public override int MinTag { get { return short.MinValue; } }
         public override int MaxAction { get { return 511; } }

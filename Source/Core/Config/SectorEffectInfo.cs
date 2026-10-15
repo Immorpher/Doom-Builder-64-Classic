@@ -44,7 +44,6 @@ namespace CodeImp.DoomBuilder.Config
 		private int index;
 		private string title;
 		private bool isknown;
-		private bool isgeneralized;
 		
 		#endregion
 
@@ -52,7 +51,6 @@ namespace CodeImp.DoomBuilder.Config
 
 		public int Index { get { return index; } }
 		public string Title { get { return title; } }
-		public bool IsGeneralized { get { return isgeneralized; } }
 		public bool IsKnown { get { return isknown; } }
 		public bool IsNull { get { return (index == 0); } }
 
@@ -61,13 +59,12 @@ namespace CodeImp.DoomBuilder.Config
 		#region ================== Constructor / Disposer
 
 		// Constructor
-		internal SectorEffectInfo(int index, string title, bool isknown, bool isgeneralized)
+		internal SectorEffectInfo(int index, string title, bool isknown)
 		{
 			// Initialize
 			this.index = index;
 			this.title = title;
 			this.isknown = isknown;
-			this.isgeneralized = isgeneralized;
 			
 			// We have no destructor
 			GC.SuppressFinalize(this);

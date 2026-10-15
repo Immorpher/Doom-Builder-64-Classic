@@ -59,13 +59,8 @@ namespace CodeImp.DoomBuilder.IO
 		public abstract string DecimalsFormat { get; }
 		public abstract bool HasLinedefTag { get; }
 		public abstract bool HasThingTag { get; }
-		public abstract bool HasThingAction { get; }
 		public abstract bool HasCustomFields { get; }
 		public abstract bool HasThingHeight { get; }
-		public abstract bool HasBuiltInActivations { get; }
-		public abstract bool HasNumericLinedefFlags { get; }
-		public abstract bool HasNumericThingFlags { get; }
-		public abstract bool HasNumericLinedefActivations { get; }
 		public abstract int MaxTag { get; }
 		public abstract int MinTag { get; }
 		public abstract int MaxAction { get; }
