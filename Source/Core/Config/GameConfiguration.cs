@@ -123,13 +123,6 @@ namespace CodeImp.DoomBuilder.Config
 		private List<SectorEffectInfo> sortedsectoreffects;
 		private StepsList brightnesslevels;
 
-		// Universal fields
-		private List<UniversalFieldInfo> linedeffields;
-		private List<UniversalFieldInfo> sectorfields;
-		private List<UniversalFieldInfo> sidedeffields;
-		private List<UniversalFieldInfo> thingfields;
-		private List<UniversalFieldInfo> vertexfields;
-		
 		// Enums
 		private Dictionary<string, EnumList> enums;
 		
@@ -217,13 +210,6 @@ namespace CodeImp.DoomBuilder.Config
 		public IDictionary<int, SectorEffectInfo> SectorEffects { get { return sectoreffects; } }
 		public List<SectorEffectInfo> SortedSectorEffects { get { return sortedsectoreffects; } }
 		public StepsList BrightnessLevels { get { return brightnesslevels; } }
-
-		// Universal fields
-		public List<UniversalFieldInfo> LinedefFields { get { return linedeffields; } }
-		public List<UniversalFieldInfo> SectorFields { get { return sectorfields; } }
-		public List<UniversalFieldInfo> SidedefFields { get { return sidedeffields; } }
-		public List<UniversalFieldInfo> ThingFields { get { return thingfields; } }
-		public List<UniversalFieldInfo> VertexFields { get { return vertexfields; } }
 
 		// Enums
 		public IDictionary<string, EnumList> Enums { get { return enums; } }
@@ -360,13 +346,6 @@ namespace CodeImp.DoomBuilder.Config
 			LoadBrightnessLevels();
 			LoadSectorEffects();
 			
-			// Universal fields
-			linedeffields = LoadUniversalFields("linedef");
-			sectorfields = LoadUniversalFields("sector");
-			sidedeffields = LoadUniversalFields("sidedef");
-			thingfields = LoadUniversalFields("thing");
-			vertexfields = LoadUniversalFields("vertex");
-
 			// Defaults
 			LoadTextureSets();
 			LoadThingFilters();
@@ -411,33 +390,6 @@ namespace CodeImp.DoomBuilder.Config
 				EnumList list = new EnumList(de.Key.ToString(), cfg);
 				enums.Add(de.Key.ToString(), list);
 			}
-		}
-		
-		// This loads a universal fields list
-		private List<UniversalFieldInfo> LoadUniversalFields(string elementname)
-		{
-			List<UniversalFieldInfo> list = new List<UniversalFieldInfo>();
-			UniversalFieldInfo uf;
-			IDictionary dic;
-			
-			// Get fields
-			dic = cfg.ReadSetting("universalfields." + elementname, new Hashtable());
-			foreach(DictionaryEntry de in dic)
-			{
-				try
-				{
-					// Read the field info and add to list
-					uf = new UniversalFieldInfo(elementname, de.Key.ToString(), cfg, enums);
-					list.Add(uf);
-				}
-				catch(Exception)
-				{
-					General.ErrorLogger.Add(ErrorType.Warning, "Unable to read universal field definition 'universalfields." + elementname + "." + de.Key + "' from game configuration '" + this.Name + "'");
-				}
-			}
-
-			// Return result
-			return list;
 		}
 		
 		// Things and thing categories

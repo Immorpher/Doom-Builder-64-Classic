@@ -161,7 +161,6 @@
     <EmbeddedResource Include="Resources\SectorsMode.png" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\WAuthor.png" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Interface\CurveLinedefsForm.resx">
@@ -237,7 +236,6 @@
       <SubType>Designer</SubType>
       <DependentUpon>UndoRedoPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Resources\HeightsMode.png" />
   </ItemGroup>
   <ItemGroup>
 	<Compile Include="ClassicModes\TriangulatorMode.cs" />

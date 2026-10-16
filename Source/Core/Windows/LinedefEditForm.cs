@@ -47,9 +47,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// Fill actions list
 			action.AddInfo(General.Map.Config.SortedLinedefActions.ToArray());
 
-			// Fill universal fields list
-			fieldslist.ListFixedFields(General.Map.Config.LinedefFields);
-			
 			// Initialize image selectors
 			fronthigh.Initialize();
 			frontmid.Initialize();
@@ -58,18 +55,9 @@ namespace CodeImp.DoomBuilder.Windows
 			backmid.Initialize();
 			backlow.Initialize();
 
-			// Initialize custom fields editor
-			fieldslist.Setup("linedef");
-			
-			// Custom fields?
 			// (Note: Control.Visible reads as false for every control until the form is shown,
 			// so the layout below works from these flags instead of reading Visible back)
-			bool hascustomfields = General.Map.FormatInterface.HasCustomFields;
 			bool hasidgroup = General.Map.FormatInterface.HasLinedefTag;
-			customgroup.Visible = hascustomfields;
-
-			customfrontbutton.Visible = General.Map.FormatInterface.HasCustomFields;
-			custombackbutton.Visible = General.Map.FormatInterface.HasCustomFields;
 			
 			// Arrange panels
 			actiongroup.Height = Math.Max(action.Bottom, browseaction.Bottom) + 10 + (actiongroup.Width - actiongroup.ClientRectangle.Width);
@@ -104,20 +92,13 @@ namespace CodeImp.DoomBuilder.Windows
 				leftbottom = activationtype.Bottom;
 			}
 
-			// Right column: sidedefs on top, then action, identification and custom fields
+			// Right column: sidedefs on top, then action and identification
 			actiongroup.Top = splitter.Bottom + gap;
 			int rightbottom = actiongroup.Bottom;
 			if(hasidgroup)
 			{
 				idgroup.Top = rightbottom + gap;
 				rightbottom = idgroup.Bottom;
-			}
-
-			if(hascustomfields)
-			{
-				customgroup.Top = rightbottom + gap;
-				customgroup.Height = Math.Max(200, leftbottom - customgroup.Top);
-				rightbottom = customgroup.Bottom;
 			}
 
 			// Size the dialog to fit the taller column (first, since the buttons are
@@ -360,9 +341,6 @@ namespace CodeImp.DoomBuilder.Windows
 				backoffsety.Text = fl.Back.OffsetY.ToString();
 			}
 
-			// Custom fields
-			fieldslist.SetValues(fl.Fields, true);
-
 			////////////////////////////////////////////////////////////////////////
 			// Now go for all lines and change the options when a setting is different
 			////////////////////////////////////////////////////////////////////////
@@ -462,11 +440,7 @@ namespace CodeImp.DoomBuilder.Windows
 					if(backsector.Text != l.Back.Sector.Index.ToString()) backsector.Text = "";
 					if(backoffsetx.Text != l.Back.OffsetX.ToString()) backoffsetx.Text = "";
 					if(backoffsety.Text != l.Back.OffsetY.ToString()) backoffsety.Text = "";
-					if(General.Map.FormatInterface.HasCustomFields) custombackbutton.Visible = true;
 				}
-				
-				// Custom fields
-				fieldslist.SetValues(l.Fields, false);
 			}
 
             foreach (Linedef l in lines)
@@ -641,9 +615,6 @@ namespace CodeImp.DoomBuilder.Windows
 						}
 					}
 				}
-
-				// Custom fields
-				fieldslist.Apply(l.Fields);
 			}
 
             // villsa
@@ -685,28 +656,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private void browseaction_Click(object sender, EventArgs e)
 		{
 			action.Value = ActionBrowserForm.BrowseAction(this, action.Value);
-		}
-
-		// Custom fields on front sides
-		private void customfrontbutton_Click(object sender, EventArgs e)
-		{
-			// Make collection of front sides
-			List<MapElement> sides = new List<MapElement>(lines.Count);
-			foreach(Linedef l in lines) if(l.Front != null) sides.Add(l.Front);
-			
-			// Edit these
-			CustomFieldsForm.ShowDialog(this, "Front side custom fields", "sidedef", sides, General.Map.Config.SidedefFields);
-		}
-
-		// Custom fields on back sides
-		private void custombackbutton_Click(object sender, EventArgs e)
-		{
-			// Make collection of back sides
-			List<MapElement> sides = new List<MapElement>(lines.Count);
-			foreach(Linedef l in lines) if(l.Back != null) sides.Add(l.Back);
-
-			// Edit these
-			CustomFieldsForm.ShowDialog(this, "Back side custom fields", "sidedef", sides, General.Map.Config.SidedefFields);
 		}
 
 		// Help!

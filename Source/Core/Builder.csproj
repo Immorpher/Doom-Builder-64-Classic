@@ -87,7 +87,6 @@
     <Compile Include="Config\TextureSet.cs" />
     <Compile Include="Config\ThingCategory.cs" />
     <Compile Include="Config\ThingTypeInfo.cs" />
-    <Compile Include="Config\UniversalFieldInfo.cs" />
     <Compile Include="Actions\ActionAttribute.cs" />
     <Compile Include="Actions\BeginActionAttribute.cs" />
     <Compile Include="Actions\EndActionAttribute.cs" />
@@ -172,7 +171,7 @@
     <Compile Include="Geometry\SidedefsTracePath.cs" />
     <Compile Include="Geometry\Vector2D.cs" />
     <Compile Include="Geometry\Vector3D.cs" />
-    <Compile Include="GZBuilder\Geometry\Line3D.cs" />
+    <Compile Include="Geometry\Line3D.cs" />
     <Compile Include="Data\TexturePatch.cs" />
     <Compile Include="Data\ImageDataFormat.cs" />
     <Compile Include="Data\DataReader.cs" />
@@ -189,22 +188,6 @@
     <Compile Include="Map\UniFields.cs" />
     <Compile Include="Map\UniValue.cs" />
     <Compile Include="Rendering\ViewMode.cs" />
-    <Compile Include="Types\BoolHandler.cs" />
-    <Compile Include="Types\ColorHandler.cs" />
-    <Compile Include="Types\EnumBitsHandler.cs" />
-    <Compile Include="Types\EnumOptionHandler.cs" />
-    <Compile Include="Types\EnumStringsHandler.cs" />
-    <Compile Include="Types\FlatHandler.cs" />
-    <Compile Include="Types\FloatHandler.cs" />
-    <Compile Include="Types\IntegerHandler.cs" />
-    <Compile Include="Types\LinedefTypeHandler.cs" />
-    <Compile Include="Types\NullHandler.cs" />
-    <Compile Include="Types\SectorEffectHandler.cs" />
-    <Compile Include="Types\StringHandler.cs" />
-    <Compile Include="Types\TextureHandler.cs" />
-    <Compile Include="Types\TypeHandler.cs" />
-    <Compile Include="Types\TypeHandlerAttribute.cs" />
-    <Compile Include="Types\TypesManager.cs" />
     <Compile Include="Types\UniversalType.cs" />
     <Compile Include="Windows\AboutForm.cs">
       <SubType>Form</SubType>
@@ -263,24 +246,11 @@
     <Compile Include="Windows\ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Windows\CustomFieldsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Windows\CustomFieldsForm.Designer.cs">
-      <DependentUpon>CustomFieldsForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Windows\EffectBrowserForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Windows\EffectBrowserForm.Designer.cs">
       <DependentUpon>EffectBrowserForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controls\FieldsEditorRow.cs" />
-    <Compile Include="Controls\FieldsEditorControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Controls\FieldsEditorControl.Designer.cs">
-      <DependentUpon>FieldsEditorControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Windows\FlatBrowserForm.cs">
       <SubType>Form</SubType>
@@ -544,11 +514,9 @@
   <ItemGroup>
     <None Include="Resources\MissingTexture.png" />
     <None Include="Resources\UnknownImage.png" />
-    <None Include="Resources\treeview.png" />
     <None Include="Resources\InfoLine.png" />
     <None Include="Resources\Folder.png" />
     <None Include="Resources\mergegeometry2.png" />
-    <None Include="Resources\mergegeometry.png" />
     <None Include="Resources\Grid4.png" />
     <None Include="Resources\Redo.png" />
     <None Include="Resources\Undo.png" />
@@ -590,10 +558,6 @@
     <EmbeddedResource Include="Windows\EffectBrowserForm.resx">
       <DependentUpon>EffectBrowserForm.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FieldsEditorControl.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>FieldsEditorControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\FlatBrowserForm.resx">
       <DependentUpon>FlatBrowserForm.cs</DependentUpon>
@@ -658,7 +622,6 @@
   <ItemGroup>
     <None Include="Resources\Copy.png" />
     <None Include="Resources\Cut.png" />
-    <None Include="Resources\Close.png" />
     <Compile Include="Compilers\MacroCompiler.cs" />
     <Compile Include="Config\AllTexturesSet.cs" />
     <Compile Include="Config\TextureIndexInfo.cs" />
@@ -711,7 +674,6 @@
 	<Compile Include="Rendering\SurfaceEntryCollection.cs" />
     <Compile Include="Rendering\SurfaceManager.cs" />
 	<Compile Include="Rendering\SurfaceUpdate.cs" />
-    <Compile Include="Types\ThingTypeHandler.cs" />
     <Compile Include="Windows\DelayedForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -767,11 +729,9 @@
     <EmbeddedResource Include="Resources\Crosshair.png" />
     <EmbeddedResource Include="Resources\CrosshairBusy.png" />
     <Compile Include="General\StepsList.cs" />
-    <None Include="Resources\Builder16.png" />
     <None Include="Resources\CLogo.png" />
     <None Include="Resources\Angle.png" />
     <Content Include="Resources\DB2.ico" />
-    <None Include="Resources\Text.png" />
     <None Include="Resources\List_Images.png" />
     <None Include="Resources\List.png" />
     <EmbeddedResource Include="Resources\ThingTrigger.png" />
@@ -798,12 +758,6 @@
     <EmbeddedResource Include="Resources\UnknownThing.png" />
     <Compile Include="Map\BlockEntry.cs" />
     <Compile Include="Map\BlockMap.cs" />
-    <Compile Include="Types\AngleDegreesFloatHandler.cs" />
-    <Compile Include="Types\AngleDegreesHandler.cs" />
-    <Compile Include="Types\AngleRadiansHandler.cs" />
-    <Compile Include="Types\LinedefTagHandler.cs" />
-    <Compile Include="Types\SectorTagHandler.cs" />
-    <Compile Include="Types\ThingTagHandler.cs" />
     <Compile Include="VisualModes\IVisualPickable.cs" />
     <Compile Include="General\BinaryHeap.cs" />
     <Compile Include="Geometry\ProjectedFrustum2D.cs" />
@@ -827,11 +781,6 @@
     <None Include="Resources\ScriptConstant.xpm" />
     <None Include="Resources\ScriptError.xpm" />
     <None Include="Resources\ScriptKeyword.xpm" />
-    <None Include="Resources\ScriptPalette.png" />
-    <None Include="Resources\SaveAll.png" />
-    <None Include="Resources\SaveScript.png" />
-    <None Include="Resources\OpenScript.png" />
-    <None Include="Resources\NewScript.png" />
     <EmbeddedResource Include="Controls\ScriptEditorPanel.resx">
       <SubType>Designer</SubType>
       <DependentUpon>ScriptEditorPanel.cs</DependentUpon>
@@ -854,7 +803,6 @@
     <None Include="Resources\Test.png" />
     <None Include="Resources\Warning.png" />
     <None Include="Resources\WarningOff.png" />
-    <None Include="Resources\SlimDX_small.png" />
     <None Include="Resources\Splash3_trans.png" />
     <None Include="Resources\Splash3_small.png" />
     <EmbeddedResource Include="Resources\UDMF.cfg" />
@@ -873,10 +821,6 @@
     <EmbeddedResource Include="Windows\BitFlagsForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>BitFlagsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Windows\CustomFieldsForm.resx">
-      <SubType>Designer</SubType>
-      <DependentUpon>CustomFieldsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Windows\DelayedForm.resx">
       <DependentUpon>DelayedForm.cs</DependentUpon>

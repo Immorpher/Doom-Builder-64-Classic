@@ -33,8 +33,6 @@ namespace CodeImp.DoomBuilder.Windows
 			System.Windows.Forms.Label label6;
 			this.groupposition = new System.Windows.Forms.GroupBox();
 			this.tabs = new System.Windows.Forms.TabControl();
-			this.tabcustom = new System.Windows.Forms.TabPage();
-			this.fieldslist = new CodeImp.DoomBuilder.Controls.FieldsEditorControl();
 			this.cancel = new System.Windows.Forms.Button();
 			this.apply = new System.Windows.Forms.Button();
 			this.positionx = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
@@ -45,7 +43,6 @@ namespace CodeImp.DoomBuilder.Windows
 			tabproperties.SuspendLayout();
 			this.groupposition.SuspendLayout();
 			this.tabs.SuspendLayout();
-			this.tabcustom.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// tabproperties
@@ -100,7 +97,6 @@ namespace CodeImp.DoomBuilder.Windows
 						| System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
 			this.tabs.Controls.Add(tabproperties);
-			this.tabs.Controls.Add(this.tabcustom);
 			this.tabs.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.tabs.Location = new System.Drawing.Point(10, 10);
 			this.tabs.Margin = new System.Windows.Forms.Padding(1);
@@ -109,31 +105,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabs.Size = new System.Drawing.Size(436, 233);
 			this.tabs.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
 			this.tabs.TabIndex = 0;
-			// 
-			// tabcustom
-			// 
-			this.tabcustom.Controls.Add(this.fieldslist);
-			this.tabcustom.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.tabcustom.Location = new System.Drawing.Point(4, 23);
-			this.tabcustom.Name = "tabcustom";
-			this.tabcustom.Padding = new System.Windows.Forms.Padding(3);
-			this.tabcustom.Size = new System.Drawing.Size(428, 206);
-			this.tabcustom.TabIndex = 1;
-			this.tabcustom.Text = "Custom";
-			this.tabcustom.UseVisualStyleBackColor = true;
-			// 
-			// fieldslist
-			// 
-			this.fieldslist.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.fieldslist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.fieldslist.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.fieldslist.Location = new System.Drawing.Point(11, 11);
-			this.fieldslist.Margin = new System.Windows.Forms.Padding(8);
-			this.fieldslist.Name = "fieldslist";
-			this.fieldslist.Size = new System.Drawing.Size(406, 187);
-			this.fieldslist.TabIndex = 2;
 			// 
 			// cancel
 			// 
@@ -203,7 +174,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.groupposition.ResumeLayout(false);
 			this.groupposition.PerformLayout();
 			this.tabs.ResumeLayout(false);
-			this.tabcustom.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -211,10 +181,8 @@ namespace CodeImp.DoomBuilder.Windows
 		#endregion
 
 		private System.Windows.Forms.TabControl tabs;
-		private System.Windows.Forms.TabPage tabcustom;
 		private System.Windows.Forms.Button cancel;
 		private System.Windows.Forms.Button apply;
-		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.GroupBox groupposition;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positiony;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox positionx;

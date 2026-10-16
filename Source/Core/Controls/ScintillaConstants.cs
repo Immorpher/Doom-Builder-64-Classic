@@ -108,17 +108,6 @@ namespace CodeImp.DoomBuilder.Controls
 		Character = 10000
 	}
 
-	internal enum ScriptMarkerOutline
-	{
-		FolderEnd = 25,
-		FolderOpenMid = 26,
-		FolderMidTail = 27,
-		FolderTail = 28,
-		FolderSub = 29,
-		Folder = 30,
-		FolderOpen = 31
-	}
-
 	internal enum ScriptMarginType
 	{
 		Symbol = 0,
@@ -179,36 +168,6 @@ namespace CodeImp.DoomBuilder.Controls
 		Box = 6
 	}
 
-	internal enum ScriptPrintOption
-	{
-		Normal = 0,
-		InvertLight = 1,
-		BlackOnWhite = 2,
-		ColourOnWhite = 3,
-		ColourOnWhiteDefaultBG = 4
-	}
-
-	internal enum ScriptFindOption
-	{
-		WholeWord = 2,
-		MatchCase = 4,
-		WordStart = 0x00100000,
-		RegExp = 0x00200000,
-		Posix = 0x00400000
-	}
-
-	internal enum ScriptFoldLevel
-	{
-		Base = 0x400,
-		WhiteFlag = 0x1000,
-		HeaderFlag = 0x2000,
-		BoxHeaderFlag = 0x4000,
-		BoxFooterFlag = 0x8000,
-		Contracted = 0x10000,
-		Unindent = 0x20000,
-		NumberMask = 0x0FFF
-	}
-
 	internal enum ScriptFoldFlag
 	{
 		LineBefore_Expanded = 0x0002,
@@ -219,68 +178,12 @@ namespace CodeImp.DoomBuilder.Controls
 		Box = 0x0001
 	}
 
-	internal enum ScriptWrap
-	{
-		None = 0,
-		Word = 1
-	}
-
-	internal enum ScriptWrapVisualFlag
-	{
-		None = 0x0000,
-		End = 0x0001,
-		Start = 0x0002
-	}
-
-	internal enum ScriptWrapVisualLocation
-	{
-		Default = 0x0000,
-		EndByText = 0x0001,
-		StartByText = 0x0002
-	}
-
-	internal enum ScriptLineCache
-	{
-		None = 0,
-		Caret = 1,
-		Page = 2,
-		Document = 3
-	}
-
 	internal enum ScriptIdentGuides
 	{
 		None = 0,
 		Real = 1,
 		LookForward = 2,
 		LookBoth = 3
-	}
-
-	internal enum ScriptEdgeVisualStyle
-	{
-		None = 0,
-		Line = 1,
-		Background = 2
-	}
-
-	internal enum ScriptCursorShape
-	{
-		Normal = -1,
-		Wait = 4
-	}
-
-	internal enum ScriptCaretPolicy
-	{
-		Slop = 0x01,
-		Strict = 0x04,
-		Jumps = 0x10,
-		Even = 0x08
-	}
-
-	internal enum ScriptSelectionMode
-	{
-		Stream = 0,
-		Rectangle = 1,
-		Lines = 2
 	}
 
 	internal enum ScriptModificationFlags
@@ -298,102 +201,6 @@ namespace CodeImp.DoomBuilder.Controls
 		BeforeDelete = 0x800
 	}
 
-	internal enum ScriptKeys
-	{
-		Down = 300,
-		Up = 301,
-		Left = 302,
-		Right = 303,
-		Home = 304,
-		End = 305,
-		Prior = 306,
-		Next = 307,
-		Delete = 308,
-		Insert = 309,
-		Escape = 7,
-		Back = 8,
-		Tab = 9,
-		Return = 13,
-		Add = 310,
-		Subtract = 311,
-		Divide = 312
-	}
-
-	internal enum ScriptKeyMod
-	{
-		Shift = 1,
-		Ctrl = 2,
-		Alt = 4
-	}
-
-	internal enum ScriptLexer
-	{
-		Container = 0,
-		Null = 1,
-		Python = 2,
-		Cpp = 3,
-		Html = 4,
-		Xml = 5,
-		Perl = 6,
-		Sql = 7,
-		Vb = 8,
-		Properties = 9,
-		Errorlist = 10,
-		Makefile = 11,
-		Batch = 12,
-		Xcode = 13,
-		Latex = 14,
-		Lua = 15,
-		Diff = 16,
-		Conf = 17,
-		Pascal = 18,
-		Ave = 19,
-		Ada = 20,
-		Lisp = 21,
-		Ruby = 22,
-		Eiffel = 23,
-		Eiffelkw = 24,
-		Tcl = 25,
-		NncronTab = 26,
-		Bullant = 27,
-		VBScript = 28,
-		Asp = 29,
-		Php = 30,
-		Baan = 31,
-		Matlab = 32,
-		Scriptol = 33,
-		Asm = 34,
-		CppNoCase = 35,
-		Fortran = 36,
-		F77 = 37,
-		Css = 38,
-		Pov = 39,
-		Lout = 40,
-		Escript = 41,
-		Ps = 42,
-		Nsis = 43,
-		Mmixal = 44,
-		Clw = 45,
-		Clwnocase = 46,
-		Lot = 47,
-		Yaml = 48,
-		Tex = 49,
-		Metapost = 50,
-		Powerbasic = 51,
-		Forth = 52,
-		Erlang = 53,
-		Octave = 54,
-		Mssql = 55,
-		Verilog = 56,
-		Kix = 57,
-		Gui4cli = 58,
-		Specman = 59,
-		Au3 = 60,
-		Apdl = 61,
-		Bash = 62,
-		Automatic = 1000
-	}
-	
 	internal enum ScintillaEvents
 	{
 		StyleNeeded = 2000,

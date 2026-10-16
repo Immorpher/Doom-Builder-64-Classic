@@ -30,7 +30,6 @@ using CodeImp.DoomBuilder.IO;
 using CodeImp.DoomBuilder.Map;
 using CodeImp.DoomBuilder.Rendering;
 using CodeImp.DoomBuilder.Geometry;
-using CodeImp.DoomBuilder.GZBuilder.Geometry;
 using System.Drawing;
 using CodeImp.DoomBuilder.Editing;
 using CodeImp.DoomBuilder.Plugins;

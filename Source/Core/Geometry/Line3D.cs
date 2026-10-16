@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CodeImp.DoomBuilder.Geometry;
 
-namespace CodeImp.DoomBuilder.GZBuilder.Geometry {
+namespace CodeImp.DoomBuilder.Geometry {
 	public enum Line3DType
 	{
 		DEFAULT,

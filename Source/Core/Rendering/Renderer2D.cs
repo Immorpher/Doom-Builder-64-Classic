@@ -31,7 +31,6 @@ using CodeImp.DoomBuilder.Map;
 using SlimDX.Direct3D9;
 using SlimDX;
 using CodeImp.DoomBuilder.Geometry;
-using CodeImp.DoomBuilder.GZBuilder.Geometry;
 using System.Drawing.Imaging;
 using CodeImp.DoomBuilder.Data;
 using CodeImp.DoomBuilder.Config;

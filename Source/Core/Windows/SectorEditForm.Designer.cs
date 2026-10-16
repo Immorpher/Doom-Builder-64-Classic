@@ -82,7 +82,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.apply = new System.Windows.Forms.Button();
             this.settingsgroup = new System.Windows.Forms.GroupBox();
             this.flags = new CodeImp.DoomBuilder.Controls.CheckboxArrayControl();
-            this.fieldslist = new CodeImp.DoomBuilder.Controls.FieldsEditorControl();
             this.flatSelectorControl2 = new CodeImp.DoomBuilder.Controls.FlatSelectorControl();
             this.flatSelectorControl1 = new CodeImp.DoomBuilder.Controls.FlatSelectorControl();
             label1 = new System.Windows.Forms.Label();
@@ -95,7 +94,6 @@ namespace CodeImp.DoomBuilder.Windows
             label4 = new System.Windows.Forms.Label();
             label6 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.customgroup = new System.Windows.Forms.GroupBox();
             colortaglabel = new System.Windows.Forms.Label();
             colorindexlabel = new System.Windows.Forms.Label();   // styd
             colorlabel = new System.Windows.Forms.Label();
@@ -106,7 +104,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.groupaction.SuspendLayout();
             this.groupeffect.SuspendLayout();
             this.settingsgroup.SuspendLayout();
-            this.customgroup.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -748,30 +745,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.flags.Size = new System.Drawing.Size(179, 343);
             this.flags.TabIndex = 4;
             // 
-            // customgroup
-            // 
-            this.customgroup.Controls.Add(this.fieldslist);
-            this.customgroup.Location = new System.Drawing.Point(221, 447);
-            this.customgroup.Name = "customgroup";
-            this.customgroup.Size = new System.Drawing.Size(578, 200);
-            this.customgroup.TabIndex = 7;
-            this.customgroup.TabStop = false;
-            this.customgroup.Text = " Custom Fields ";
-            // 
-            // fieldslist
-            // 
-            this.fieldslist.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.fieldslist.AutoInsertUserPrefix = true;
-            this.fieldslist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.fieldslist.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.fieldslist.Location = new System.Drawing.Point(8, 18);
-            this.fieldslist.Margin = new System.Windows.Forms.Padding(8);
-            this.fieldslist.Name = "fieldslist";
-            this.fieldslist.Size = new System.Drawing.Size(562, 174);
-            this.fieldslist.TabIndex = 0;
-            // 
             // flatSelectorControl2
             // 
             this.flatSelectorControl2.Location = new System.Drawing.Point(271, 37);
@@ -795,7 +768,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.cancel;
             this.ClientSize = new System.Drawing.Size(811, 490);
-            this.Controls.Add(this.customgroup);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.groupeffect);
@@ -824,7 +796,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.groupeffect.ResumeLayout(false);
             this.groupeffect.PerformLayout();
             this.settingsgroup.ResumeLayout(false);
-            this.customgroup.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -833,12 +804,10 @@ namespace CodeImp.DoomBuilder.Windows
 
 		private System.Windows.Forms.Button cancel;
 		private System.Windows.Forms.Button apply;
-		private System.Windows.Forms.GroupBox customgroup;
 		private CodeImp.DoomBuilder.Controls.FlatSelectorControl floortex;
 		private CodeImp.DoomBuilder.Controls.FlatSelectorControl ceilingtex;
 		private CodeImp.DoomBuilder.Controls.FlatSelectorControl flatSelectorControl2;
 		private CodeImp.DoomBuilder.Controls.FlatSelectorControl flatSelectorControl1;
-		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.Label sectorheight;
 		private CodeImp.DoomBuilder.Controls.ActionSelectorControl effect;
 		private System.Windows.Forms.Button newtag;

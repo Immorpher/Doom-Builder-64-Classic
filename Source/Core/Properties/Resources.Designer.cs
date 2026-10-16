@@ -83,16 +83,6 @@ namespace CodeImp.DoomBuilder.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Close {
-            get {
-                object obj = ResourceManager.GetObject("Close", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ColorPick {
             get {
                 object obj = ResourceManager.GetObject("ColorPick", resourceCulture);
@@ -253,16 +243,6 @@ namespace CodeImp.DoomBuilder.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap mergegeometry {
-            get {
-                object obj = ResourceManager.GetObject("mergegeometry", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap mergegeometry2 {
             get {
                 object obj = ResourceManager.GetObject("mergegeometry2", resourceCulture);
@@ -323,29 +303,9 @@ namespace CodeImp.DoomBuilder.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap NewScript {
-            get {
-                object obj = ResourceManager.GetObject("NewScript", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap OpenMap {
             get {
                 object obj = ResourceManager.GetObject("OpenMap", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap OpenScript {
-            get {
-                object obj = ResourceManager.GetObject("OpenScript", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -423,29 +383,9 @@ namespace CodeImp.DoomBuilder.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap SaveAll {
-            get {
-                object obj = ResourceManager.GetObject("SaveAll", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap SaveMap {
             get {
                 object obj = ResourceManager.GetObject("SaveMap", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SaveScript {
-            get {
-                object obj = ResourceManager.GetObject("SaveScript", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -507,26 +447,6 @@ namespace CodeImp.DoomBuilder.Properties {
             get {
                 object obj = ResourceManager.GetObject("ScriptKeyword", resourceCulture);
                 return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap ScriptPalette {
-            get {
-                object obj = ResourceManager.GetObject("ScriptPalette", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap SlimDX_small {
-            get {
-                object obj = ResourceManager.GetObject("SlimDX_small", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -621,31 +541,11 @@ namespace CodeImp.DoomBuilder.Properties {
         }
         
         /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Text {
-            get {
-                object obj = ResourceManager.GetObject("Text", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap InfoLine {
             get {
                 object obj = ResourceManager.GetObject("InfoLine", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap treeview {
-            get {
-                object obj = ResourceManager.GetObject("treeview", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

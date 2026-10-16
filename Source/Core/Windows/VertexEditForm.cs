@@ -58,22 +58,12 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			InitializeComponent();
 
-			// Fill universal fields list
-			fieldslist.ListFixedFields(General.Map.Config.VertexFields);
-
-			// Custom fields?
-			if(!General.Map.FormatInterface.HasCustomFields)
-				tabs.TabPages.Remove(tabcustom);
-			
 			// Decimals allowed?
 			if(General.Map.FormatInterface.VertexDecimals > 0)
 			{
 				positionx.AllowDecimal = true;
 				positiony.AllowDecimal = true;
 			}
-
-			// Initialize custom fields editor
-			fieldslist.Setup("vertex");
 		}
 
 		#endregion
@@ -98,9 +88,6 @@ namespace CodeImp.DoomBuilder.Windows
 			positionx.Text = vc.Position.x.ToString();
 			positiony.Text = vc.Position.y.ToString();
 			
-			// Custom fields
-			fieldslist.SetValues(vc.Fields, true);
-			
 			////////////////////////////////////////////////////////////////////////
 			// Now go for all sectors and change the options when a setting is different
 			////////////////////////////////////////////////////////////////////////
@@ -111,9 +98,6 @@ namespace CodeImp.DoomBuilder.Windows
 				// Position
 				if(positionx.Text != v.Position.x.ToString()) positionx.Text = "";
 				if(positiony.Text != v.Position.y.ToString()) positiony.Text = "";
-
-				// Custom fields
-				fieldslist.SetValues(v.Fields, false);
 			}
 		}
 		
@@ -146,9 +130,6 @@ namespace CodeImp.DoomBuilder.Windows
 				p.x = General.Clamp(positionx.GetResultFloat(v.Position.x), (float)General.Map.FormatInterface.MinCoordinate, (float)General.Map.FormatInterface.MaxCoordinate);
 				p.y = General.Clamp(positiony.GetResultFloat(v.Position.y), (float)General.Map.FormatInterface.MinCoordinate, (float)General.Map.FormatInterface.MaxCoordinate);
 				v.Move(p);
-				
-				// Custom fields
-				fieldslist.Apply(v.Fields);
 			}
 			
 			// Done

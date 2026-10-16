@@ -83,7 +83,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontoffsety = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
             this.frontoffsetx = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
             this.frontsector = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-            this.customfrontbutton = new System.Windows.Forms.Button();
             this.frontlow = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
             this.frontmid = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
             this.fronthigh = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
@@ -92,12 +91,9 @@ namespace CodeImp.DoomBuilder.Windows
             this.backoffsety = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
             this.backoffsetx = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
             this.backsector = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
-            this.custombackbutton = new System.Windows.Forms.Button();
             this.backlow = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
             this.backmid = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
             this.backhigh = new CodeImp.DoomBuilder.Controls.TextureSelectorControl();
-            this.customgroup = new System.Windows.Forms.GroupBox();
-            this.fieldslist = new CodeImp.DoomBuilder.Controls.FieldsEditorControl();
             this.tabmacros = new System.Windows.Forms.TabPage();
             label2 = new System.Windows.Forms.Label();
             taglabel = new System.Windows.Forms.Label();
@@ -127,7 +123,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.splitter.SuspendLayout();
             this.frontgroup.SuspendLayout();
             this.backgroup.SuspendLayout();
-            this.customgroup.SuspendLayout();
             this.tabmacros.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -700,7 +695,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontgroup.Controls.Add(this.frontoffsety);
             this.frontgroup.Controls.Add(this.frontoffsetx);
             this.frontgroup.Controls.Add(this.frontsector);
-            this.frontgroup.Controls.Add(this.customfrontbutton);
             this.frontgroup.Controls.Add(label11);
             this.frontgroup.Controls.Add(this.frontlow);
             this.frontgroup.Controls.Add(this.frontmid);
@@ -753,17 +747,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontsector.StepValues = null;
             this.frontsector.TabIndex = 14;
             // 
-            // customfrontbutton
-            // 
-            this.customfrontbutton.Location = new System.Drawing.Point(88, 124);
-            this.customfrontbutton.Name = "customfrontbutton";
-            this.customfrontbutton.Size = new System.Drawing.Size(115, 25);
-            this.customfrontbutton.TabIndex = 3;
-            this.customfrontbutton.Text = "Custom fields...";
-            this.customfrontbutton.UseVisualStyleBackColor = true;
-            this.customfrontbutton.Visible = false;
-            this.customfrontbutton.Click += new System.EventHandler(this.customfrontbutton_Click);
-            // 
             // frontlow
             // 
             this.frontlow.Location = new System.Drawing.Point(406, 37);
@@ -810,7 +793,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.backgroup.Controls.Add(this.backoffsety);
             this.backgroup.Controls.Add(this.backoffsetx);
             this.backgroup.Controls.Add(this.backsector);
-            this.backgroup.Controls.Add(this.custombackbutton);
             this.backgroup.Controls.Add(label12);
             this.backgroup.Controls.Add(this.backlow);
             this.backgroup.Controls.Add(this.backmid);
@@ -863,17 +845,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.backsector.StepValues = null;
             this.backsector.TabIndex = 17;
             // 
-            // custombackbutton
-            // 
-            this.custombackbutton.Location = new System.Drawing.Point(88, 124);
-            this.custombackbutton.Name = "custombackbutton";
-            this.custombackbutton.Size = new System.Drawing.Size(115, 25);
-            this.custombackbutton.TabIndex = 3;
-            this.custombackbutton.Text = "Custom fields...";
-            this.custombackbutton.UseVisualStyleBackColor = true;
-            this.custombackbutton.Visible = false;
-            this.custombackbutton.Click += new System.EventHandler(this.custombackbutton_Click);
-            // 
             // backlow
             // 
             this.backlow.Location = new System.Drawing.Point(409, 37);
@@ -901,31 +872,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.backhigh.TabIndex = 4;
             this.backhigh.TextureName = "";
             // 
-            // customgroup
-            // 
-            this.customgroup.Controls.Add(this.fieldslist);
-            this.customgroup.Location = new System.Drawing.Point(378, 487);
-            this.customgroup.Name = "customgroup";
-            this.customgroup.Size = new System.Drawing.Size(505, 200);
-            this.customgroup.TabIndex = 5;
-            this.customgroup.TabStop = false;
-            this.customgroup.Text = " Custom Fields ";
-            this.customgroup.Visible = false;
-            // 
-            // fieldslist
-            // 
-            this.fieldslist.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.fieldslist.AutoInsertUserPrefix = true;
-            this.fieldslist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.fieldslist.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.fieldslist.Location = new System.Drawing.Point(8, 20);
-            this.fieldslist.Margin = new System.Windows.Forms.Padding(8);
-            this.fieldslist.Name = "fieldslist";
-            this.fieldslist.Size = new System.Drawing.Size(517, 172);
-            this.fieldslist.TabIndex = 0;
-            // 
             // tabmacros
             // 
             this.tabmacros.Controls.Add(groupBox2);
@@ -945,7 +891,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.cancel;
             this.ClientSize = new System.Drawing.Size(893, 700);
-            this.Controls.Add(this.customgroup);
             this.Controls.Add(this.switchsetupbox);
             this.Controls.Add(this.splitter);
             this.Controls.Add(this.activationtype);
@@ -985,7 +930,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.frontgroup.PerformLayout();
             this.backgroup.ResumeLayout(false);
             this.backgroup.PerformLayout();
-            this.customgroup.ResumeLayout(false);
             this.tabmacros.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -1002,7 +946,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.Button browseaction;
 		private CodeImp.DoomBuilder.Controls.ActionSelectorControl action;
 		private System.Windows.Forms.Button newtag;
-		private System.Windows.Forms.GroupBox customgroup;
 		private System.Windows.Forms.GroupBox frontgroup;
 		private System.Windows.Forms.CheckBox frontside;
 		private System.Windows.Forms.CheckBox backside;
@@ -1013,11 +956,8 @@ namespace CodeImp.DoomBuilder.Windows
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backlow;
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backmid;
 		private CodeImp.DoomBuilder.Controls.TextureSelectorControl backhigh;
-		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.GroupBox idgroup;
 		private System.Windows.Forms.SplitContainer splitter;
-		private System.Windows.Forms.Button customfrontbutton;
-		private System.Windows.Forms.Button custombackbutton;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox tag;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox frontoffsetx;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox frontsector;

@@ -55,8 +55,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.label7 = new System.Windows.Forms.Label();
 			this.filtertag = new CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox();
 			this.labeltag = new System.Windows.Forms.Label();
-			this.tabcustom = new System.Windows.Forms.TabPage();
-			this.fieldslist = new CodeImp.DoomBuilder.Controls.FieldsEditorControl();
 			this.filtername = new System.Windows.Forms.TextBox();
 			this.label1 = new System.Windows.Forms.Label();
 			this.cancel = new System.Windows.Forms.Button();
@@ -66,7 +64,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabbasic.SuspendLayout();
 			this.tabflags.SuspendLayout();
 			this.tabaction.SuspendLayout();
-			this.tabcustom.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// listfilters
@@ -141,7 +138,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabs.Controls.Add(this.tabbasic);
 			this.tabs.Controls.Add(this.tabflags);
 			this.tabs.Controls.Add(this.tabaction);
-			this.tabs.Controls.Add(this.tabcustom);
 			this.tabs.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.tabs.Location = new System.Drawing.Point(6, 63);
 			this.tabs.Name = "tabs";
@@ -406,33 +402,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.labeltag.TabIndex = 12;
 			this.labeltag.Text = "Filter by tag:";
 			// 
-			// tabcustom
-			// 
-			this.tabcustom.Controls.Add(this.fieldslist);
-			this.tabcustom.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.tabcustom.Location = new System.Drawing.Point(4, 23);
-			this.tabcustom.Name = "tabcustom";
-			this.tabcustom.Padding = new System.Windows.Forms.Padding(3);
-			this.tabcustom.Size = new System.Drawing.Size(445, 289);
-			this.tabcustom.TabIndex = 3;
-			this.tabcustom.Text = "Custom";
-			this.tabcustom.UseVisualStyleBackColor = true;
-			// 
-			// fieldslist
-			// 
-			this.fieldslist.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
-			this.fieldslist.AutoInsertUserPrefix = false;
-			this.fieldslist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.fieldslist.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.fieldslist.Location = new System.Drawing.Point(8, 9);
-			this.fieldslist.Margin = new System.Windows.Forms.Padding(8, 9, 8, 9);
-			this.fieldslist.Name = "fieldslist";
-			this.fieldslist.Size = new System.Drawing.Size(426, 271);
-			this.fieldslist.TabIndex = 2;
-			this.fieldslist.Validated += new System.EventHandler(this.fieldslist_Validated);
-			// 
 			// filtername
 			// 
 			this.filtername.Location = new System.Drawing.Point(70, 27);
@@ -506,7 +475,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.tabflags.PerformLayout();
 			this.tabaction.ResumeLayout(false);
 			this.tabaction.PerformLayout();
-			this.tabcustom.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -532,7 +500,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.Button browsetype;
 		private System.Windows.Forms.TabPage tabaction;
-		private System.Windows.Forms.TabPage tabcustom;
 		private System.Windows.Forms.Label label5;
 		private CodeImp.DoomBuilder.Controls.ActionSelectorControl filtertype;
 		private CodeImp.DoomBuilder.Controls.ButtonsNumericTextbox filterangle;
@@ -544,7 +511,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private CodeImp.DoomBuilder.Controls.ActionSelectorControl filteraction;
 		private System.Windows.Forms.Button browseaction;
 		private System.Windows.Forms.Label label7;
-		private CodeImp.DoomBuilder.Controls.FieldsEditorControl fieldslist;
 		private System.Windows.Forms.Label label6;
 	}
 }

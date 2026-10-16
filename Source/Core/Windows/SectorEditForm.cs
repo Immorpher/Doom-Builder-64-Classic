@@ -81,9 +81,6 @@ namespace CodeImp.DoomBuilder.Windows
                 groupeffect.Height = 64;
             }
 			
-			// Fill universal fields list
-			fieldslist.ListFixedFields(General.Map.Config.SectorFields);
-
 			// Initialize image selectors
 			floortex.Initialize();
 			ceilingtex.Initialize();
@@ -91,17 +88,10 @@ namespace CodeImp.DoomBuilder.Windows
 			// Set steps for brightness field
 			brightness.StepValues = General.Map.Config.BrightnessLevels;
 
-			// Custom fields?
-			bool hascustomfields = General.Map.FormatInterface.HasCustomFields;
-			customgroup.Visible = hascustomfields;
-
             // villsa
             bool hascolors = General.Map.FormatInterface.InDoom64Mode;
             groupBox1.Visible = hascolors;
             groupBox3.Visible = hascolors;
-
-			// Initialize custom fields editor
-			fieldslist.Setup("sector");
 
 			// Arrange the single-screen layout.
 			int gap = 6;
@@ -111,11 +101,6 @@ namespace CodeImp.DoomBuilder.Windows
 			{
 				groupBox1.Top = groupBox3.Top = rightbottom + gap;
 				rightbottom = groupBox1.Bottom;
-			}
-			if(hascustomfields)
-			{
-				customgroup.Top = rightbottom + gap;
-				rightbottom = customgroup.Bottom;
 			}
 			groupaction.Top = rightbottom - groupaction.Height;
 			settingsgroup.Height = Math.Max(groupaction.Top - gap - settingsgroup.Top, 100);
@@ -187,9 +172,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// Action
 			tag.Text = sc.Tag.ToString();
 
-			// Custom fields
-			fieldslist.SetValues(sc.Fields, true);
-			
 			////////////////////////////////////////////////////////////////////////
 			// Now go for all sectors and change the options when a setting is different
 			////////////////////////////////////////////////////////////////////////
@@ -222,9 +204,6 @@ namespace CodeImp.DoomBuilder.Windows
 
 				// Action
 				if(s.Tag.ToString() != tag.Text) tag.Text = "";
-
-				// Custom fields
-				fieldslist.SetValues(s.Fields, false);
 			}
 
 			// Show sector height
@@ -419,9 +398,6 @@ namespace CodeImp.DoomBuilder.Windows
 
 				// Action
 				s.Tag = General.Clamp(tag.GetResult(s.Tag), General.Map.FormatInterface.MinTag, General.Map.FormatInterface.MaxTag);
-
-				// Custom fields
-				fieldslist.Apply(s.Fields);
 			}
 			
 			// Update the used textures

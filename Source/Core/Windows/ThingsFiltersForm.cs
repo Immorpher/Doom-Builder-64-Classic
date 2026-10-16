@@ -66,10 +66,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// Fill actions list
 			filteraction.AddInfo(General.Map.Config.SortedLinedefActions.ToArray());
 			
-			// Initialize custom fields editor
-			fieldslist.ListNoFixedFields();
-			fieldslist.Setup("thing");
-			
 			// Fill checkboxes list
 			foreach(KeyValuePair<string, string> flag in General.Map.Config.ThingFlags)
 			{
@@ -101,8 +97,6 @@ namespace CodeImp.DoomBuilder.Windows
 			labelzheight.Visible = General.Map.FormatInterface.HasThingHeight;
 			labeltag.Visible = General.Map.FormatInterface.HasThingTag;
 			filtertag.Visible = General.Map.FormatInterface.HasThingTag;
-			if(!General.Map.FormatInterface.HasCustomFields)
-				tabs.TabPages.Remove(tabcustom);
 			if(!General.Map.FormatInterface.HasThingTag)
 				tabs.TabPages.Remove(tabaction);
 			
@@ -235,11 +229,6 @@ namespace CodeImp.DoomBuilder.Windows
 						b.CheckState = CheckState.Indeterminate;
 					}
 				}
-				
-				// Custom fields
-				fieldslist.ClearFields();
-				fieldslist.Setup("thing");
-				fieldslist.SetValues(f.ThingCustomFields, true);
 				
 				// Done
 				settingup = false;
@@ -424,17 +413,6 @@ namespace CodeImp.DoomBuilder.Windows
 			}
 		}
 
-		private void fieldslist_Validated(object sender, EventArgs e)
-		{
-			// Anything selected?
-			if(listfilters.SelectedItems.Count > 0)
-			{
-				// Get selected filter
-				ThingsFilter f = listfilters.SelectedItems[0].Tag as ThingsFilter;
-				fieldslist.Apply(f.ThingCustomFields);
-			}
-		}
-		
 		#endregion
 	}
 }

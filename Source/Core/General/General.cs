@@ -162,7 +162,6 @@ namespace CodeImp.DoomBuilder
 		private static ActionManager actions;
 		private static PluginManager plugins;
 		private static ColorCollection colors;
-		private static TypesManager types;
         //private static Clock clock;
         public static Stopwatch stopwatch; // instead of clock
         private static ErrorLogger errorlogger;
@@ -209,7 +208,6 @@ namespace CodeImp.DoomBuilder
 		internal static PluginManager Plugins { get { return plugins; } }
 		//public static Clock Clock { get { return clock; } }
 		public static bool DebugBuild { get { return debugbuild; } }
-		internal static TypesManager Types { get { return types; } }
 		public static string AutoLoadFile { get { return autoloadfile; } }
 		public static string AutoLoadMap { get { return autoloadmap; } }
 		public static string AutoLoadConfig { get { return autoloadconfig; } }
@@ -659,10 +657,6 @@ namespace CodeImp.DoomBuilder
                 stopwatch = new Stopwatch();
                 stopwatch.Start();
 
-                // Create types manager
-                General.WriteLogLine("Creating types manager...");
-				types = new TypesManager();
-				
 				// Do auto map loading when window is delayed
 				if(delaymainwindow)
 					mainwindow.PerformAutoMapLoading();
@@ -837,7 +831,6 @@ namespace CodeImp.DoomBuilder
 				if(actions != null) actions.Dispose();
 				//if(clock != null) clock.Dispose();
 				if(plugins != null) plugins.Dispose();
-				if(types != null) types.Dispose();
 				try { D3DDevice.Terminate(); } catch(Exception) { }
 
 				// Application ends here and now
