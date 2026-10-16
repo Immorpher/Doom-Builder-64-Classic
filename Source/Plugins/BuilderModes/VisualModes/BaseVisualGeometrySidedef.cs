@@ -93,6 +93,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		#region ================== Methods
 
+		// Doom 64 never draws the "BLANK" texture (texture index 1) on a wall part, see R_RenderWall
+		// in the Doom 64 engine. The part is simply left see-through. Every other texture on an upper
+		// or lower part is drawn fully opaque (no transparency).
+		protected static bool IsBlankTexture(string texturename)
+		{
+			return General.Map.FormatInterface.InDoom64Mode &&
+				   !string.IsNullOrEmpty(texturename) &&
+				   string.Equals(texturename, "BLANK", StringComparison.OrdinalIgnoreCase);
+		}
+
 		// This performs a fast test in object picking
 		public override bool PickFastReject(Vector3D from, Vector3D to, Vector3D dir)
 		{

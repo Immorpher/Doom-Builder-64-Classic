@@ -93,7 +93,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			{
                 // styd: The double middle wall should ONLY be displayed if the "Render Mid-Texture" flag (512) is checked,
                 // exactly like ML_DRAWMASKED in the original engine's R_WallPrep
-                bool hasmidflag = General.Map.FormatInterface.InDoom64Mode ? Sidedef.Line.IsFlagSet("512") : true;
+                bool hasmidflag = General.Map.FormatInterface.InDoom64Mode ? (Sidedef.Line.IsFlagSet("512") && !IsBlankTexture(Sidedef.MiddleTexture)) : true;
 
                 // Texture given?
                 if(hasmidflag && (Sidedef.MiddleTexture.Length > 0) && (Sidedef.MiddleTexture[0] != '-'))

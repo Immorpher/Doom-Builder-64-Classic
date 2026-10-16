@@ -84,7 +84,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			float geotop = (float)Sidedef.Sector.CeilHeight;
 			float geobottom = (float)Sidedef.Other.Sector.CeilHeight;
 			float geoheight = geotop - geobottom;
-			if(geoheight > 0.001f)
+			if((geoheight > 0.001f) && !IsBlankTexture(Sidedef.HighTexture))
 			{
 				Vector2D t1 = new Vector2D();
 				Vector2D t2 = new Vector2D();

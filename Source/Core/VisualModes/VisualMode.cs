@@ -84,6 +84,27 @@ namespace CodeImp.DoomBuilder.VisualModes
 		protected Dictionary<Sector, VisualSector> visiblesectors;
 		protected List<VisualGeometry> visiblegeometry;
 		
+		// Doom 64 occlusion culling
+		private struct OcclusionLine
+		{
+			public int start, end;		// Covered columns [start, end)
+			public float s1, s2;		// Screen x (-1 .. 1) at the left and right end
+			public float w1, w2;		// 1 / depth at the left and right end
+			
+			// 1 / depth at the center of a column
+			public float GetW(int column, int columns)
+			{
+				float s = ((column + 0.5f) - (columns / 2)) / (columns / 2);
+				float u = (s - s1) / (s2 - s1);
+				if(u < 0.0f) u = 0.0f; else if(u > 1.0f) u = 1.0f;
+				return w1 + (w2 - w1) * u;
+			}
+		}
+		private List<Sidedef> cullingsidedefs = new List<Sidedef>();
+		private OcclusionLine[] occlusionprojected = new OcclusionLine[0];
+		private float[] occlusionbuffer;
+		private bool occlusionenabled = true;
+		
 		// Lines that were processed by the visibility culling (kept to reuse the collection)
 		private Dictionary<Linedef, Linedef> cullinglines = new Dictionary<Linedef, Linedef>(200);
 		
@@ -92,6 +113,9 @@ namespace CodeImp.DoomBuilder.VisualModes
 		#region ================== Properties
 
 		public bool ProcessGeometry { get { return processgeometry; } set { processgeometry = value; } }
+		
+		// Doom 64 occlusion culling (No Occlusion linedef flag), only applies to Doom 64 maps
+		public bool OcclusionEnabled { get { return occlusionenabled; } set { occlusionenabled = value; } }
 		public bool ProcessThings { get { return processthings; } set { processthings = value; } }
 		public VisualBlockMap BlockMap { get { return blockmap; } }
 
@@ -377,6 +401,7 @@ namespace CodeImp.DoomBuilder.VisualModes
 			float viewdist = General.Settings.ViewDistance;
 			
 			// Empty the collections (they are reused for every frame)
+			cullingsidedefs.Clear();
 			visiblelines.Clear();
 			visiblesectors.Clear();
 			visiblegeometry.Clear();
@@ -403,12 +428,12 @@ namespace CodeImp.DoomBuilder.VisualModes
 							if(ld.SideOfLine(campos2d) < 0)
 							{
 								// Do front of line
-								if(ld.Front != null) ProcessSidedefCulling(ld.Front);
+								if(ld.Front != null) cullingsidedefs.Add(ld.Front);
 							}
 							else
 							{
 								// Do back of line
-								if(ld.Back != null) ProcessSidedefCulling(ld.Back);
+								if(ld.Back != null) cullingsidedefs.Add(ld.Back);
 							}
 						}
 					}
@@ -446,6 +471,14 @@ namespace CodeImp.DoomBuilder.VisualModes
 
 			if(processgeometry)
 			{
+				// Doom 64 occlusion: drop the sidedefs that the engine would have culled
+				if(General.Map.FormatInterface.InDoom64Mode && occlusionenabled)
+					ApplyDoom64Occlusion(cullingsidedefs);
+
+				// Create the visual sectors and geometry for the remaining sidedefs
+				foreach(Sidedef sd in cullingsidedefs)
+					ProcessSidedefCulling(sd);
+
 				// Find camera sector
 				Linedef nld = MapSet.NearestLinedef(visiblelines.Values, campos2d);
 				if(nld != null)
@@ -488,6 +521,138 @@ namespace CodeImp.DoomBuilder.VisualModes
 			}
 		}
 
+		// 
+		// Doom 64 occlusion culling. The Doom 64 engine keeps a buffer of 320 screen columns. Walls that are
+		// solid (one-sided, or two-sided with no opening) mark the columns they cover as occluded, and
+		// everything behind them in those columns is not rendered. A line with the "No Occlusion" (1024) or the
+		// "Render Mid-Texture" (512) flag never occludes (see R_AddLine in r_phase1.c), which is what makes
+		// the illusion of bridges possible.
+		// 
+		// The engine walks the BSP front to back. We have no BSP, so instead of relying on order, we first
+		// build the nearest occluder depth per column and then keep every sidedef that is not strictly behind
+		// it in all of its columns. This only removes sidedefs that are certainly hidden; sidedefs that
+		// cannot be projected (behind the camera, edge-on) are kept.
+		// 
+		private void ApplyDoom64Occlusion(List<Sidedef> sidedefs)
+		{
+			const int COLUMNS = 320;
+			const float NEARCLIP = 8.0f;		// R_AddLine clips at y = 8
+			const float TOLERANCE = 1.002f;		// Slack so a wall does not occlude itself (or coplanar walls)
+			
+			int count = sidedefs.Count;
+			if(count == 0) return;
+			
+			Vector3D cam = General.Map.VisualCamera.Position;
+			float sin = (float)Math.Sin(General.Map.VisualCamera.AngleXY);
+			float cos = (float)Math.Cos(General.Map.VisualCamera.AngleXY);
+			float tanhalf = (float)Math.Tan(Angle2D.DegToRad((float)General.Settings.VisualFOV) * 0.5f);
+			
+			// Reuse buffers
+			if(occlusionbuffer == null) occlusionbuffer = new float[COLUMNS];
+			Array.Clear(occlusionbuffer, 0, COLUMNS);
+			if(occlusionprojected.Length < count) occlusionprojected = new OcclusionLine[count + count / 2];
+			OcclusionLine[] lines = occlusionprojected;
+			
+			// Project all sidedefs to screen columns. We keep 1/depth (w) because it is linear in screen space.
+			for(int i = 0; i < count; i++)
+			{
+				Sidedef sd = sidedefs[i];
+				OcclusionLine ol = new OcclusionLine();
+				
+				Vector2D p1 = sd.Line.Start.Position;
+				Vector2D p2 = sd.Line.End.Position;
+				float dx1 = p1.x - cam.x, dy1 = p1.y - cam.y;
+				float dx2 = p2.x - cam.x, dy2 = p2.y - cam.y;
+				float x1 = dx1 * sin - dy1 * cos, y1 = dx1 * cos + dy1 * sin;
+				float x2 = dx2 * sin - dy2 * cos, y2 = dx2 * cos + dy2 * sin;
+				
+				if((y1 >= NEARCLIP) || (y2 >= NEARCLIP))
+				{
+					// Clip against the near line
+					if(y1 < NEARCLIP)
+					{
+						float u = (NEARCLIP - y1) / (y2 - y1);
+						x1 += (x2 - x1) * u; y1 = NEARCLIP;
+					}
+					else if(y2 < NEARCLIP)
+					{
+						float u = (NEARCLIP - y2) / (y1 - y2);
+						x2 += (x1 - x2) * u; y2 = NEARCLIP;
+					}
+					
+					// Screen x, relative to half the view width
+					float s1 = x1 / y1 / tanhalf;
+					float s2 = x2 / y2 / tanhalf;
+					float w1 = 1.0f / y1, w2 = 1.0f / y2;
+					if(s1 > s2)
+					{
+						float t = s1; s1 = s2; s2 = t;
+						t = w1; w1 = w2; w2 = t;
+					}
+					
+					// Same truncation as the engine
+					int start = (int)Math.Floor(s1 * (COLUMNS / 2) + (COLUMNS / 2));
+					int end = (int)Math.Floor(s2 * (COLUMNS / 2) + (COLUMNS / 2));
+					if(start < 0) start = 0;
+					if(end > COLUMNS) end = COLUMNS;
+					if((start < end) && ((s2 - s1) > 0.00001f))
+					{
+						ol.start = start; ol.end = end;
+						ol.s1 = s1; ol.s2 = s2;
+						ol.w1 = w1; ol.w2 = w2;
+					}
+				}
+				
+				lines[i] = ol;
+			}
+			
+			// Build the occluder buffer
+			for(int i = 0; i < count; i++)
+			{
+				OcclusionLine ol = lines[i];
+				if(ol.end <= ol.start) continue;
+				if(!IsDoom64Occluder(sidedefs[i])) continue;
+				
+				for(int c = ol.start; c < ol.end; c++)
+				{
+					float w = ol.GetW(c, COLUMNS);
+					if(w > occlusionbuffer[c]) occlusionbuffer[c] = w;
+				}
+			}
+			
+			// Remove sidedefs that are completely behind occluders
+			int keep = 0;
+			for(int i = 0; i < count; i++)
+			{
+				OcclusionLine ol = lines[i];
+				bool visible = (ol.end <= ol.start);
+				for(int c = ol.start; (c < ol.end) && !visible; c++)
+				{
+					if((ol.GetW(c, COLUMNS) * TOLERANCE) >= occlusionbuffer[c])
+						visible = true;
+				}
+				
+				if(visible) sidedefs[keep++] = sidedefs[i];
+			}
+			sidedefs.RemoveRange(keep, count - keep);
+		}
+		
+		// This checks if a camera-facing sidedef marks the columns it covers as occluded (R_AddLine)
+		private static bool IsDoom64Occluder(Sidedef sd)
+		{
+			Linedef ld = sd.Line;
+			if(ld.IsFlagSet("1024") || ld.IsFlagSet("512")) return false;
+			
+			Sidedef other = sd.Other;
+			if((other == null) || (other.Sector == null)) return true;
+			
+			Sector front = sd.Sector;
+			Sector back = other.Sector;
+			return (back.CeilHeight <= front.FloorHeight) ||
+				   (back.FloorHeight >= front.CeilHeight) ||
+				   (back.FloorHeight == back.CeilHeight);
+		}
+		
 		// This finds and adds visible sectors
 		private void ProcessSidedefCulling(Sidedef sd)
 		{
