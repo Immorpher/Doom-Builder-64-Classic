@@ -44,6 +44,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		
 		private const float DRAG_ANGLE_TOLERANCE = 0.06f;
 		
+		// Vertex alpha (0-255) of the glow on pick-only (BLANK) wall parts
+		protected const int PICKONLY_ALPHA = 0x70;
+		
 		#endregion
 
 		#region ================== Variables
@@ -95,7 +98,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// Doom 64 never draws the "BLANK" texture (texture index 1) on a wall part, see R_RenderWall
 		// in the Doom 64 engine. The part is simply left see-through. Every other texture on an upper
-		// or lower part is drawn fully opaque (no transparency).
+		// or lower part is drawn fully opaque (no transparency). Upper and lower parts keep their geometry
+		// as pick-only so they can still be targeted and selected; middle parts are not generated at all.
 		protected static bool IsBlankTexture(string texturename)
 		{
 			return General.Map.FormatInterface.InDoom64Mode &&

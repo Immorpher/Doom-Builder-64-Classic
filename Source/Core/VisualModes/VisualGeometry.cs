@@ -96,6 +96,7 @@ namespace CodeImp.DoomBuilder.VisualModes
 		
 		// Rendering
 		private int renderpass = (int)RenderPass.Solid;
+		private bool pickonly;
 		
 		// Sector buffer info
 		private int vertexoffset;
@@ -115,6 +116,13 @@ namespace CodeImp.DoomBuilder.VisualModes
 		// Render pass in which this geometry must be rendered. Default is Solid.
 		// 
 		public RenderPass RenderPass { get { return (RenderPass)renderpass; } set { renderpass = (int)value; } }
+
+		// 
+		// When set, this geometry takes part in object picking (so it can be targeted and selected) but is not
+		// drawn, except while it is highlighted or selected. Used for Doom 64 "BLANK" wall parts, which the
+		// engine never draws.
+		// 
+		public bool PickOnly { get { return pickonly; } set { pickonly = value; } }
 
 		// 
 		// Image to use as texture on this geometry.

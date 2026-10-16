@@ -1059,18 +1059,30 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This collects a visual sector's geometry for rendering
 		public void AddSectorGeometry(VisualGeometry g)
 		{
+			// Pick-only geometry (invisible, but targetable) is only drawn to show the highlight or selection
+			bool pickonlyvisible = false;
+			if(g.PickOnly)
+			{
+				if(!((g == highlighted) && showhighlight) && !(g.Selected && showselection))
+					return;
+				
+				// It is drawn as a see-through white sheet, so only the translucent glow shows
+				pickonlyvisible = true;
+			}
+			
 			// Must have a texture and vertices
 			if((g.Texture != null) && (g.Triangles > 0))
 			{
-				Dictionary<ImageData, BinaryHeap<VisualGeometry>> geopass = geometry[g.RenderPassInt];
+				Dictionary<ImageData, BinaryHeap<VisualGeometry>> geopass = geometry[pickonlyvisible ? (int)RenderPass.Alpha : g.RenderPassInt];
 				BinaryHeap<VisualGeometry> group;
+				ImageData grouptexture = pickonlyvisible ? General.Map.Data.WhiteTexture : g.Texture;
 				
 				// Texture group not yet collected?
-				if(!geopass.TryGetValue(g.Texture, out group))
+				if(!geopass.TryGetValue(grouptexture, out group))
 				{
 					// Create texture group (reuse an old one when possible)
 					group = (geometryheappool.Count > 0) ? geometryheappool.Pop() : new BinaryHeap<VisualGeometry>();
-					geopass.Add(g.Texture, group);
+					geopass.Add(grouptexture, group);
 				}
 				
 				// Add geometry to texture group
