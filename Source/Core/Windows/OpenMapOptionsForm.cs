@@ -150,6 +150,24 @@ namespace CodeImp.DoomBuilder.Windows
 				}
 			}
 			
+			// Still no configuration selected? Default to Doom 64.
+			if(config.SelectedIndex == -1)
+			{
+				for(int i = 0; i < config.Items.Count; i++)
+				{
+					ConfigurationInfo ci = config.Items[i] as ConfigurationInfo;
+					if((ci != null) && string.Equals(ci.Filename, "Doom64.cfg", StringComparison.OrdinalIgnoreCase))
+					{
+						config.SelectedIndex = i;
+						break;
+					}
+				}
+				
+				// Doom64.cfg is not installed, take the first configuration
+				if((config.SelectedIndex == -1) && (config.Items.Count > 0))
+					config.SelectedIndex = 0;
+			}
+			
 			// Done
 			Cursor.Current = Cursors.Default;
 		}
