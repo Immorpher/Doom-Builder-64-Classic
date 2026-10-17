@@ -555,6 +555,13 @@ namespace CodeImp.DoomBuilder.Editing
 			}
 			else
 			{
+				// This edit is grouped with the previous undo snapshot, so no new snapshot is made.
+				// The map must still be flagged as changed: the map may have been saved since the
+				// snapshot was created (saving clears the changed flag but keeps the group), and
+				// continuing the same grouped edit (e.g. scrolling a sector height in visual mode)
+				// would otherwise leave the save indicator off.
+				General.Map.IsChanged = true;
+
 				return -1;
 			}
 		}
