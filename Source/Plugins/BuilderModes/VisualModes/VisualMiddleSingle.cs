@@ -84,10 +84,19 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			float geotop = (float)Sidedef.Sector.CeilHeight;
 			float geobottom = (float)Sidedef.Sector.FloorHeight;
 			float geoheight = geotop - geobottom;
-			if((geoheight > 0.001f) && !IsBlankTexture(Sidedef.MiddleTexture))
+			if(geoheight > 0.001f)
 			{
 				Vector2D t1 = new Vector2D();
 				Vector2D t2 = new Vector2D();
+
+				// The engine never draws BLANK, so a BLANK wall is only kept for picking
+				base.PickOnly = IsBlankTexture(Sidedef.MiddleTexture);
+				if(base.PickOnly)
+				{
+					// Vertex alpha makes the highlight / selection glow translucent
+					c1 = (c1 & 0x00FFFFFF) | (PICKONLY_ALPHA << 24);
+					c2 = (c2 & 0x00FFFFFF) | (PICKONLY_ALPHA << 24);
+				}
 
 				// Texture given?
 				if((Sidedef.MiddleTexture.Length > 0) && (Sidedef.MiddleTexture[0] != '-'))
