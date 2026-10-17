@@ -202,9 +202,17 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
             Vector2D offsetCenter = center + normal * SWITCH_NORMAL_OFFSET;
 
+            // The renderer culls counter-clockwise back faces, so the quad has to wind
+            // counter-clockwise when seen from the side the decal belongs to. Like the other
+            // wall parts (VisualUpper/Lower/Middle*), walk the line from End to Start on the
+            // back sidedef; otherwise the decal is only visible from the front of the line.
+            // (In the original engine each seg has its own angle, so both sides of a two-sided
+            // line get their own decal.)
+            Vector2D walkdir = Sidedef.IsFront ? dir : -dir;
+
             float half = SWITCH_SIZE * 0.5f;
-            Vector2D p1 = offsetCenter - dir * half;
-            Vector2D p2 = offsetCenter + dir * half;
+            Vector2D p1 = offsetCenter - walkdir * half;
+            Vector2D p2 = offsetCenter + walkdir * half;
 
             WorldVertex[] verts = new WorldVertex[6];
             verts[0] = new WorldVertex(p1.x, p1.y, bottomY, color, 0f, 1f);
