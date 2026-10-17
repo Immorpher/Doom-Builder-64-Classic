@@ -89,8 +89,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				Vector2D t1 = new Vector2D();
 				Vector2D t2 = new Vector2D();
 
-				// The engine never draws BLANK, so it is only kept for picking
-				base.PickOnly = IsBlankTexture(Sidedef.HighTexture);
+				// The engine never draws BLANK, nor an upper part against a sky ceiling, so it is only kept for picking
+				base.PickOnly = IsBlankTexture(Sidedef.HighTexture) || IsUpperHiddenBySky();
 				if(base.PickOnly)
 				{
 					// Vertex alpha makes the highlight / selection glow translucent

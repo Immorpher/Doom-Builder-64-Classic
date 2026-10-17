@@ -93,6 +93,9 @@ namespace CodeImp.DoomBuilder
 		// A null value means that the lump must be removed from the PWAD.
 		private Dictionary<string, byte[]> globallumps = new Dictionary<string, byte[]>();
 		private bool animdefschanged;
+
+		// Names of the sky flats defined in SKYDEFS (null when they must be read again)
+		private HashSet<string> skyflatnames;
 		private GridSetup grid;
 		private UndoManager undoredo;
 		private CopyPasteManager copypaste;
@@ -1108,6 +1111,43 @@ namespace CodeImp.DoomBuilder
 			}
 		}
 
+		// This forgets the cached sky definitions, so they are read again from SKYDEFS the next time they are needed
+		public void InvalidateSkyFlats()
+		{
+			skyflatnames = null;
+		}
+
+		// This returns true when the flat is a sky in Doom 64: the engine never draws it as a floor or ceiling plane,
+		// and does not draw upper walls against a ceiling that uses it. Stock F_SKY* flats and the skies
+		// defined in SKYDEFS are skies. Always false for other game formats.
+		public bool IsSkyFlat(string flatname)
+		{
+			if(string.IsNullOrEmpty(flatname) || (flatname[0] == '-')) return false;
+			if((FormatInterface == null) || !FormatInterface.InDoom64Mode) return false;
+			if(SkyDefs.IsStockSky(flatname)) return true;
+
+			if(skyflatnames == null)
+			{
+				HashSet<string> names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+				try
+				{
+					string source;
+					byte[] data = GetGlobalLumpData(LUMP_SKYDEFS, out source);
+					if(data != null)
+					{
+						string text = Encoding.ASCII.GetString(data).Replace('\0', ' ');
+						foreach(string name in SkyDefs.ParseNames(text)) names.Add(name);
+					}
+				}
+				catch(Exception e)
+				{
+					General.WriteLogLine("Unable to read the sky definitions: " + e.Message);
+				}
+				skyflatnames = names;
+			}
+			return skyflatnames.Contains(flatname);
+		}
+
 		// This stores edited data for a global script lump. The lump is written to the PWAD when the map is saved.
 		// When the data is null or empty, the lump is removed from the PWAD instead, so that the
 		// engine uses its own version again.
@@ -1117,6 +1157,7 @@ namespace CodeImp.DoomBuilder
 			if((lumpdata != null) && (lumpdata.Length == 0)) lumpdata = null;
 			globallumps[lumpname] = lumpdata;
 			if(lumpname == LUMP_ANIMDEFS) animdefschanged = true;
+			if(lumpname == LUMP_SKYDEFS) skyflatnames = null;
 			
 			// The scripts changed, but not the map itself (so nodes do not need to be rebuilt)
 			scriptschanged = true;

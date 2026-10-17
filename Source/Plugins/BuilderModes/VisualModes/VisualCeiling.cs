@@ -92,6 +92,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					setuponloadedtexture = s.LongCeilTexture;
 			}
 			
+			// A sky is never drawn as a plane by the engine, so keep it for picking only
+			base.PickOnly = IsSkyFlat(s.CeilTexture);
+			if(base.PickOnly) brightness = (brightness & 0x00FFFFFF) | (PICKONLY_ALPHA << 24);
+
 			// Make vertices
 			verts = new WorldVertex[s.Triangles.Vertices.Count];
 			for(int i = 0; i < s.Triangles.Vertices.Count; i++)
@@ -203,9 +207,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// This changes the texture
 		protected override void SetTexture(string texturename)
 		{
+			bool wassky = IsSkyFlat(this.Sector.Sector.CeilTexture);
 			this.Sector.Sector.SetCeilTexture(texturename);
 			General.Map.Data.UpdateUsedTextures();
 			this.Setup();
+
+			// Upper walls of the neighbouring sectors depend on whether this ceiling is a sky
+			if(wassky != IsSkyFlat(texturename)) this.Sector.UpdateSectorGeometry(true);
 		}
 		
 		#endregion

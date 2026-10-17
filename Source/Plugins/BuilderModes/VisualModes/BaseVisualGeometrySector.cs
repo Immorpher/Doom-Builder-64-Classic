@@ -74,6 +74,16 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		#region ================== Methods
 
+		// Vertex alpha (0-255) of the glow on pick-only (sky) planes, same as on pick-only wall parts
+		protected const int PICKONLY_ALPHA = 0x70;
+
+		// The Doom 64 engine never draws a sky flat as a floor or ceiling plane (see R_RenderPlane callers in
+		// R_FlatPrep), the sky is drawn behind the level instead. The plane is kept for picking only.
+		protected static bool IsSkyFlat(string flatname)
+		{
+			return General.Map.IsSkyFlat(flatname);
+		}
+
 		// This changes the height
 		protected abstract void ChangeHeight(int amount);
 		

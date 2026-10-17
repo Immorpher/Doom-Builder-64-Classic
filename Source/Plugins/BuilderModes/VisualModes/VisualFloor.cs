@@ -106,6 +106,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				base.RenderPass = RenderPass.Solid;
 			}
 
+			// A sky is never drawn as a plane by the engine, so keep it for picking only
+			base.PickOnly = IsSkyFlat(s.FloorTexture);
+			if(base.PickOnly) brightness = (brightness & 0x00FFFFFF) | (PICKONLY_ALPHA << 24);
+
 			// Make vertices
 			verts = new WorldVertex[s.Triangles.Vertices.Count];
 			for(int i = 0; i < s.Triangles.Vertices.Count; i++)

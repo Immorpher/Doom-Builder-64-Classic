@@ -107,6 +107,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				   string.Equals(texturename, "BLANK", StringComparison.OrdinalIgnoreCase);
 		}
 
+		// The Doom 64 engine does not draw an upper wall part when the ceiling of the sector behind it is a sky
+		// (R_WallPrep checks backsector->ceilingpic != -1). The part is kept as pick-only so it can still be selected.
+		protected bool IsUpperHiddenBySky()
+		{
+			return (Sidedef.Other != null) && General.Map.IsSkyFlat(Sidedef.Other.Sector.CeilTexture);
+		}
+
 		// This performs a fast test in object picking
 		public override bool PickFastReject(Vector3D from, Vector3D to, Vector3D dir)
 		{

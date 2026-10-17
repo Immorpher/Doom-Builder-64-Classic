@@ -424,6 +424,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public override void OnEngage()
 		{
 			base.OnEngage();
+
+			// The sky definitions may have been edited since the last time
+			General.Map.InvalidateSkyFlats();
 			
 			// Read settings
 			cameraflooroffset = General.Map.Config.ReadSetting("cameraflooroffset", cameraflooroffset);
@@ -547,6 +550,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		protected override void ResourcesReloaded()
 		{
 			base.ResourcesReloaded();
+			General.Map.InvalidateSkyFlats();
 			PickTarget();
 		}
 		
