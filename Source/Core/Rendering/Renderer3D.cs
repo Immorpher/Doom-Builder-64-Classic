@@ -639,10 +639,12 @@ namespace CodeImp.DoomBuilder.Rendering
 			wirebuffer.Unlock();
 			bufferstream.Dispose();
 
-			// Set renderstates: opaque lines that are hidden by walls in front of them
+			// Set renderstates: see-through lines (alpha is in the vertex color) that are hidden by walls in front of them
 			world = Matrix.Identity;
 			ApplyMatrices3D();
-			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
+			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, true);
+			graphics.Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+			graphics.Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
 			graphics.Device.SetRenderState(RenderState.AlphaTestEnable, false);
 			graphics.Device.SetRenderState(RenderState.ZEnable, true);
 			graphics.Device.SetRenderState(RenderState.ZWriteEnable, false);

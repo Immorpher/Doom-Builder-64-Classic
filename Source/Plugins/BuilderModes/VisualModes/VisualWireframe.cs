@@ -14,8 +14,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 	// The lines use the colors and the 1 pixel thickness of the linedefs in the 2D map view.
 	internal static class VisualWireframe
 	{
+		// How opaque the lines are (0-255)
+		private const int ALPHA = 0x40;
+
 		// The color of a linedef as in the 2D view: single-sided lines in the linedef color, double-sided lines
 		// in the same color faded by the double-sided alpha (blended over the background to stay opaque in 3D)
+		// The alpha makes the lines see-through.
 		public static int GetLinedefColor(Linedef l)
 		{
 			PixelColor c = General.Colors.Linedefs;
@@ -28,10 +32,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					(byte)((c.g * a + bg.g * (255 - a)) / 255),
 					(byte)((c.b * a + bg.b * (255 - a)) / 255));
 			}
-			else
-			{
-				c.a = 255;
-			}
+
+			c.a = (byte)ALPHA;
 			return c.ToInt();
 		}
 
