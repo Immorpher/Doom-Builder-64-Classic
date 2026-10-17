@@ -145,6 +145,12 @@ namespace CodeImp.DoomBuilder.VisualModes
 		public Sidedef Sidedef { get { return sidedef; } }
 
 		// 
+		// Adds line segments (pairs of vertices, with the color in the vertex color) to draw over this geometry
+		// while it is pick-only. The renderer draws them as a thin wireframe so that invisible geometry can be seen.
+		// 
+		public virtual void AppendWireframe(List<WorldVertex> lines) { }
+
+		// 
 		// Selected or not? This is only used by the core to determine what color to draw it with.
 		// 
 		public bool Selected { get { return selected; } set { selected = value; } }

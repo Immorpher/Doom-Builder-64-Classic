@@ -114,6 +114,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			return (Sidedef.Other != null) && General.Map.IsSkyFlat(Sidedef.Other.Sector.CeilTexture);
 		}
 
+		// Pick-only wall parts are shown as a rectangular frame along the linedef
+		public override void AppendWireframe(List<WorldVertex> lines)
+		{
+			if(PickOnly && (Sidedef != null)) VisualWireframe.AddWallFrame(lines, Sidedef.Line, bottom, top);
+		}
+
 		// This performs a fast test in object picking
 		public override bool PickFastReject(Vector3D from, Vector3D to, Vector3D dir)
 		{

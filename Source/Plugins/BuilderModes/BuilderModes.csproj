@@ -144,6 +144,7 @@
     <Compile Include="VisualModes\VisualSidedefParts.cs" />
     <Compile Include="VisualModes\VisualUpper.cs" />
 	<Compile Include="VisualModes\VisualSwitchDecal.cs" />
+	<Compile Include="VisualModes\VisualWireframe.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Actions.cfg" />

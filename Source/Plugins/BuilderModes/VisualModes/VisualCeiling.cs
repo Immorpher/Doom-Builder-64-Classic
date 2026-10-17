@@ -155,6 +155,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			}
 		}
 		
+		// A pick-only (sky) ceiling is shown as the outline of the sector
+		public override void AppendWireframe(List<WorldVertex> lines)
+		{
+			if(PickOnly) VisualWireframe.AddSectorOutline(lines, Sector.Sector, (float)Sector.Sector.CeilHeight);
+		}
+
 		// This changes the height
 		protected override void ChangeHeight(int amount)
 		{

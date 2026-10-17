@@ -77,6 +77,12 @@ namespace CodeImp.DoomBuilder.Rendering
 
         // villsa 9/15/11 (builder64) thing arrows
         private VertexBuffer thingarrow;
+
+		// Wireframe of pick-only geometry (BLANK walls, sky planes): pairs of vertices, one line per pair
+		private const float WIREFRAME_DEPTH_BIAS = -0.00005f;	// Pulls the lines slightly towards the camera, so they don't flicker on the surfaces they lie on
+		private List<WorldVertex> wirelines = new List<WorldVertex>();
+		private VertexBuffer wirebuffer;
+		private int wirebuffercapacity;
 		
 		// Crosshair
 		private FlatVertex[] crosshairverts;
@@ -155,10 +161,13 @@ namespace CodeImp.DoomBuilder.Rendering
 				// Clean up
 				if(thingcage != null) thingcage.Dispose();
                 if (thingarrow != null) thingarrow.Dispose();   // villsa 9/15/11
+				if(wirebuffer != null) wirebuffer.Dispose();
 				if(selectionimage != null) selectionimage.Dispose();
 				if(highlightimage != null) highlightimage.Dispose();
 				thingcage = null;
                 thingarrow = null;  // villsa 9/15/11
+				wirebuffer = null;
+				wirebuffercapacity = 0;
 				selectionimage = null;
 				highlightimage = null;
 				
@@ -178,10 +187,13 @@ namespace CodeImp.DoomBuilder.Rendering
 			crosshairverts = null;
 			if(thingcage != null) thingcage.Dispose();
             if (thingarrow != null) thingarrow.Dispose();   // villsa 9/15/11
+			if(wirebuffer != null) wirebuffer.Dispose();
 			if(selectionimage != null) selectionimage.Dispose();
 			if(highlightimage != null) highlightimage.Dispose();
 			thingcage = null;
             thingarrow = null;  // villsa 9/15/11
+			wirebuffer = null;
+			wirebuffercapacity = 0;
 			selectionimage = null;
 			highlightimage = null;
 		}
@@ -546,6 +558,7 @@ namespace CodeImp.DoomBuilder.Rendering
 				things[i].Clear();
 			}
 			thingsbydistance.Clear();
+			wirelines.Clear();
 		}
 
 		// This ends rendering world geometry
@@ -585,6 +598,9 @@ namespace CodeImp.DoomBuilder.Rendering
 			if(renderthingcages) RenderThingCages();
             RenderThingArrows();    // villsa
 			
+			// WIREFRAME OF PICK-ONLY GEOMETRY
+			RenderWireframe();
+
 			// ADDITIVE PASS
 			world = Matrix.Identity;
 			ApplyMatrices3D();
@@ -599,6 +615,57 @@ namespace CodeImp.DoomBuilder.Rendering
 			
 			// Release the references to the geometry, the collections are reused for the next frame
 			RecycleGeometry();
+		}
+
+		// This draws the wireframe of the pick-only geometry as 1 pixel lines, like the linedefs in the 2D view
+		private void RenderWireframe()
+		{
+			int vertexcount = wirelines.Count - (wirelines.Count % 2);
+			if(vertexcount < 2) return;
+
+			// Make sure the vertex buffer is large enough
+			if((wirebuffer == null) || (wirebuffercapacity < vertexcount))
+			{
+				if(wirebuffer != null) wirebuffer.Dispose();
+				wirebuffercapacity = Math.Max(vertexcount, 1024);
+				wirebuffer = new VertexBuffer(General.Map.Graphics.Device, WorldVertex.Stride * wirebuffercapacity,
+											  Usage.WriteOnly | Usage.Dynamic, VertexFormat.None, Pool.Default);
+			}
+
+			// Fill the buffer
+			WorldVertex[] verts = (wirelines.Count == vertexcount) ? wirelines.ToArray() : wirelines.GetRange(0, vertexcount).ToArray();
+			DataStream bufferstream = wirebuffer.Lock(0, WorldVertex.Stride * vertexcount, LockFlags.Discard);
+			bufferstream.WriteRange<WorldVertex>(verts);
+			wirebuffer.Unlock();
+			bufferstream.Dispose();
+
+			// Set renderstates: opaque lines that are hidden by walls in front of them
+			world = Matrix.Identity;
+			ApplyMatrices3D();
+			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, false);
+			graphics.Device.SetRenderState(RenderState.AlphaTestEnable, false);
+			graphics.Device.SetRenderState(RenderState.ZEnable, true);
+			graphics.Device.SetRenderState(RenderState.ZWriteEnable, false);
+			graphics.Device.SetRenderState(RenderState.DepthBias, WIREFRAME_DEPTH_BIAS);
+			graphics.Device.SetRenderState(RenderState.SlopeScaleDepthBias, -1.0f);
+			graphics.Device.SetStreamSource(0, wirebuffer, 0, WorldVertex.Stride);
+			graphics.Device.SetTexture(0, General.Map.Data.WhiteTexture.Texture);
+			graphics.Shaders.World3D.Texture1 = General.Map.Data.WhiteTexture.Texture;
+			graphics.Shaders.World3D.SetModulateColor(-1);
+			graphics.Shaders.World3D.SetHighlightColor(0);
+
+			// Render!
+			graphics.Shaders.World3D.BeginPass(shaderpass);
+			graphics.Shaders.World3D.ApplySettings();
+			graphics.Device.DrawPrimitives(PrimitiveType.LineList, 0, vertexcount / 2);
+			graphics.Shaders.World3D.EndPass();
+
+			// Restore the renderstates of the passes that follow
+			graphics.Device.SetRenderState(RenderState.DepthBias, 0.0f);
+			graphics.Device.SetRenderState(RenderState.SlopeScaleDepthBias, 0.0f);
+			graphics.Device.SetRenderState(RenderState.AlphaBlendEnable, true);
+			graphics.Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
+			graphics.Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
 		}
 
         // villsa 9/15/11
@@ -1063,6 +1130,9 @@ namespace CodeImp.DoomBuilder.Rendering
 			bool pickonlyvisible = false;
 			if(g.PickOnly)
 			{
+				// It always gets a thin wireframe, so it can be seen
+				if(g.Triangles > 0) g.AppendWireframe(wirelines);
+
 				if(!((g == highlighted) && showhighlight) && !(g.Selected && showselection))
 					return;
 				
