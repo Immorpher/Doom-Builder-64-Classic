@@ -88,7 +88,6 @@ namespace CodeImp.DoomBuilder.Data
 		private ImageData crosshair;
 		private ImageData crosshairbusy;
 		private Dictionary<string, ImageData> internalsprites;
-		private ImageData thingbox;
 		private ImageData whitetexture;
 		
 		// Used images
@@ -125,7 +124,6 @@ namespace CodeImp.DoomBuilder.Data
 		public ImageData Hourglass3D { get { return hourglass3d; } }
 		public ImageData Crosshair3D { get { return crosshair; } }
 		public ImageData CrosshairBusy3D { get { return crosshairbusy; } }
-		public ImageData ThingBox { get { return thingbox; } }
 		public ImageData WhiteTexture { get { return whitetexture; } }
 		public List<ThingCategory> ThingCategories { get { return thingcategories; } }
 		public ICollection<ThingTypeInfo> ThingTypes { get { return thingtypes.Values; } }
@@ -173,8 +171,6 @@ namespace CodeImp.DoomBuilder.Data
 			crosshair.LoadImage();
 			crosshairbusy = new ResourceImage("CodeImp.DoomBuilder.Resources.CrosshairBusy.png");
 			crosshairbusy.LoadImage();
-			thingbox = new ResourceImage("CodeImp.DoomBuilder.Resources.ThingBox.png");
-			thingbox.LoadImage();
 			whitetexture = new ResourceImage("CodeImp.DoomBuilder.Resources.White.png");
 			whitetexture.UseColorCorrection = false;
 			whitetexture.LoadImage();
@@ -203,8 +199,6 @@ namespace CodeImp.DoomBuilder.Data
 				crosshair = null;
 				crosshairbusy.Dispose();
 				crosshairbusy = null;
-				thingbox.Dispose();
-				thingbox = null;
 				whitetexture.Dispose();
 				whitetexture = null;
 				

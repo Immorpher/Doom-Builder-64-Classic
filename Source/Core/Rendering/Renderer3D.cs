@@ -72,6 +72,7 @@ namespace CodeImp.DoomBuilder.Rendering
 		private ProjectedFrustum2D frustum;
 		
 		// Thing cage
+		private const int THING_CAGE_ALPHA = 128;	// Opacity of the thing wireframe (0-255) when not highlighted or selected
 		private VertexBuffer thingcage;
 		private bool renderthingcages;
 
@@ -282,10 +283,10 @@ namespace CodeImp.DoomBuilder.Rendering
             bufferstream.Dispose();
         }
 		
-		// This sets up the thing cage
+		// This sets up the thing cage as a wireframe box (12 edges, line list)
 		private void SetupThingCage()
 		{
-			const int totalvertices = 36;
+			const int totalvertices = 24;
 			WorldVertex[] tv = new WorldVertex[totalvertices];
 			float x0 = -1.0f;
 			float x1 = 1.0f;
@@ -293,59 +294,25 @@ namespace CodeImp.DoomBuilder.Rendering
 			float y1 = 1.0f;
 			float z0 = 0.0f;
 			float z1 = 1.0f;
-			float u0 = 0.0f;
-			float u1 = 1.0f;
-			float v0 = 0.0f;
-			float v1 = 1.0f;
 			int c = -1;
 			
-			// Front
-			tv[0] = new WorldVertex(x0, y0, z0, c, u0, v0);
-			tv[1] = new WorldVertex(x0, y0, z1, c, u0, v1);
-			tv[2] = new WorldVertex(x1, y0, z0, c, u1, v0);
-			tv[3] = new WorldVertex(x1, y0, z0, c, u1, v0);
-			tv[4] = new WorldVertex(x0, y0, z1, c, u0, v1);
-			tv[5] = new WorldVertex(x1, y0, z1, c, u1, v1);
-
-			// Right
-			tv[6] = new WorldVertex(x1, y0, z0, c, u0, v0);
-			tv[7] = new WorldVertex(x1, y0, z1, c, u0, v1);
-			tv[8] = new WorldVertex(x1, y1, z0, c, u1, v0);
-			tv[9] = new WorldVertex(x1, y1, z0, c, u1, v0);
-			tv[10] = new WorldVertex(x1, y0, z1, c, u0, v1);
-			tv[11] = new WorldVertex(x1, y1, z1, c, u1, v1);
-
-			// Back
-			tv[12] = new WorldVertex(x1, y1, z0, c, u0, v0);
-			tv[13] = new WorldVertex(x1, y1, z1, c, u0, v1);
-			tv[14] = new WorldVertex(x0, y1, z0, c, u1, v0);
-			tv[15] = new WorldVertex(x0, y1, z0, c, u1, v0);
-			tv[16] = new WorldVertex(x1, y1, z1, c, u0, v1);
-			tv[17] = new WorldVertex(x0, y1, z1, c, u1, v1);
-
-			// Left
-			tv[18] = new WorldVertex(x0, y1, z0, c, u0, v1);
-			tv[19] = new WorldVertex(x0, y1, z1, c, u0, v0);
-			tv[20] = new WorldVertex(x0, y0, z1, c, u1, v0);
-			tv[21] = new WorldVertex(x0, y1, z0, c, u1, v0);
-			tv[22] = new WorldVertex(x0, y0, z1, c, u0, v1);
-			tv[23] = new WorldVertex(x0, y0, z0, c, u1, v1);
-
-			// Top
-			tv[24] = new WorldVertex(x0, y0, z1, c, u0, v0);
-			tv[25] = new WorldVertex(x0, y1, z1, c, u0, v1);
-			tv[26] = new WorldVertex(x1, y0, z1, c, u1, v0);
-			tv[27] = new WorldVertex(x1, y0, z1, c, u1, v0);
-			tv[28] = new WorldVertex(x0, y1, z1, c, u0, v1);
-			tv[29] = new WorldVertex(x1, y1, z1, c, u1, v1);
-
-			// Bottom
-			tv[30] = new WorldVertex(x1, y0, z0, c, u1, v0);
-			tv[31] = new WorldVertex(x0, y1, z0, c, u0, v1);
-			tv[32] = new WorldVertex(x0, y0, z0, c, u0, v0);
-			tv[33] = new WorldVertex(x1, y0, z0, c, u1, v0);
-			tv[34] = new WorldVertex(x1, y1, z0, c, u1, v1);
-			tv[35] = new WorldVertex(x0, y1, z0, c, u0, v1);
+			// Bottom rectangle
+			tv[0] = new WorldVertex(x0, y0, z0, c); tv[1] = new WorldVertex(x1, y0, z0, c);
+			tv[2] = new WorldVertex(x1, y0, z0, c); tv[3] = new WorldVertex(x1, y1, z0, c);
+			tv[4] = new WorldVertex(x1, y1, z0, c); tv[5] = new WorldVertex(x0, y1, z0, c);
+			tv[6] = new WorldVertex(x0, y1, z0, c); tv[7] = new WorldVertex(x0, y0, z0, c);
+			
+			// Top rectangle
+			tv[8] = new WorldVertex(x0, y0, z1, c); tv[9] = new WorldVertex(x1, y0, z1, c);
+			tv[10] = new WorldVertex(x1, y0, z1, c); tv[11] = new WorldVertex(x1, y1, z1, c);
+			tv[12] = new WorldVertex(x1, y1, z1, c); tv[13] = new WorldVertex(x0, y1, z1, c);
+			tv[14] = new WorldVertex(x0, y1, z1, c); tv[15] = new WorldVertex(x0, y0, z1, c);
+			
+			// Vertical edges
+			tv[16] = new WorldVertex(x0, y0, z0, c); tv[17] = new WorldVertex(x0, y0, z1, c);
+			tv[18] = new WorldVertex(x1, y0, z0, c); tv[19] = new WorldVertex(x1, y0, z1, c);
+			tv[20] = new WorldVertex(x1, y1, z0, c); tv[21] = new WorldVertex(x1, y1, z1, c);
+			tv[22] = new WorldVertex(x0, y1, z0, c); tv[23] = new WorldVertex(x0, y1, z1, c);
 
 			// Create vertexbuffer
 			thingcage = new VertexBuffer(General.Map.Graphics.Device, WorldVertex.Stride * totalvertices,
@@ -441,10 +408,6 @@ namespace CodeImp.DoomBuilder.Rendering
 		// This starts rendering
 		public bool Start()
 		{
-			// Create texture
-			if(General.Map.Data.ThingBox.Texture == null)
-				General.Map.Data.ThingBox.CreateTexture();
-			
 			// Start drawing
 			if(graphics.StartRendering(true, General.Colors.Background.ToColorValue(), graphics.BackBuffer, graphics.DepthBuffer))
 			{
@@ -748,8 +711,8 @@ namespace CodeImp.DoomBuilder.Rendering
 			graphics.Device.SetRenderState(RenderState.SourceBlend, Blend.SourceAlpha);
 			graphics.Device.SetRenderState(RenderState.DestinationBlend, Blend.InverseSourceAlpha);
 			graphics.Device.SetStreamSource(0, thingcage, 0, WorldVertex.Stride);
-			graphics.Device.SetTexture(0, General.Map.Data.ThingBox.Texture);
-			graphics.Shaders.World3D.Texture1 = General.Map.Data.ThingBox.Texture;
+			graphics.Device.SetTexture(0, General.Map.Data.WhiteTexture.Texture);
+			graphics.Shaders.World3D.Texture1 = General.Map.Data.WhiteTexture.Texture;
 
 			graphics.Shaders.World3D.BeginPass(shaderpass);
 			foreach(VisualThing t in thingsbydistance)
@@ -780,13 +743,15 @@ namespace CodeImp.DoomBuilder.Rendering
 				}
 				else
 				{
-					graphics.Shaders.World3D.SetModulateColor(t.CageColor);
-					graphics.Device.SetRenderState(RenderState.TextureFactor, t.CageColor);
+					// Thing color at partial opacity, so the wireframe isn't too bright
+					int cagecolor = (t.CageColor & 0x00FFFFFF) | (THING_CAGE_ALPHA << 24);
+					graphics.Shaders.World3D.SetModulateColor(cagecolor);
+					graphics.Device.SetRenderState(RenderState.TextureFactor, cagecolor);
 				}
 
 				// Render!
 				graphics.Shaders.World3D.ApplySettings();
-				graphics.Device.DrawPrimitives(PrimitiveType.TriangleList, 0, 12);
+				graphics.Device.DrawPrimitives(PrimitiveType.LineList, 0, 12);
 			}
 
 			// Done
