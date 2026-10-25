@@ -158,6 +158,8 @@
     <Compile Include="Actions\SpecialKeys.cs" />
     <Compile Include="Config\NodebuilderInfo.cs" />
     <Compile Include="Geometry\Angle2D.cs" />
+    <Compile Include="Geometry\CurveTools.cs" />
+    <Compile Include="Geometry\InterpolationTools.cs" />
     <Compile Include="Geometry\DrawnVertex.cs" />
     <Compile Include="Geometry\LabelPositionInfo.cs" />
     <Compile Include="Geometry\LinedefsTracePath.cs" />
@@ -629,6 +631,7 @@
     <Compile Include="Config\PasteOptions.cs" />
     <Compile Include="Controls\ButtonsNumericTextboxDesigner.cs" />
     <Compile Include="Controls\Docker.cs" />
+    <Compile Include="Controls\ToolStripNumericUpDown.cs" />
     <Compile Include="Controls\DockersControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

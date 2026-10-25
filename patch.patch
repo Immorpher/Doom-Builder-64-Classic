@@ -1,0 +1,54 @@
+diff --git a/Source/Plugins/BuilderModes/ClassicModes/DrawCurveMode.cs b/Source/Plugins/BuilderModes/ClassicModes/DrawCurveMode.cs
+index 3b521d2..bb11ece 100644
+--- a/Source/Plugins/BuilderModes/ClassicModes/DrawCurveMode.cs
++++ b/Source/Plugins/BuilderModes/ClassicModes/DrawCurveMode.cs
+@@ -40,6 +40,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
+ 
+ 		#endregion
+ 
++		#region ================== Properties
++
++		// Keep this mode's own button checked in the side bar while it is active
++		public override string EditModeButtonName { get { return GetType().Name; } }
++
++		#endregion
++
+ 		#region ================== Constructor/Disposer
+ 
+ 		public DrawCurveMode() 
+diff --git a/Source/Plugins/BuilderModes/ClassicModes/DrawGridMode.cs b/Source/Plugins/BuilderModes/ClassicModes/DrawGridMode.cs
+index 3d4b821..2854368 100644
+--- a/Source/Plugins/BuilderModes/ClassicModes/DrawGridMode.cs
++++ b/Source/Plugins/BuilderModes/ClassicModes/DrawGridMode.cs
+@@ -66,6 +66,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
+ 
+ 		#endregion
+ 
++		#region ================== Properties
++
++		// Keep this mode's own button checked in the side bar while it is active
++		public override string EditModeButtonName { get { return GetType().Name; } }
++
++		#endregion
++
+ 		#region ================== Constructor
+ 
+ 		public DrawGridMode() 
+diff --git a/Source/Plugins/BuilderModes/ClassicModes/DrawRectangleMode.cs b/Source/Plugins/BuilderModes/ClassicModes/DrawRectangleMode.cs
+index a6f0981..74521fb 100644
+--- a/Source/Plugins/BuilderModes/ClassicModes/DrawRectangleMode.cs
++++ b/Source/Plugins/BuilderModes/ClassicModes/DrawRectangleMode.cs
+@@ -54,6 +54,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
+ 
+ 		#endregion
+ 
++		#region ================== Properties
++
++		// Keep this mode's own button checked in the side bar while it is active
++		public override string EditModeButtonName { get { return GetType().Name; } }
++
++		#endregion
++
+ 		#region ================== Constructor/Disposer
+ 
+ 		public DrawRectangleMode() 

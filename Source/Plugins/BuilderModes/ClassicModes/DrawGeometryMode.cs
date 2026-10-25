@@ -47,15 +47,15 @@ namespace CodeImp.DoomBuilder.BuilderModes
 	{
 		#region ================== Constants
 
-		private const float LINE_THICKNESS = 0.8f;
+		protected const float LINE_THICKNESS = 0.8f;
 
 		#endregion
 
 		#region ================== Variables
 
 		// Drawing points
-		private List<DrawnVertex> points;
-		private List<LineLengthLabel> labels;
+		protected List<DrawnVertex> points;
+		protected List<LineLengthLabel> labels;
 
 		// Keep track of view changes
 		private float lastoffsetx;
@@ -63,8 +63,17 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private float lastscale;
 
 		// Options
-		private bool snaptogrid;		// SHIFT to toggle
-		private bool snaptonearest;		// CTRL to enable
+		protected bool snaptogrid;		// SHIFT to toggle
+		protected bool snaptonearest;	// CTRL to enable
+		protected bool snaptocardinaldirection;	// ALT-SHIFT to enable
+		protected bool usefourcardinaldirections;
+		protected bool continuousdrawing;	// Restart after finishing drawing?
+		protected bool drawingautoclosed;
+		protected bool showguidelines;
+
+		// Labels display style
+		protected bool labelshowangle;
+		protected bool labeluseoffset;
 		
 		#endregion
 
@@ -87,6 +96,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// No selection in this mode
 			General.Map.Map.ClearAllSelected();
 			General.Map.Map.ClearAllMarks(false);
+
+			// Let derived modes set up their options
+			SetupInterface();
 			
 			// We have no destructor
 			GC.SuppressFinalize(this);
@@ -131,7 +143,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		}
 		
 		// This updates the dragging
-		private void Update()
+		protected virtual void Update()
 		{
 			PixelColor stitchcolor = General.Colors.Highlight;
 			PixelColor losecolor = General.Colors.Selection;
@@ -207,9 +219,38 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// This returns the aligned and snapped draw position
 		public static DrawnVertex GetCurrentPosition(Vector2D mousemappos, bool snaptonearest, bool snaptogrid, IRenderer2D renderer, List<DrawnVertex> points)
 		{
+			return GetCurrentPosition(mousemappos, snaptonearest, snaptogrid, false, false, renderer, points);
+		}
+
+		// This returns the aligned and snapped draw position
+		public static DrawnVertex GetCurrentPosition(Vector2D mousemappos, bool snaptonearest, bool snaptogrid, bool snaptocardinal, bool usefourcardinaldirections, IRenderer2D renderer, List<DrawnVertex> points)
+		{
 			DrawnVertex p = new DrawnVertex();
 			Vector2D vm = mousemappos;
+			Vector2D gridoffset = new Vector2D();
 			float vrange = BuilderPlug.Me.StitchRange / renderer.Scale;
+
+			// Don't snap to cardinal directions when there are no points
+			snaptocardinal = (snaptocardinal && points.Count > 0);
+
+			// If snap to cardinal directions is enabled and we have points, modify the mouse position
+			if(snaptocardinal)
+			{
+				Vector2D prev = points[points.Count - 1].pos;
+				Vector2D offset = mousemappos - prev;
+
+				float angle;
+				if(usefourcardinaldirections)
+					angle = Angle2D.DegToRad((General.ClampAngle((int)Angle2D.RadToDeg(offset.GetAngle()))) / 90 * 90 + 45);
+				else
+					angle = Angle2D.DegToRad((General.ClampAngle((int)Angle2D.RadToDeg(offset.GetAngle()) + 22)) / 45 * 45);
+
+				offset = new Vector2D(0, -offset.GetLength()).GetRotated(angle);
+				vm = prev + offset;
+
+				// We need to be snapped relative to the initial position
+				gridoffset = prev - General.Map.Grid.SnappedToGrid(prev);
+			}
 
 			// Snap to nearest?
 			if(snaptonearest)
@@ -217,7 +258,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				// Go for all drawn points
 				foreach(DrawnVertex v in points)
 				{
-					if(Vector2D.DistanceSq(mousemappos, v.pos) < (vrange * vrange))
+					if(Vector2D.DistanceSq(vm, v.pos) < (vrange * vrange))
 					{
 						p.pos = v.pos;
 						p.stitch = true;
@@ -227,17 +268,21 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				}
 
 				// Try the nearest vertex
-				Vertex nv = General.Map.Map.NearestVertexSquareRange(mousemappos, vrange);
+				Vertex nv = General.Map.Map.NearestVertexSquareRange(vm, vrange);
 				if(nv != null)
 				{
-					p.pos = nv.Position;
-					p.stitch = true;
-					p.stitchline = true;
-					return p;
+					// When snapping to cardinal directions the line angle must stay the same
+					if(!snaptocardinal || Math.Round(new Line2D(points[points.Count - 1].pos, vm).GetSideOfLine(nv.Position), 1) == 0)
+					{
+						p.pos = nv.Position;
+						p.stitch = true;
+						p.stitchline = true;
+						return p;
+					}
 				}
 
-				// Try the nearest linedef
-				Linedef nl = General.Map.Map.NearestLinedefRange(mousemappos, BuilderPlug.Me.StitchRange / renderer.Scale);
+				// Try the nearest linedef (not when snapping to cardinal directions, because the line angle must stay the same)
+				Linedef nl = snaptocardinal ? null : General.Map.Map.NearestLinedefRange(vm, BuilderPlug.Me.StitchRange / renderer.Scale);
 				if(nl != null)
 				{
 					// Snap to grid?
@@ -252,10 +297,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 						// A linedef that does not cross any grid line (for example a short line inside a
 						// single grid cell) has no grid intersections. Fall back to the nearest point on the
 						// line rather than leaving the position at the default (0,0).
-						Vector2D found_coord = nl.NearestOnLine(mousemappos);
+						Vector2D found_coord = nl.NearestOnLine(vm);
 						foreach(Vector2D v in coords)
 						{
-							Vector2D delta = mousemappos - v;
+							Vector2D delta = vm - v;
 							if(delta.GetLengthSq() < found_distance)
 							{
 								found_distance = delta.GetLengthSq();
@@ -272,7 +317,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					else
 					{
 						// Aligned to line
-						p.pos = nl.NearestOnLine(mousemappos);
+						p.pos = nl.NearestOnLine(vm);
 						p.stitch = true;
 						p.stitchline = true;
 						return p;
@@ -284,7 +329,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				// Always snap to the first drawn vertex so that the user can finish a complete sector without stitching
 				if(points.Count > 0)
 				{
-					if(Vector2D.DistanceSq(mousemappos, points[0].pos) < (vrange * vrange))
+					if(Vector2D.DistanceSq(vm, points[0].pos) < (vrange * vrange))
 					{
 						p.pos = points[0].pos;
 						p.stitch = true;
@@ -338,7 +383,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			if(snaptogrid)
 			{
 				// Aligned to grid
-				p.pos = General.Map.Grid.SnappedToGrid(vm);
+				p.pos = General.Map.Grid.SnappedToGrid(vm - gridoffset) + gridoffset;
 
 				// special handling 
 				if (p.pos.x > General.Map.Config.RightBoundary) p.pos.x = General.Map.Config.RightBoundary;
@@ -358,9 +403,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		}
 		
 		// This gets the aligned and snapped draw position
-		private DrawnVertex GetCurrentPosition()
+		protected DrawnVertex GetCurrentPosition()
 		{
-			return GetCurrentPosition(mousemappos, snaptonearest, snaptogrid, renderer, points);
+			return GetCurrentPosition(mousemappos, snaptonearest, snaptogrid, snaptocardinaldirection, usefourcardinaldirections, renderer, points);
 		}
 		
 		// This draws a point at a specific location
@@ -370,7 +415,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		}
 		
 		// This draws a point at a specific location
-		public bool DrawPointAt(Vector2D pos, bool stitch, bool stitchline)
+		public virtual bool DrawPointAt(Vector2D pos, bool stitch, bool stitchline)
 		{
 			if (pos.x < General.Map.Config.LeftBoundary || pos.x > General.Map.Config.RightBoundary ||
 				pos.y > General.Map.Config.TopBoundary || pos.y < General.Map.Config.BottomBoundary)
@@ -381,7 +426,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			newpoint.stitch = stitch;
 			newpoint.stitchline = stitchline;
 			points.Add(newpoint);
-			labels.Add(new LineLengthLabel());
+			labels.Add(new LineLengthLabel(labelshowangle, labeluseoffset));
 			labels[labels.Count - 1].Start = newpoint.pos;
 			if(labels.Count > 1) labels[labels.Count - 2].End = newpoint.pos;
 			Update();
@@ -402,6 +447,40 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			return true;
 		}
 		
+		// This renders guidelines through the given start and end points (extending to the map boundaries)
+		protected void RenderGuidelines(Vector2D start, Vector2D end, PixelColor c)
+		{
+			float left = General.Map.Config.LeftBoundary;
+			float right = General.Map.Config.RightBoundary;
+			float top = General.Map.Config.TopBoundary;
+			float bottom = General.Map.Config.BottomBoundary;
+
+			// Vertical guidelines
+			renderer.RenderLine(new Vector2D(start.x, top), new Vector2D(start.x, bottom), LINE_THICKNESS, c, true);
+			if(end.x != start.x)
+				renderer.RenderLine(new Vector2D(end.x, top), new Vector2D(end.x, bottom), LINE_THICKNESS, c, true);
+
+			// Horizontal guidelines
+			renderer.RenderLine(new Vector2D(left, start.y), new Vector2D(right, start.y), LINE_THICKNESS, c, true);
+			if(end.y != start.y)
+				renderer.RenderLine(new Vector2D(left, end.y), new Vector2D(right, end.y), LINE_THICKNESS, c, true);
+		}
+
+		// This is the color used to render guidelines (before applying alpha)
+		protected static PixelColor GuidelineColor
+		{
+			get { return new PixelColor(80, 255, 255, 0); }
+		}
+
+		#endregion
+
+		#region ================== Settings panel
+
+		// Derived modes can override these to add (and remove) their option controls
+		protected virtual void SetupInterface() { }
+		protected virtual void AddInterface() { }
+		protected virtual void RemoveInterface() { }
+
 		#endregion
 
 		#region ================== Events
@@ -416,6 +495,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			base.OnEngage();
 			EnableAutoPanning();
+			AddInterface();
 			renderer.SetPresentation(Presentation.Standard);
 			
 			// Set cursor
@@ -425,6 +505,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// Disengaging
 		public override void OnDisengage()
 		{
+			RemoveInterface();
 			base.OnDisengage();
 			DisableAutoPanning();
 		}
@@ -537,7 +618,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			base.OnKeyUp(e);
 			if((snaptogrid != (General.Interface.ShiftState ^ General.Interface.SnapToGrid)) ||
-			   (snaptonearest != (General.Interface.CtrlState ^ General.Interface.AutoMerge))) Update();
+			   (snaptonearest != (General.Interface.CtrlState ^ General.Interface.AutoMerge)) ||
+			   (snaptocardinaldirection != (General.Interface.AltState && General.Interface.ShiftState))) Update();
 		}
 
 		// When a key is pressed
@@ -545,7 +627,21 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			base.OnKeyDown(e);
 			if((snaptogrid != (General.Interface.ShiftState ^ General.Interface.SnapToGrid)) ||
-			   (snaptonearest != (General.Interface.CtrlState ^ General.Interface.AutoMerge))) Update();
+			   (snaptonearest != (General.Interface.CtrlState ^ General.Interface.AutoMerge)) ||
+			   (snaptocardinaldirection != (General.Interface.AltState && General.Interface.ShiftState))) Update();
+		}
+		
+		// Continuous drawing option changed
+		protected void OnContinuousDrawingChanged(object value, EventArgs e)
+		{
+			continuousdrawing = (bool)value;
+		}
+
+		// Show guidelines option changed
+		protected void OnShowGuidelinesChanged(object value, EventArgs e)
+		{
+			showguidelines = (bool)value;
+			General.Interface.RedrawDisplay();
 		}
 		
 		#endregion
@@ -567,7 +663,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		
 		// Remove a point
 		[BeginAction("removepoint")]
-		public void RemovePoint()
+		public virtual void RemovePoint()
 		{
 			if(points.Count > 0) points.RemoveAt(points.Count - 1);
 			if(labels.Count > 0)

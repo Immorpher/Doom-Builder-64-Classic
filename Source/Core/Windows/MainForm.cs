@@ -1535,6 +1535,20 @@ namespace CodeImp.DoomBuilder.Windows
 			}
 		}
 
+		// This suspends the layout of all toolbars
+		public void BeginToolbarUpdate()
+		{
+			toolbar.SuspendLayout();
+			modestoolbar.SuspendLayout();
+		}
+
+		// This resumes the layout of all toolbars
+		public void EndToolbarUpdate()
+		{
+			toolbar.ResumeLayout(true);
+			modestoolbar.ResumeLayout(true);
+		}
+
         // This adds a button to the toolbar
         public void AddButton(ToolStripItem button) { AddButton(button, ToolbarSection.Custom, General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly())); }
         public void AddButton(ToolStripItem button, ToolbarSection section) { AddButton(button, section, General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly())); }

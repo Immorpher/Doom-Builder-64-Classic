@@ -43,14 +43,19 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private const int TEXT_CAPACITY = 10;
 		private const float TEXT_SCALE = 14f;
 		private const string VALUE_FORMAT = "0";
+		private const float OFFSET_PIXELS = 12f;
 
 		#endregion
 
 		#region ================== Variables
 
-		private TextLabel label;
-		private Vector2D start;
-		private Vector2D end;
+		protected TextLabel label;
+		protected Vector2D start;
+		protected Vector2D end;
+
+		// Display options
+		private bool showangle;
+		private bool offsetposition;
 		
 		#endregion
 
@@ -59,6 +64,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public TextLabel TextLabel { get { return label; } }
 		public Vector2D Start { get { return start; } set { start = value; Update(); } }
 		public Vector2D End { get { return end; } set { end = value; Update(); } }
+
+		// Display options
+		public bool ShowAngle { get { return showangle; } set { showangle = value; Update(); } }
+		public bool OffsetPosition { get { return offsetposition; } set { offsetposition = value; Update(); } }
 
 		#endregion
 
@@ -72,8 +81,29 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		}
 
 		// Constructor
+		public LineLengthLabel(bool showangle, bool offsetposition)
+		{
+			this.showangle = showangle;
+			this.offsetposition = offsetposition;
+
+			// Initialize
+			Initialize();
+		}
+
+		// Constructor
 		public LineLengthLabel(Vector2D start, Vector2D end)
 		{
+			// Initialize
+			Initialize();
+			Move(start, end);
+		}
+
+		// Constructor
+		public LineLengthLabel(Vector2D start, Vector2D end, bool showangle, bool offsetposition)
+		{
+			this.showangle = showangle;
+			this.offsetposition = offsetposition;
+
 			// Initialize
 			Initialize();
 			Move(start, end);
@@ -92,7 +122,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		}
 		
 		// Disposer
-		public void Dispose()
+		public virtual void Dispose()
 		{
 			label.Dispose();
 		}
@@ -102,16 +132,41 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		#region ================== Methods
 
 		// This updates the text
-		private void Update()
+		protected virtual void UpdateText()
 		{
 			Vector2D delta = end - start;
 			float length = delta.GetLength();
-			label.Text = length.ToString(VALUE_FORMAT);
-			label.Rectangle = new RectangleF(start.x + delta.x * 0.5f, start.y + delta.y * 0.5f, 0f, 0f);
+			if(showangle)
+			{
+				int displayangle = (int)Math.Round(Angle2D.RadToDeg(delta.GetAngle()));
+				label.Text = "L:" + length.ToString(VALUE_FORMAT) + "; A:" + displayangle;
+			}
+			else
+			{
+				label.Text = length.ToString(VALUE_FORMAT);
+			}
+		}
+
+		// This updates the text and position
+		private void Update()
+		{
+			UpdateText();
+
+			Vector2D delta = end - start;
+			Vector2D pos = new Vector2D(start.x + delta.x * 0.5f, start.y + delta.y * 0.5f);
+
+			// Offset the label sideways so it does not overlap the line
+			if(offsetposition && (delta.x != 0.0f || delta.y != 0.0f))
+			{
+				Vector2D perpendicular = delta.GetPerpendicular().GetNormal();
+				pos += perpendicular.GetScaled(OFFSET_PIXELS / General.Map.Renderer2D.Scale);
+			}
+
+			label.Rectangle = new RectangleF(pos.x, pos.y, 0f, 0f);
 		}
 
 		// This moves the label
-		public void Move(Vector2D start, Vector2D end)
+		public virtual void Move(Vector2D start, Vector2D end)
 		{
 			this.start = start;
 			this.end = end;

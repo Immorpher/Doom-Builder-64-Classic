@@ -146,6 +146,16 @@ namespace CodeImp.DoomBuilder.Windows
 		void InvokeTaggedAction(object sender, EventArgs e);
 		
 		// 
+		// This suspends layouts of all toolbars, which can have buttons added/removed using AddButton() / RemoveButton().
+		// 
+		void BeginToolbarUpdate();
+
+		// 
+		// This resumes layouts of all toolbars, which can have buttons added/removed using AddButton() / RemoveButton().
+		// 
+		void EndToolbarUpdate();
+
+		// 
 		// This adds a custom button to the toolbar.
 		// 
 		void AddButton(ToolStripItem button);
