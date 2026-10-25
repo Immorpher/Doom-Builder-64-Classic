@@ -94,8 +94,11 @@ namespace CodeImp.DoomBuilder.BuilderModes
 					setuponloadedtexture = s.LongFloorTexture;
 			}
 			
-			// A liquid floor draws this flat as a translucent layer (alpha 160 of 255) over the flat after it
-			bool liquid = TextureScroll.IsLiquid(s);
+			// A liquid floor draws this flat as a translucent layer (alpha 160 of 255) over the flat after it.
+			// The translucent layer is only used when that opaque bottom layer exists. When there is none (the flat
+			// is the last one in the texture list, a custom flat, or the index is unknown) the floor must stay
+			// solid, otherwise it can be seen through (the game never shows the void below a floor).
+			bool liquid = TextureScroll.IsLiquid(s) && (TextureScroll.GetLiquidBaseName(s) != null);
 			if(liquid)
 			{
 				brightness = (160 << 24) | (brightness & 0x00FFFFFF);
