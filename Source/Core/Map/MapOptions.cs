@@ -50,9 +50,6 @@ namespace CodeImp.DoomBuilder.Map
 		private string currentname;
 		private string previousname;		// When zero length string, map has not renamed
 		
-		// Strict pathes loading?
-		private bool strictpatches;
-		
 		// Additional resources
 		private DataLocationList resources;
 
@@ -70,7 +67,6 @@ namespace CodeImp.DoomBuilder.Map
 
 		internal string ConfigFile { get { return configfile; } set { configfile = value; } }
 		internal DataLocationList Resources { get { return resources; } }
-		internal bool StrictPatches { get { return strictpatches; } set { strictpatches = value; } }
 		internal List<string> ScriptFiles { get { return scriptfiles; } set { scriptfiles = value; } }
 		internal string ScriptEditorTab { get { return scripteditortab; } set { scripteditortab = value ?? ""; } }
 		internal string PreviousName { get { return previousname; } set { previousname = value; } }
@@ -102,7 +98,6 @@ namespace CodeImp.DoomBuilder.Map
 			this.previousname = "";
 			this.currentname = "";
 			this.configfile = "";
-			this.strictpatches = false;
 			this.resources = new DataLocationList();
 			this.mapconfig = new Configuration(true);
 			this.scriptfiles = new List<string>();
@@ -117,7 +112,6 @@ namespace CodeImp.DoomBuilder.Map
 			// Initialize
 			this.previousname = "";
 			this.currentname = mapname;
-			this.strictpatches = General.Int2Bool(cfg.ReadSetting("strictpatches", 0));
 			this.configfile = cfg.ReadSetting("gameconfig", "");
 			this.resources = new DataLocationList();
 			this.mapconfig = new Configuration(true);
@@ -230,7 +224,6 @@ namespace CodeImp.DoomBuilder.Map
 			// Write configuration type information
 			wadcfg.WriteSetting("type", "Doom Builder Map Settings Configuration");
 			wadcfg.WriteSetting("gameconfig", configfile);
-			wadcfg.WriteSetting("strictpatches", General.Bool2Int(strictpatches));
 			
 			// Update the settings file with this map configuration
 			wadcfg.WriteSetting("maps." + currentname, mapconfig.Root);

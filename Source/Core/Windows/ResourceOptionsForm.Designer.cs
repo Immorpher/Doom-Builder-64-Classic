@@ -30,8 +30,6 @@ namespace CodeImp.DoomBuilder.Windows
 		{
 			System.Windows.Forms.Label label1;
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ResourceOptionsForm));
-			this.label6 = new System.Windows.Forms.Label();
-			this.strictpatches = new System.Windows.Forms.CheckBox();
 			this.browsewad = new System.Windows.Forms.Button();
 			this.wadlocation = new System.Windows.Forms.TextBox();
 			this.cancel = new System.Windows.Forms.Button();
@@ -49,24 +47,6 @@ namespace CodeImp.DoomBuilder.Windows
 			label1.Size = new System.Drawing.Size(104, 14);
 			label1.TabIndex = 0;
 			label1.Text = "WAD File Resource:";
-			// 
-			// label6
-			// 
-			this.label6.Location = new System.Drawing.Point(12, 92);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(362, 58);
-			this.label6.TabIndex = 8;
-			this.label6.Text = resources.GetString("label6.Text");
-			// 
-			// strictpatches
-			// 
-			this.strictpatches.AutoSize = true;
-			this.strictpatches.Location = new System.Drawing.Point(12, 64);
-			this.strictpatches.Name = "strictpatches";
-			this.strictpatches.Size = new System.Drawing.Size(298, 18);
-			this.strictpatches.TabIndex = 2;
-			this.strictpatches.Text = "Strictly load patches between P_START and P_END only";
-			this.strictpatches.UseVisualStyleBackColor = true;
 			// 
 			// browsewad
 			// 
@@ -93,7 +73,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// 
 			this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cancel.Location = new System.Drawing.Point(262, 186);
+			this.cancel.Location = new System.Drawing.Point(262, 96);
 			this.cancel.Name = "cancel";
 			this.cancel.Size = new System.Drawing.Size(112, 25);
 			this.cancel.TabIndex = 5;
@@ -104,7 +84,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// apply
 			// 
 			this.apply.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.apply.Location = new System.Drawing.Point(144, 186);
+			this.apply.Location = new System.Drawing.Point(144, 96);
 			this.apply.Name = "apply";
 			this.apply.Size = new System.Drawing.Size(112, 25);
 			this.apply.TabIndex = 4;
@@ -121,7 +101,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// 
 			this.notfortesting.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.notfortesting.AutoSize = true;
-			this.notfortesting.Location = new System.Drawing.Point(12, 156);
+			this.notfortesting.Location = new System.Drawing.Point(12, 64);
 			this.notfortesting.Name = "notfortesting";
 			this.notfortesting.Size = new System.Drawing.Size(249, 18);
 			this.notfortesting.TabIndex = 3;
@@ -134,9 +114,7 @@ namespace CodeImp.DoomBuilder.Windows
 			this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
 			this.CancelButton = this.cancel;
-			this.ClientSize = new System.Drawing.Size(386, 224);
-			this.Controls.Add(this.label6);
-			this.Controls.Add(this.strictpatches);
+			this.ClientSize = new System.Drawing.Size(386, 134);
 			this.Controls.Add(this.browsewad);
 			this.Controls.Add(this.wadlocation);
 			this.Controls.Add(label1);
@@ -166,8 +144,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.TextBox wadlocation;
 		private System.Windows.Forms.Button browsewad;
 		private System.Windows.Forms.OpenFileDialog wadfiledialog;
-		private System.Windows.Forms.CheckBox strictpatches;
-		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.CheckBox notfortesting;
 	}
 }

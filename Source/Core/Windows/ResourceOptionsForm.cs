@@ -54,7 +54,6 @@ namespace CodeImp.DoomBuilder.Windows
 			if(res.type == DataLocation.RESOURCE_WAD)
 			{
 				wadlocation.Text = res.location;
-				strictpatches.Checked = res.option1;
 			}
 			
 			// Checkbox
@@ -76,7 +75,7 @@ namespace CodeImp.DoomBuilder.Windows
 				// Apply settings
 				res.type = DataLocation.RESOURCE_WAD;
 				res.location = wadlocation.Text;
-				res.option1 = strictpatches.Checked;
+				res.option1 = false;
 				res.option2 = false;
 				res.notfortesting = notfortesting.Checked;
 

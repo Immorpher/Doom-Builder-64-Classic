@@ -38,7 +38,6 @@ namespace CodeImp.DoomBuilder.Windows
 			this.apply = new System.Windows.Forms.Button();
 			this.cancel = new System.Windows.Forms.Button();
 			this.panelres = new System.Windows.Forms.GroupBox();
-			this.strictpatches = new System.Windows.Forms.CheckBox();
 			this.datalocations = new CodeImp.DoomBuilder.Controls.ResourceListEditor();
 			label3 = new System.Windows.Forms.Label();
 			label2 = new System.Windows.Forms.Label();
@@ -150,7 +149,6 @@ namespace CodeImp.DoomBuilder.Windows
 			// 
 			this.panelres.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
 						| System.Windows.Forms.AnchorStyles.Right)));
-			this.panelres.Controls.Add(this.strictpatches);
 			this.panelres.Controls.Add(this.datalocations);
 			this.panelres.Controls.Add(label4);
 			this.panelres.Location = new System.Drawing.Point(12, 141);
@@ -160,23 +158,13 @@ namespace CodeImp.DoomBuilder.Windows
 			this.panelres.TabStop = false;
 			this.panelres.Text = " Resources ";
 			// 
-			// strictpatches
-			// 
-			this.strictpatches.AutoSize = true;
-			this.strictpatches.Location = new System.Drawing.Point(15, 27);
-			this.strictpatches.Name = "strictpatches";
-			this.strictpatches.Size = new System.Drawing.Size(352, 18);
-			this.strictpatches.TabIndex = 20;
-			this.strictpatches.Text = "Strictly load patches between P_START and P_END only for this file";
-			this.strictpatches.UseVisualStyleBackColor = true;
-			// 
 			// datalocations
 			// 
 			this.datalocations.DialogOffset = new System.Drawing.Point(40, 20);
 			this.datalocations.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.datalocations.Location = new System.Drawing.Point(15, 57);
+			this.datalocations.Location = new System.Drawing.Point(15, 26);
 			this.datalocations.Name = "datalocations";
-			this.datalocations.Size = new System.Drawing.Size(368, 130);
+			this.datalocations.Size = new System.Drawing.Size(368, 161);
 			this.datalocations.TabIndex = 0;
 			// 
 			// MapOptionsForm
@@ -217,7 +205,6 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.Button cancel;
 		private System.Windows.Forms.GroupBox panelres;
 		private CodeImp.DoomBuilder.Controls.ResourceListEditor datalocations;
-		private System.Windows.Forms.CheckBox strictpatches;
 
 
 	}

@@ -481,7 +481,7 @@ namespace CodeImp.DoomBuilder
             // texture hash table needs to be initialized first
             General.WriteLogLine("Loading data resources...");
             data = new DataManager();
-            maplocation = new DataLocation(DataLocation.RESOURCE_WAD, filepathname, options.StrictPatches, false, false);
+            maplocation = new DataLocation(DataLocation.RESOURCE_WAD, filepathname, false, false, false);
             data.Load(configinfo.Resources, options.Resources, maplocation);
 
 			// Remove unused sectors
