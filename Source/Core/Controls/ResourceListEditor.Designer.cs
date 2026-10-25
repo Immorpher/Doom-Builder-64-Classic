@@ -32,7 +32,7 @@ namespace CodeImp.DoomBuilder.Controls
 			System.Windows.Forms.SplitContainer buttonsbar2;
 			System.Windows.Forms.SplitContainer buttonsbar1;
 			System.Windows.Forms.ListViewItem listViewItem1 = new System.Windows.Forms.ListViewItem(new string[] {
-            "C:\\Windows\\Doom\\Doom2.wad"}, 3, System.Drawing.SystemColors.GrayText, System.Drawing.SystemColors.Window, null);
+            "C:\\Doom64\\DOOM64.WAD"}, 3, System.Drawing.SystemColors.GrayText, System.Drawing.SystemColors.Window, null);
 			System.Windows.Forms.ListViewItem listViewItem2 = new System.Windows.Forms.ListViewItem(new string[] {
             "C:\\My\\Little\\Textures\\"}, 2, System.Drawing.SystemColors.GrayText, System.Drawing.SystemColors.Window, null);
 			System.Windows.Forms.ListViewItem listViewItem3 = new System.Windows.Forms.ListViewItem("C:\\My\\Little\\Pony.wad", 1);

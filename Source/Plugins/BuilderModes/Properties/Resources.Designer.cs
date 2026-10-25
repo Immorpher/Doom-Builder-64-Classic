@@ -165,13 +165,6 @@ namespace CodeImp.DoomBuilder.BuilderModes.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap Text {
-            get {
-                object obj = ResourceManager.GetObject("Text", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
         internal static System.Drawing.Bitmap treeview {
             get {
                 object obj = ResourceManager.GetObject("treeview", resourceCulture);

@@ -115,7 +115,7 @@ namespace CodeImp.DoomBuilder.Windows
 			label6.Size = new System.Drawing.Size(452, 37);
 			label6.TabIndex = 21;
 			label6.Text = "These are the resources that will be loaded when this configuration is chosen for" +
-				" editing. Usually you add your IWAD (like doom.wad or doom2.wad) here.";
+				" editing. Usually you add your Doom 64 IWAD (DOOM64.WAD) here.";
 			// 
 			// label3
 			// 
