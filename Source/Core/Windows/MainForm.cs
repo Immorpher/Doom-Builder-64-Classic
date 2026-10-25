@@ -305,7 +305,7 @@ namespace CodeImp.DoomBuilder.Windows
 				{
 					dockersspace.Dock = DockStyle.Left;
 					dockerspanel.Setup(false);
-					dockerspanel.Location = dockersspace.Location;
+					dockerspanel.Location = new Point(modestoolbar.Right, dockersspace.Top);
 					dockerspanel.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
 				}
 				else
@@ -1567,6 +1567,7 @@ namespace CodeImp.DoomBuilder.Windows
                 case ToolbarSection.Geometry: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatorgeometry), button); break;
                 case ToolbarSection.Testing: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatortesting), button); break;
                 case ToolbarSection.Custom: toolbar.Items.Add(button); break;
+                case ToolbarSection.Modes: modestoolbar.Items.Add(button); break;
             }
 
             UpdateToolbar();
@@ -1594,6 +1595,7 @@ namespace CodeImp.DoomBuilder.Windows
 
                 // Remove button from toolbar
                 toolbar.Items.Remove(button);
+                modestoolbar.Items.Remove(button);
 			    UpdateSeparators();
             }
         }
@@ -1612,6 +1614,7 @@ namespace CodeImp.DoomBuilder.Windows
 		internal void UpdateSeparators()
 		{
 			UpdateToolStripSeparators(toolbar.Items, false);
+			UpdateToolStripSeparators(modestoolbar.Items, false);
 			UpdateToolStripSeparators(menumode.DropDownItems, true);
 		}
 		
@@ -1695,7 +1698,7 @@ namespace CodeImp.DoomBuilder.Windows
 			foreach(ToolStripItem i in editmodeitems)
 			{
 				// Remove it and restart
-				toolbar.Items.Remove(i);
+				modestoolbar.Items.Remove(i);
 				menumode.DropDownItems.Remove(i);
 				i.Dispose();
 			}
@@ -1711,11 +1714,10 @@ namespace CodeImp.DoomBuilder.Windows
 			ToolStripSeparator item;
 			int index;
 
-            // Create a button
-            index = toolbar.Items.IndexOf(seperatormodes);
+            // Create a separator on the editing modes toolbar (left side)
             item = new ToolStripSeparator();
-			item.Margin = new Padding(6, 0, 6, 0);
-			toolbar.Items.Insert(index, item);
+			item.Margin = new Padding(0, 3, 0, 3);
+			modestoolbar.Items.Add(item);
 			editmodeitems.Add(item);
 			
 			// Create menu item
@@ -1736,12 +1738,11 @@ namespace CodeImp.DoomBuilder.Windows
 
 			string controlname = modeinfo.ButtonDesc.Replace("&", "&&");
 
-            // Create a button
-            index = toolbar.Items.IndexOf(seperatormodes);
+            // Create a button on the editing modes toolbar (left side)
             item = new ToolStripButton(modeinfo.ButtonDesc, modeinfo.ButtonImage, new EventHandler(EditModeButtonHandler));
 			item.DisplayStyle = ToolStripItemDisplayStyle.Image;
 			item.Tag = modeinfo;
-			toolbar.Items.Insert(index, item);
+			modestoolbar.Items.Add(item);
 			editmodeitems.Add(item);
 			
 			// Create menu item

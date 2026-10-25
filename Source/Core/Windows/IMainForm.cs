@@ -80,109 +80,104 @@ namespace CodeImp.DoomBuilder.Windows
 		void SetCursor(Cursor cursor);
 		void MessageBeep(MessageBeepType type);
 
-		/// <summary>
-		/// This moves the focus to the editing display.
-		/// </summary>
+		// 
+		// This moves the focus to the editing display.
+		// 
 		bool FocusDisplay();
 
-		/// <summary>
-		/// This browses the lindef types
-		/// </summary>
-		/// <returns>Returns the new action or the same action when cancelled</returns>
+		// 
+		// This browses the lindef types
+		// 
+		// Returns the new action or the same action when cancelled</returns>
 		int BrowseLinedefActions(IWin32Window owner, int initialvalue);
 		
-		/// <summary>
-		/// This browses sector effects
-		/// </summary>
-		/// <returns>Returns the new effect or the same effect when cancelled</returns>
+		// 
+		// This browses sector effects
+		// 
+		// Returns the new effect or the same effect when cancelled</returns>
 		int BrowseSectorEffect(IWin32Window owner, int initialvalue);
 
-		/// <summary>
-		/// This browses for a texture
-		/// </summary>
-		/// <returns>Returns the new texture name or the same texture name when cancelled</returns>
+		// 
+		// This browses for a texture
+		// 
+		// Returns the new texture name or the same texture name when cancelled</returns>
 		string BrowseTexture(IWin32Window owner, string initialvalue);
 
-		/// <summary>
-		/// This browses for a flat
-		/// </summary>
-		/// <returns>Returns the new flat name or the same flat name when cancelled</returns>
+		// 
+		// This browses for a flat
+		// 
+		// Returns the new flat name or the same flat name when cancelled</returns>
 		string BrowseFlat(IWin32Window owner, string initialvalue);
 
-		/// <summary>
-		/// THis browses for a thing type
-		/// </summary>
-		/// <returns>Returns the new thing type or the same thing type when cancelled</returns>
+		// 
+		// THis browses for a thing type
+		// 
+		// Returns the new thing type or the same thing type when cancelled</returns>
 		int BrowseThingType(IWin32Window owner, int initialvalue);
 		
-		/// <summary>
-		/// This adds a menu to the Doom Builder menu strip.
-		/// <para>
-		/// NOTE: When the Tag property of menu items is set with a string, this changes the
-		/// tag to a fully qualified action name by prefixing it with the assembly name.
-		/// </para>
-		/// </summary>
-		/// <param name="menu">The menu to add to Doom Builder.</param>
+		// 
+		// This adds a menu to the Doom Builder menu strip.
+		// 
+		// NOTE: When the Tag property of menu items is set with a string, this changes the
+		// tag to a fully qualified action name by prefixing it with the assembly name.
+		// 
 		void AddMenu(ToolStripMenuItem menu);
 		
-		/// <summary>
-		/// This adds a menu or menu item to the Doom Builder menu strip in a specific location.
-		/// <para>
-		/// NOTE: When the Tag property of menu items is set with a string, this changes the
-		/// tag to a fully qualified action name by prefixing it with the assembly name.
-		/// </para>
-		/// </summary>
-		/// <param name="menu">The menu to add to Doom Builder.</param>
-		/// <param name="section">The location where to insert the menu or item.</param>
+		// 
+		// This adds a menu or menu item to the Doom Builder menu strip in a specific location.
+		// 
+		// NOTE: When the Tag property of menu items is set with a string, this changes the
+		// tag to a fully qualified action name by prefixing it with the assembly name.
+		// 
+		// 
 		void AddMenu(ToolStripMenuItem menu, MenuSection section);
 		
-		/// <summary>
-		/// This removes a menu from the Doom Builder menu strip.
-		/// </summary>
-		/// <param name="menu">The menu to remove.</param>
+		// 
+		// This removes a menu from the Doom Builder menu strip.
+		// 
 		void RemoveMenu(ToolStripMenuItem menu);
 		
-		/// <summary>
-		/// This method invokes the action specified on the Tag property of the given menu item.
-		/// </summary>
-		/// <param name="sender">Menu item with Tag property set to the name of an action
-		/// that you want to invoke.</param>
-		/// <param name="e">Unused.</param>
+		// 
+		// This method invokes the action specified on the Tag property of the given menu item.
+		// 
+		// <param name="sender">Menu item with Tag property set to the name of an action
+		// that you want to invoke.</param>
+		// <param name="e">Unused.</param>
 		void InvokeTaggedAction(object sender, EventArgs e);
 		
-		/// <summary>
-		/// This adds a custom button to the toolbar.
-		/// </summary>
+		// 
+		// This adds a custom button to the toolbar.
+		// 
 		void AddButton(ToolStripItem button);
 
-		/// <summary>
-		/// This adds a custom button to a specific section in the toolbar. Note that the visibility of the button will be controlled by the user's preferences of that section!
-		/// </summary>
+		// 
+		// This adds a custom button to a specific section in the toolbar. Note that the visibility of the button will be controlled by the user's preferences of that section! ToolbarSection.Modes places the button on the vertical editing modes toolbar on the left.
+		// 
 		void AddButton(ToolStripItem button, ToolbarSection section);
 
-		/// <summary>
-		/// This removes a custom button from the toolbar.
-		/// </summary>
+		// 
+		// This removes a custom button from the toolbar.
+		// 
 		void RemoveButton(ToolStripItem button);
 		
-		/// <summary>
-		/// This adds a docker to the side panel.
-		/// </summary>
+		// 
+		// This adds a docker to the side panel.
+		// 
 		void AddDocker(Docker d);
 		
-		/// <summary>
-		/// This removes a docker from the side panel.
-		/// </summary>
+		// 
+		// This removes a docker from the side panel.
+		// 
 		bool RemoveDocker(Docker d);
 		
-		/// <summary>
-		/// Selects a docker in the side panel.
-		/// </summary>
+		// 
+		// Selects a docker in the side panel.
+		// 
 		bool SelectDocker(Docker d);
 		
-		/// <summary>
-		/// This selected the previously selected docker in the side panel.
-		/// </summary>
+		// 
+		// This selected the previously selected docker in the side panel.
+		// 
 		void SelectPreviousDocker();
 	}
 }

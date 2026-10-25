@@ -45,7 +45,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.seperatorprefabs = new System.Windows.Forms.ToolStripSeparator();
             this.seperatorundo = new System.Windows.Forms.ToolStripSeparator();
             this.seperatorcopypaste = new System.Windows.Forms.ToolStripSeparator();
-            this.seperatormodes = new System.Windows.Forms.ToolStripSeparator();
+            this.modestoolbar = new System.Windows.Forms.ToolStrip();
             this.poscommalabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.menumain = new System.Windows.Forms.MenuStrip();
             this.menufile = new System.Windows.Forms.ToolStripMenuItem();
@@ -196,6 +196,7 @@ namespace CodeImp.DoomBuilder.Windows
             toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.menumain.SuspendLayout();
             this.toolbar.SuspendLayout();
+            this.modestoolbar.SuspendLayout();
             this.statusbar.SuspendLayout();
             this.panelinfo.SuspendLayout();
             this.SuspendLayout();
@@ -303,12 +304,18 @@ namespace CodeImp.DoomBuilder.Windows
             this.display.MouseUp += new System.Windows.Forms.MouseEventHandler(this.display_MouseUp);
             this.display.MouseEnter += new System.EventHandler(this.display_MouseEnter);
             // 
-            // seperatormodes
+            // modestoolbar
             // 
-            this.seperatormodes.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.seperatormodes.Name = "seperatormodes";
-            this.seperatormodes.Size = new System.Drawing.Size(6, 25);
-            this.seperatormodes.Visible = false;
+            this.modestoolbar.AutoSize = false;
+            this.modestoolbar.Dock = System.Windows.Forms.DockStyle.Left;
+            this.modestoolbar.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.modestoolbar.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.VerticalStackWithOverflow;
+            this.modestoolbar.Location = new System.Drawing.Point(0, 49);
+            this.modestoolbar.Name = "modestoolbar";
+            this.modestoolbar.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.modestoolbar.Size = new System.Drawing.Size(27, 621);
+            this.modestoolbar.TabIndex = 8;
+            this.modestoolbar.Text = "Editing Modes";
             // 
             // poscommalabel
             // 
@@ -974,7 +981,6 @@ namespace CodeImp.DoomBuilder.Windows
             this.buttoninsertprefabfile,
             this.buttoninsertpreviousprefab,
             this.seperatorprefabs,
-            this.seperatormodes,
             this.buttonthingsfilter,
             this.thingfilters,
             this.buttonviewnormal,
@@ -1747,6 +1753,7 @@ namespace CodeImp.DoomBuilder.Windows
             this.Controls.Add(this.display);
             this.Controls.Add(this.panelinfo);
             this.Controls.Add(this.dockersspace);
+            this.Controls.Add(this.modestoolbar);
             this.Controls.Add(this.statusbar);
             this.Controls.Add(this.toolbar);
             this.Controls.Add(this.menumain);
@@ -1771,6 +1778,8 @@ namespace CodeImp.DoomBuilder.Windows
             this.menumain.PerformLayout();
             this.toolbar.ResumeLayout(false);
             this.toolbar.PerformLayout();
+            this.modestoolbar.ResumeLayout(false);
+            this.modestoolbar.PerformLayout();
             this.statusbar.ResumeLayout(false);
             this.statusbar.PerformLayout();
             this.panelinfo.ResumeLayout(false);
@@ -1854,7 +1863,7 @@ namespace CodeImp.DoomBuilder.Windows
 		private System.Windows.Forms.ToolStripButton buttontoggleeventlines;
 		private System.Windows.Forms.ToolStripMenuItem itemtoggleeventlines;
 		private System.Windows.Forms.ToolStripMenuItem itemfullbrightness;
-        private System.Windows.Forms.ToolStripSeparator seperatormodes;
+        private System.Windows.Forms.ToolStrip modestoolbar;
         private System.Windows.Forms.Timer processor;
         private System.Windows.Forms.ToolStripSeparator seperatorgeometry;
         private System.Windows.Forms.ToolStripSeparator seperatorfilesave;
