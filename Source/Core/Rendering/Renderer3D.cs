@@ -203,6 +203,9 @@ namespace CodeImp.DoomBuilder.Rendering
 		// (when resized or display adapter was changed)
 		public override void ReloadResource()
 		{
+			// The size of the display changed, so the projection must follow it or the
+			// view gets stretched (pixels must stay square)
+			UpdateProjection();
 			CreateMatrices2D();
 			SetupThingCage();
             SetupThingArrow();  // villsa
@@ -327,12 +330,21 @@ namespace CodeImp.DoomBuilder.Rendering
 		
 		#region ================== Presentation
 
-		// This creates the projection
+		// This creates the projection and applies it
 		internal void CreateProjection()
 		{
+			UpdateProjection();
+			ApplyMatrices3D();
+		}
+
+		// This calculates the projection matrix for the current size of the display
+		private void UpdateProjection()
+		{
 			// Calculate aspect
-			float aspect = (float)General.Map.Graphics.RenderTarget.ClientSize.Width /
-						   (float)General.Map.Graphics.RenderTarget.ClientSize.Height;
+			// (the display can have no size when the window is minimized, keep the previous projection then)
+			Size displaysize = graphics.RenderTarget.ClientSize;
+			if((displaysize.Width < 1) || (displaysize.Height < 1)) return;
+			float aspect = (float)displaysize.Width / (float)displaysize.Height;
 			
 			// The DirectX PerspectiveFovRH matrix method calculates the scaling in X and Y as follows:
 			// yscale = 1 / tan(fovY / 2)
@@ -346,9 +358,6 @@ namespace CodeImp.DoomBuilder.Rendering
 			
 			// Make the projection matrix
 			projection = Matrix.PerspectiveFovRH(fovy, aspect, PROJ_NEAR_PLANE, General.Settings.ViewDistance);
-
-			// Apply matrices
-			ApplyMatrices3D();
 		}
 		
 		// This creates matrices for a camera view
