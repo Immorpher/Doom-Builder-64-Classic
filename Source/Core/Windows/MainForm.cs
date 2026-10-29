@@ -155,6 +155,12 @@ namespace CodeImp.DoomBuilder.Windows
 
         // Separates the editing mode buttons from the toolbar buttons that were moved to the side bar
         private ToolStripSeparator sidegroupseparator;
+
+        // Width that is reserved extra in the top toolbar, because the toolbar still had to
+        // put items in its overflow menu after the buttons were placed (see toolbar_Layout)
+        private int overflowextra;
+        private bool overflowcheckpending;
+        private bool inoverflowcheck;
         private bool updatingfilters;
 		
 		// Statusbar
@@ -238,6 +244,7 @@ namespace CodeImp.DoomBuilder.Windows
 			// Event handlers
 			buttonvisiblechangedhandler = new EventHandler(ToolbarButtonVisibleChanged);
 			toolbar.SizeChanged += new EventHandler(toolbar_SizeChanged);
+			toolbar.Layout += new LayoutEventHandler(toolbar_Layout);
 			
 			// Bind any methods
 			General.Actions.BindMethods(this);
@@ -1692,7 +1699,47 @@ namespace CodeImp.DoomBuilder.Windows
 		// The toolbar was resized
 		private void toolbar_SizeChanged(object sender, EventArgs e)
 		{
+			overflowextra = 0;
 			LayoutModeBar();
+		}
+
+		// The toolbar has been laid out
+		private void toolbar_Layout(object sender, LayoutEventArgs e)
+		{
+			// (the check itself also lays out the toolbar, which must not start another check)
+			if(!inmodebarlayout && !inoverflowcheck) RequestOverflowCheck();
+		}
+
+		// This checks the toolbar for overflow after the current layout is done
+		private void RequestOverflowCheck()
+		{
+			if(overflowcheckpending || !toolbar.IsHandleCreated) return;
+			overflowcheckpending = true;
+			toolbar.BeginInvoke(new MethodInvoker(CheckToolbarOverflow));
+		}
+
+		// When items still did not fit in the toolbar (and ended up in its overflow menu), then the sizes of
+		// the items were measured too small. Move more buttons to the side bar to make room for them.
+		private void CheckToolbarOverflow()
+		{
+			overflowcheckpending = false;
+			if(inmodebarlayout) return;
+
+			// Make sure the placement of the items is up to date
+			inoverflowcheck = true;
+			try { toolbar.PerformLayout(); }
+			finally { inoverflowcheck = false; }
+
+			int over = 0;
+			foreach(ToolStripItem i in toolbar.Items)
+				if(i.Available && (i.Placement == ToolStripItemPlacement.Overflow))
+					over += i.Width + i.Margin.Horizontal;
+
+			if(over > 0)
+			{
+				overflowextra += over;
+				LayoutModeBar();
+			}
 		}
 
 		// This returns the width an item takes in a horizontal toolbar
@@ -1701,19 +1748,25 @@ namespace CodeImp.DoomBuilder.Windows
 			// Separators always count, because they can show up when the buttons around them change
 			if(item is ToolStripSeparator) return 6 + item.Margin.Horizontal;
 			if(!item.Available) return 0;
+			if(!item.AutoSize) return item.Width + item.Margin.Horizontal;
 			return item.GetPreferredSize(Size.Empty).Width + item.Margin.Horizontal;
 		}
 
-		// Only simple buttons and separators fit in the narrow side bar. Other items
-		// (such as the things filter and the test button with its menu) always stay in the top toolbar.
+		// Only buttons with just an icon and separators fit in the narrow side bar. Other items
+		// (such as the things filter, the test button with its menu, buttons with text and
+		// the option fields of the drawing modes) always stay in the top toolbar.
 		private static bool CanMoveToSideBar(ToolStripItem item)
 		{
-			return (item is ToolStripButton) || (item is ToolStripSeparator);
+			return (item is ToolStripSeparator) ||
+				   ((item is ToolStripButton) && (item.DisplayStyle == ToolStripItemDisplayStyle.Image));
 		}
 
 		// This puts all toolbar buttons that were moved to the side bar back in the toolbar, in their real order
 		private void RestoreToolbarItems()
 		{
+			// The toolbar is about to change, so measure again
+			overflowextra = 0;
+
 			if(toolbarorder == null) return;
 
 			bool wasinlayout = inmodebarlayout;
@@ -1750,6 +1803,7 @@ namespace CodeImp.DoomBuilder.Windows
 		internal void LayoutModeBar()
 		{
 			if(inmodebarlayout || (modebaritems == null)) return;
+			bool rebuilt = false;
 			inmodebarlayout = true;
 			try
 			{
@@ -1766,7 +1820,7 @@ namespace CodeImp.DoomBuilder.Windows
 				flow.AddRange(modebaritems);
 
 				// Width that is taken by the items that always stay in the top toolbar
-				int free = toolbar.DisplayRectangle.Width - 8;
+				int free = toolbar.DisplayRectangle.Width - 8 - overflowextra;
 				foreach(ToolStripItem i in flow)
 					if(!CanMoveToSideBar(i)) free -= GetToolbarItemWidth(i);
 
@@ -1831,6 +1885,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 					modestoolbar.ResumeLayout(true);
 					toolbar.ResumeLayout(true);
+					rebuilt = true;
 				}
 
 				// The side bar is only needed when there is something in it
@@ -1851,6 +1906,9 @@ namespace CodeImp.DoomBuilder.Windows
 			{
 				inmodebarlayout = false;
 			}
+
+			// Check if the toolbar was able to show everything that was placed in it
+			if(rebuilt) RequestOverflowCheck();
 		}
 
 		// This enables or disables all editing mode items and toolbar buttons
