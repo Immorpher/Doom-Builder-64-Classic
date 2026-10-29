@@ -1119,17 +1119,32 @@ namespace CodeImp.DoomBuilder.Rendering
 				
 				// Find thing information
 				ThingTypeInfo ti = General.Map.Data.GetThingInfo(t.Type);
-				if((ti.Sprite.Length == 0) || (ti.Sprite.Length > 8)) continue;
 				
-				// Choose which sprite rotation to show. The view is from the south, so a thing
-				// that faces south shows its front. Convert to [0..7] range; 292 == 270 + 45/2
-				SpriteFrameInfo[] frames = ti.SpriteFrame;
+				// The camera (type 0) shows the same camera icon as in 3D mode and the Edit Thing dialog
+				bool iscamera = (t.Type == 0) && (General.Map.Data.ThingCamera != null);
+				
+				SpriteFrameInfo[] frames = null;
 				int frameindex = 0;
-				if(frames.Length == 8)
-					frameindex = General.ClampAngle(-t.AngleDoom + 292) / 45;
-				
-				// Find the sprite image
-				ImageData sprite = General.Map.Data.GetSpriteImage(frames[frameindex].Sprite, ti.PalIndex);
+				ImageData sprite;
+				bool mirror = false;
+				if(iscamera)
+				{
+					sprite = General.Map.Data.ThingCamera;
+				}
+				else
+				{
+					if((ti.Sprite.Length == 0) || (ti.Sprite.Length > 8)) continue;
+					
+					// Choose which sprite rotation to show. The view is from the south, so a thing
+					// that faces south shows its front. Convert to [0..7] range; 292 == 270 + 45/2
+					frames = ti.SpriteFrame;
+					if(frames.Length == 8)
+						frameindex = General.ClampAngle(-t.AngleDoom + 292) / 45;
+					mirror = frames[frameindex].Mirror;
+					
+					// Find the sprite image
+					sprite = General.Map.Data.GetSpriteImage(frames[frameindex].Sprite, ti.PalIndex);
+				}
 				if((sprite == null) || (sprite is UnknownImage)) continue;
 				
 				// Load the sprite when needed (the screen is redrawn when it is loaded)
@@ -1173,7 +1188,7 @@ namespace CodeImp.DoomBuilder.Rendering
 					target.Add(sprite, list);
 				}
 				
-				AddThingSpriteVerts(list, info.screenpos, spritewidth, spriteheight, (nightmare ? nightmarecolor : (t.Selected ? selectioncolor : 0xFFFFFF)), frames[frameindex].Mirror);
+				AddThingSpriteVerts(list, info.screenpos, spritewidth, spriteheight, (nightmare ? nightmarecolor : (t.Selected ? selectioncolor : 0xFFFFFF)), mirror);
 			}
 			
 			if((spriteverts.Count == 0) && (nightmareverts.Count == 0)) return;

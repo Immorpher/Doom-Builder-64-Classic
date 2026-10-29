@@ -143,6 +143,11 @@ namespace CodeImp.DoomBuilder.Windows
         private List<PluginToolbarButton> pluginbuttons;
         private EventHandler buttonvisiblechangedhandler;
         private bool preventupdateseperators;
+
+        // The editing mode buttons (and plugin buttons for the modes section), in order. They are shown at the end of
+        // the top toolbar when there is room for them. Buttons that no longer fit move to the side bar instead.
+        private List<ToolStripItem> modebaritems;
+        private bool inmodebarlayout;
         private bool updatingfilters;
 		
 		// Statusbar
@@ -190,6 +195,7 @@ namespace CodeImp.DoomBuilder.Windows
 			InitializeComponent();
             pluginbuttons = new List<PluginToolbarButton>();
             editmodeitems = new List<ToolStripItem>();
+            modebaritems = new List<ToolStripItem>();
 			labelcollapsedinfo.Text = "";
 			display.Dock = DockStyle.Fill;			
 			
@@ -222,6 +228,7 @@ namespace CodeImp.DoomBuilder.Windows
 
 			// Event handlers
 			buttonvisiblechangedhandler = new EventHandler(ToolbarButtonVisibleChanged);
+			toolbar.SizeChanged += new EventHandler(toolbar_SizeChanged);
 			
 			// Bind any methods
 			General.Actions.BindMethods(this);
@@ -305,7 +312,7 @@ namespace CodeImp.DoomBuilder.Windows
 				{
 					dockersspace.Dock = DockStyle.Left;
 					dockerspanel.Setup(false);
-					dockerspanel.Location = new Point(modestoolbar.Right, dockersspace.Top);
+					dockerspanel.Location = new Point(modestoolbar.Visible ? modestoolbar.Width : 0, dockersspace.Top);
 					dockerspanel.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Bottom;
 				}
 				else
@@ -1581,10 +1588,13 @@ namespace CodeImp.DoomBuilder.Windows
                 case ToolbarSection.Geometry: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatorgeometry), button); break;
                 case ToolbarSection.Testing: toolbar.Items.Insert(toolbar.Items.IndexOf(seperatortesting), button); break;
                 case ToolbarSection.Custom: toolbar.Items.Add(button); break;
-                case ToolbarSection.Modes: modestoolbar.Items.Add(button); break;
+                case ToolbarSection.Modes: AddModeBarItem(button); break;
             }
 
             UpdateToolbar();
+
+            // Custom buttons are added to the end of the toolbar, so put the mode buttons back behind them
+            LayoutModeBar();
         }
 
 		// Removes a button
@@ -1610,6 +1620,7 @@ namespace CodeImp.DoomBuilder.Windows
                 // Remove button from toolbar
                 toolbar.Items.Remove(button);
                 modestoolbar.Items.Remove(button);
+                modebaritems.Remove(button);
 			    UpdateSeparators();
             }
         }
@@ -1617,7 +1628,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// This handle visibility changes in the toolbar buttons
 		private void ToolbarButtonVisibleChanged(object sender, EventArgs e)
 		{
-            if(!preventupdateseperators)
+            if(!preventupdateseperators && !inmodebarlayout)
             {
                 // Update the seeprators
                 UpdateSeparators();
@@ -1627,6 +1638,7 @@ namespace CodeImp.DoomBuilder.Windows
 		// This hides redundant seperators and shows single seperators
 		internal void UpdateSeparators()
 		{
+			LayoutModeBar();
 			UpdateToolStripSeparators(toolbar.Items, false);
 			UpdateToolStripSeparators(modestoolbar.Items, false);
 			UpdateToolStripSeparators(menumode.DropDownItems, true);
@@ -1646,17 +1658,111 @@ namespace CodeImp.DoomBuilder.Windows
 				{
 					// Make visible when previous item was not a seperator
 					separatorvisible = !(pvi is ToolStripSeparator) && (pvi != null);
-					i.Visible = separatorvisible;
+					i.Available = separatorvisible;
 				}
 				
 				// Keep as previous visible item
-				if(i.Visible || separatorvisible || (defaultvisible && !(i is ToolStripSeparator))) pvi = i;
+				if(i.Available || separatorvisible || (defaultvisible && !(i is ToolStripSeparator))) pvi = i;
 			}
 			
 			// Hide last item if it is a seperator
-			if(pvi is ToolStripSeparator) pvi.Visible = false;
+			if(pvi is ToolStripSeparator) pvi.Available = false;
 		}
 		
+		// This adds an item to the editing modes buttons
+		private void AddModeBarItem(ToolStripItem item)
+		{
+			modebaritems.Add(item);
+			LayoutModeBar();
+		}
+
+		// The toolbar was resized
+		private void toolbar_SizeChanged(object sender, EventArgs e)
+		{
+			LayoutModeBar();
+		}
+
+		// This returns the width an item takes in a horizontal toolbar
+		private static int GetToolbarItemWidth(ToolStripItem item)
+		{
+			if(!item.Available) return 0;
+			if(item is ToolStripSeparator) return 6 + item.Margin.Horizontal;
+			return item.GetPreferredSize(Size.Empty).Width + item.Margin.Horizontal;
+		}
+
+		// This places the editing mode buttons. When the window is wide enough they all
+		// fit at the end of the top toolbar and the side bar is hidden. When the window gets
+		// narrower, the buttons that no longer fit move to the side bar, which then shows up.
+		internal void LayoutModeBar()
+		{
+			if(inmodebarlayout || (modebaritems == null)) return;
+			inmodebarlayout = true;
+			try
+			{
+				// Width that is taken by the buttons that always stay in the top toolbar
+				int free = toolbar.DisplayRectangle.Width - 8;
+				foreach(ToolStripItem i in toolbar.Items)
+					if(!modebaritems.Contains(i)) free -= GetToolbarItemWidth(i);
+
+				// Find how many of the mode buttons fit after them
+				int count = 0;
+				while(count < modebaritems.Count)
+				{
+					int w = GetToolbarItemWidth(modebaritems[count]);
+					if(w > free) break;
+					free -= w;
+					count++;
+				}
+				int total = modebaritems.Count;
+
+				// Is everything already where it should be?
+				bool correct = (toolbar.Items.Count >= count) && (modestoolbar.Items.Count == total - count);
+				for(int k = 0; correct && (k < count); k++)
+					correct = (toolbar.Items[toolbar.Items.Count - count + k] == modebaritems[k]);
+				for(int k = count; correct && (k < total); k++)
+					correct = (modestoolbar.Items[k - count] == modebaritems[k]);
+
+				if(!correct)
+				{
+					toolbar.SuspendLayout();
+					modestoolbar.SuspendLayout();
+
+					foreach(ToolStripItem i in modebaritems)
+					{
+						toolbar.Items.Remove(i);
+						modestoolbar.Items.Remove(i);
+					}
+
+					for(int k = 0; k < total; k++)
+					{
+						if(k < count) toolbar.Items.Add(modebaritems[k]);
+						else modestoolbar.Items.Add(modebaritems[k]);
+					}
+
+					modestoolbar.ResumeLayout(true);
+					toolbar.ResumeLayout(true);
+				}
+
+				// The side bar is only needed when some buttons did not fit
+				bool showside = (count < total);
+				if(modestoolbar.Visible != showside)
+				{
+					modestoolbar.Visible = showside;
+
+					// The dockers panel floats next to the side bar
+					if(dockerspanel.Visible && (General.Settings != null) && (General.Settings.DockersPosition == 0))
+						dockerspanel.Left = (showside ? modestoolbar.Width : 0);
+				}
+
+				UpdateToolStripSeparators(toolbar.Items, false);
+				UpdateToolStripSeparators(modestoolbar.Items, false);
+			}
+			finally
+			{
+				inmodebarlayout = false;
+			}
+		}
+
 		// This enables or disables all editing mode items and toolbar buttons
 		private void UpdateToolbar()
 		{
@@ -1683,6 +1789,7 @@ namespace CodeImp.DoomBuilder.Windows
             }
 
             preventupdateseperators = false;
+            LayoutModeBar();
         }
 
 		// This checks one of the edit mode items (and unchecks all others)
@@ -1712,7 +1819,9 @@ namespace CodeImp.DoomBuilder.Windows
 			foreach(ToolStripItem i in editmodeitems)
 			{
 				// Remove it and restart
+				toolbar.Items.Remove(i);
 				modestoolbar.Items.Remove(i);
+				modebaritems.Remove(i);
 				menumode.DropDownItems.Remove(i);
 				i.Dispose();
 			}
@@ -1728,10 +1837,10 @@ namespace CodeImp.DoomBuilder.Windows
 			ToolStripSeparator item;
 			int index;
 
-            // Create a separator on the editing modes toolbar (left side)
+            // Create a separator on the editing modes buttons (top toolbar or side bar)
             item = new ToolStripSeparator();
 			item.Margin = new Padding(0, 3, 0, 3);
-			modestoolbar.Items.Add(item);
+			AddModeBarItem(item);
 			editmodeitems.Add(item);
 			
 			// Create menu item
@@ -1752,11 +1861,11 @@ namespace CodeImp.DoomBuilder.Windows
 
 			string controlname = modeinfo.ButtonDesc.Replace("&", "&&");
 
-            // Create a button on the editing modes toolbar (left side)
+            // Create a button on the editing modes buttons (top toolbar or side bar)
             item = new ToolStripButton(modeinfo.ButtonDesc, modeinfo.ButtonImage, new EventHandler(EditModeButtonHandler));
 			item.DisplayStyle = ToolStripItemDisplayStyle.Image;
 			item.Tag = modeinfo;
-			modestoolbar.Items.Add(item);
+			AddModeBarItem(item);
 			editmodeitems.Add(item);
 			
 			// Create menu item
