@@ -148,6 +148,13 @@ namespace CodeImp.DoomBuilder.Windows
         // the top toolbar when there is room for them. Buttons that no longer fit move to the side bar instead.
         private List<ToolStripItem> modebaritems;
         private bool inmodebarlayout;
+
+        // All other toolbar items in their real order (also the ones that were moved to the side bar).
+        // This is null when the order must be read from the toolbar again.
+        private List<ToolStripItem> toolbarorder;
+
+        // Separates the editing mode buttons from the toolbar buttons that were moved to the side bar
+        private ToolStripSeparator sidegroupseparator;
         private bool updatingfilters;
 		
 		// Statusbar
@@ -196,6 +203,8 @@ namespace CodeImp.DoomBuilder.Windows
             pluginbuttons = new List<PluginToolbarButton>();
             editmodeitems = new List<ToolStripItem>();
             modebaritems = new List<ToolStripItem>();
+            sidegroupseparator = new ToolStripSeparator();
+            sidegroupseparator.Margin = new Padding(0, 3, 0, 3);
 			labelcollapsedinfo.Text = "";
 			display.Dock = DockStyle.Fill;			
 			
@@ -1561,6 +1570,9 @@ namespace CodeImp.DoomBuilder.Windows
         public void AddButton(ToolStripItem button, ToolbarSection section) { AddButton(button, section, General.Plugins.FindPluginByAssembly(Assembly.GetCallingAssembly())); }
         private void AddButton(ToolStripItem button, ToolbarSection section, Plugin plugin)
         {
+			// Put all toolbar buttons back in the toolbar, so they can be found by the code below
+			RestoreToolbarItems();
+
 			// Fix tags to full action names
 			ToolStripItemCollection items = new ToolStripItemCollection(toolbar, new ToolStripItem[0]);
 			items.Add(button);
@@ -1618,6 +1630,7 @@ namespace CodeImp.DoomBuilder.Windows
                 if(!(button is ToolStripSeparator)) button.VisibleChanged -= buttonvisiblechangedhandler;
 
                 // Remove button from toolbar
+                RestoreToolbarItems();
                 toolbar.Items.Remove(button);
                 modestoolbar.Items.Remove(button);
                 modebaritems.Remove(button);
@@ -1685,66 +1698,143 @@ namespace CodeImp.DoomBuilder.Windows
 		// This returns the width an item takes in a horizontal toolbar
 		private static int GetToolbarItemWidth(ToolStripItem item)
 		{
-			if(!item.Available) return 0;
+			// Separators always count, because they can show up when the buttons around them change
 			if(item is ToolStripSeparator) return 6 + item.Margin.Horizontal;
+			if(!item.Available) return 0;
 			return item.GetPreferredSize(Size.Empty).Width + item.Margin.Horizontal;
 		}
 
-		// This places the editing mode buttons. When the window is wide enough they all
-		// fit at the end of the top toolbar and the side bar is hidden. When the window gets
-		// narrower, the buttons that no longer fit move to the side bar, which then shows up.
+		// Only simple buttons and separators fit in the narrow side bar. Other items
+		// (such as the things filter and the test button with its menu) always stay in the top toolbar.
+		private static bool CanMoveToSideBar(ToolStripItem item)
+		{
+			return (item is ToolStripButton) || (item is ToolStripSeparator);
+		}
+
+		// This puts all toolbar buttons that were moved to the side bar back in the toolbar, in their real order
+		private void RestoreToolbarItems()
+		{
+			if(toolbarorder == null) return;
+
+			bool wasinlayout = inmodebarlayout;
+			inmodebarlayout = true;
+			for(int pos = 0; pos < toolbarorder.Count; pos++)
+			{
+				ToolStripItem i = toolbarorder[pos];
+				if((pos >= toolbar.Items.Count) || (toolbar.Items[pos] != i))
+				{
+					modestoolbar.Items.Remove(i);
+					toolbar.Items.Remove(i);
+					toolbar.Items.Insert(pos, i);
+				}
+			}
+			inmodebarlayout = wasinlayout;
+
+			// The order is read again the next time
+			toolbarorder = null;
+		}
+
+		// This checks if a toolbar contains exactly the given items in the given order
+		private static bool HasItems(ToolStripItemCollection items, List<ToolStripItem> expected)
+		{
+			if(items.Count != expected.Count) return false;
+			for(int k = 0; k < expected.Count; k++)
+				if(items[k] != expected[k]) return false;
+			return true;
+		}
+
+		// This places the toolbar buttons and the editing mode buttons. When the window is wide enough
+		// they all fit in the top toolbar (the mode buttons at the end) and the side bar is hidden.
+		// When the window gets narrower, the buttons from the end that no longer fit move to the side bar,
+		// which then shows up. The things filter and the test button stay in the top toolbar.
 		internal void LayoutModeBar()
 		{
 			if(inmodebarlayout || (modebaritems == null)) return;
 			inmodebarlayout = true;
 			try
 			{
-				// Width that is taken by the buttons that always stay in the top toolbar
-				int free = toolbar.DisplayRectangle.Width - 8;
-				foreach(ToolStripItem i in toolbar.Items)
-					if(!modebaritems.Contains(i)) free -= GetToolbarItemWidth(i);
-
-				// Find how many of the mode buttons fit after them
-				int count = 0;
-				while(count < modebaritems.Count)
+				// Remember the real order of the toolbar items
+				if(toolbarorder == null)
 				{
-					int w = GetToolbarItemWidth(modebaritems[count]);
-					if(w > free) break;
-					free -= w;
-					count++;
+					toolbarorder = new List<ToolStripItem>();
+					foreach(ToolStripItem i in toolbar.Items)
+						if(!modebaritems.Contains(i)) toolbarorder.Add(i);
 				}
-				int total = modebaritems.Count;
+
+				// All items in order: first the toolbar items, then the mode buttons
+				List<ToolStripItem> flow = new List<ToolStripItem>(toolbarorder);
+				flow.AddRange(modebaritems);
+
+				// Width that is taken by the items that always stay in the top toolbar
+				int free = toolbar.DisplayRectangle.Width - 8;
+				foreach(ToolStripItem i in flow)
+					if(!CanMoveToSideBar(i)) free -= GetToolbarItemWidth(i);
+
+				// Everything that does not fit (and everything after it) moves to the side bar
+				List<ToolStripItem> top = new List<ToolStripItem>();
+				List<ToolStripItem> sidemodes = new List<ToolStripItem>();
+				List<ToolStripItem> sidetools = new List<ToolStripItem>();
+				bool cutreached = false;
+				foreach(ToolStripItem i in flow)
+				{
+					bool ismode = modebaritems.Contains(i);
+					if(CanMoveToSideBar(i))
+					{
+						if(!cutreached)
+						{
+							int w = GetToolbarItemWidth(i);
+							if(w <= free) free -= w; else cutreached = true;
+						}
+						if(cutreached)
+						{
+							if(ismode) sidemodes.Add(i); else sidetools.Add(i);
+							continue;
+						}
+					}
+					top.Add(i);
+				}
+
+				// The mode buttons stay at the top of the side bar, the moved toolbar buttons follow them
+				List<ToolStripItem> side = new List<ToolStripItem>(sidemodes);
+				if((sidemodes.Count > 0) && (sidetools.Count > 0)) side.Add(sidegroupseparator);
+				side.AddRange(sidetools);
 
 				// Is everything already where it should be?
-				bool correct = (toolbar.Items.Count >= count) && (modestoolbar.Items.Count == total - count);
-				for(int k = 0; correct && (k < count); k++)
-					correct = (toolbar.Items[toolbar.Items.Count - count + k] == modebaritems[k]);
-				for(int k = count; correct && (k < total); k++)
-					correct = (modestoolbar.Items[k - count] == modebaritems[k]);
-
-				if(!correct)
+				if(!HasItems(toolbar.Items, top) || !HasItems(modestoolbar.Items, side))
 				{
 					toolbar.SuspendLayout();
 					modestoolbar.SuspendLayout();
 
-					foreach(ToolStripItem i in modebaritems)
+					// Empty the side bar
+					List<ToolStripItem> current = new List<ToolStripItem>();
+					foreach(ToolStripItem i in modestoolbar.Items) current.Add(i);
+					foreach(ToolStripItem i in current) modestoolbar.Items.Remove(i);
+
+					// Take out what does not belong in the top toolbar
+					current.Clear();
+					foreach(ToolStripItem i in toolbar.Items) current.Add(i);
+					foreach(ToolStripItem i in current)
+						if(!top.Contains(i)) toolbar.Items.Remove(i);
+
+					// Put the rest in the right order
+					for(int k = 0; k < top.Count; k++)
 					{
-						toolbar.Items.Remove(i);
-						modestoolbar.Items.Remove(i);
+						if((k >= toolbar.Items.Count) || (toolbar.Items[k] != top[k]))
+						{
+							toolbar.Items.Remove(top[k]);
+							toolbar.Items.Insert(k, top[k]);
+						}
 					}
 
-					for(int k = 0; k < total; k++)
-					{
-						if(k < count) toolbar.Items.Add(modebaritems[k]);
-						else modestoolbar.Items.Add(modebaritems[k]);
-					}
+					// Fill the side bar
+					foreach(ToolStripItem i in side) modestoolbar.Items.Add(i);
 
 					modestoolbar.ResumeLayout(true);
 					toolbar.ResumeLayout(true);
 				}
 
-				// The side bar is only needed when some buttons did not fit
-				bool showside = (count < total);
+				// The side bar is only needed when there is something in it
+				bool showside = side.Exists(delegate(ToolStripItem i) { return !(i is ToolStripSeparator) && i.Available; });
 				if(modestoolbar.Visible != showside)
 				{
 					modestoolbar.Visible = showside;
