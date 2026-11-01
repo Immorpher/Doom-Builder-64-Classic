@@ -89,6 +89,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// The thing that is being dragged with the edit button, if any
 		private BaseVisualThing draggingthing;
+
+		// Set by cutting things, so the delete that follows only deletes the things
+		private bool thingsonlydelete;
+		private bool thingsdeleted;
 		private int editpresscount;
 		
 		#endregion
@@ -169,6 +173,87 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		
 		// This counts how many times the edit button was pressed
 		internal int EditPressCount { get { return editpresscount; } }
+
+		// This is called by a thing when it was deleted
+		internal void ThingsWereDeleted()
+		{
+			thingsdeleted = true;
+		}
+
+		// This rotates a vector
+		private static Vector2D RotateVector(Vector2D v, float angle)
+		{
+			float sin = (float)Math.Sin(angle);
+			float cos = (float)Math.Cos(angle);
+			return new Vector2D((v.x * cos) - (v.y * sin), (v.x * sin) + (v.y * cos));
+		}
+
+		// This finds the sector at the given position
+		private Sector FindSectorAt(Vector2D p)
+		{
+			foreach(Sector s in blockmap.GetBlock(blockmap.GetBlockCoordinates(p)).Sectors)
+			{
+				if(s.Intersect(p)) return s;
+			}
+
+			return null;
+		}
+
+		// This recreates all the visual things after things were added or removed
+		private void RefreshThings()
+		{
+			foreach(KeyValuePair<Thing, VisualThing> vt in allthings)
+				vt.Value.Dispose();
+
+			allthings = new Dictionary<Thing, VisualThing>(allthings.Count);
+			visiblesectors.Clear();
+			visibleblocks.Clear();
+			visiblegeometry.Clear();
+			visiblethings.Clear();
+
+			FillBlockMap();
+			DoCulling();
+			RebuildSelectedObjectsList();
+			PickTarget();
+		}
+
+		// This places a pasted thing. The height is only changed when haveworldz is set. Returns
+		// false when the position is not inside a sector (the thing is still moved there).
+		private bool PlacePastedThing(Thing t, Vector2D xy, bool haveworldz, float worldz, float angle)
+		{
+			Vector2D newxy = new Vector2D((float)Math.Round(xy.x), (float)Math.Round(xy.y));
+			Sector s = FindSectorAt(newxy);
+			float zoffset = t.Position.z;
+
+			if((s != null) && General.Map.FormatInterface.HasThingHeight)
+			{
+				ThingTypeInfo info = General.Map.Data.GetThingInfo(t.Type);
+				if(info.AbsoluteZ)
+				{
+					if(haveworldz) zoffset = worldz;
+				}
+				else
+				{
+					// Keep the thing between the floor and the ceiling
+					float maxoffset = Math.Max(0.0f, (float)(s.CeilHeight - s.FloorHeight) - info.Height);
+					if(haveworldz)
+					{
+						if(info.Hangs)
+							zoffset = (s.CeilHeight - info.Height) - worldz;
+						else
+							zoffset = worldz - s.FloorHeight;
+					}
+
+					zoffset = Math.Max(0.0f, Math.Min(zoffset, maxoffset));
+				}
+
+				zoffset = (float)Math.Round(zoffset);
+			}
+
+			t.Move(new Vector3D(newxy.x, newxy.y, zoffset));
+			t.Rotate(Angle2D.DoomToReal(Angle2D.RealToDoom(Angle2D.Normalized(angle))));
+			return (s != null);
+		}
 
 		// This is called by a thing when it starts being dragged
 		internal void SetDraggingThing(BaseVisualThing t)
@@ -458,6 +543,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			// Process things?
 			base.ProcessThings = (BuilderPlug.Me.ShowVisualThings != 0);
+
+			// A cut is done by now, so a delete is a normal delete again
+			thingsonlydelete = false;
 			
 			// Setup the move multiplier depending on gravity
 			Vector3D movemultiplier = new Vector3D(1.0f, 1.0f, 1.0f);
@@ -652,6 +740,152 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			PickTarget();
 		}
 		
+		// When copying (or cutting): the selected things, or the thing we are aiming at, are copied
+		public override bool OnCopyBegin()
+		{
+			PickTargetUnlocked();
+			List<Thing> things = GetSelectedThings();
+			if(things.Count == 0) return false;
+
+			// Mark the things for copying
+			General.Map.Map.ClearAllMarks(false);
+			foreach(Thing t in things) t.Marked = true;
+			List<Thing> marked = General.Map.Map.GetMarkedThings(true);
+
+			// The middle of the things
+			Vector2D center = new Vector2D(0.0f, 0.0f);
+			foreach(Thing t in marked)
+				center += new Vector2D(t.Position.x, t.Position.y);
+			center /= (float)marked.Count;
+
+			// Remember how the things are placed around the view, so they can be pasted the same way
+			float camangle = General.Map.VisualCamera.AngleXY;
+			Vector3D campos = General.Map.VisualCamera.Position;
+			Vector2D campos2d = new Vector2D(campos.x, campos.y);
+			VisualThingClipboard clip = new VisualThingClipboard();
+			foreach(Thing t in marked)
+			{
+				VisualThingClipboard.Item item = new VisualThingClipboard.Item();
+				Vector2D pos = new Vector2D(t.Position.x, t.Position.y);
+				item.type = t.Type;
+				item.originalxy = pos;
+				item.centeroffset = RotateVector(pos - center, -camangle);
+				item.viewoffset = RotateVector(pos - campos2d, -camangle);
+				item.anglerel = t.Angle - camangle;
+
+				float basez = t.Position.z;
+				if(VisualThingExists(t))
+					basez = (GetVisualThing(t) as BaseVisualThing).WorldBaseZ;
+				else if(t.Sector != null)
+					basez += t.Sector.FloorHeight;
+				item.heightdiff = basez - campos.z;
+
+				clip.items.Add(item);
+			}
+
+			BuilderPlug.Me.VisualClipboard = clip;
+			return true;
+		}
+
+		// When the copy is done. If this is a cut, the delete that follows must only delete the things.
+		public override void OnCopyEnd()
+		{
+			thingsonlydelete = true;
+		}
+
+		// When pasting: only things that were copied in visual mode can be pasted
+		public override bool OnPasteBegin(PasteOptions options)
+		{
+			if(BuilderPlug.Me.VisualClipboard == null)
+			{
+				General.Interface.DisplayStatus(StatusType.Warning, "Nothing to paste. Copy or cut things in visual mode first.");
+				return false;
+			}
+
+			return true;
+		}
+
+		// When the things were pasted (they are marked), this places them around the view
+		public override void OnPasteEnd(PasteOptions options)
+		{
+			VisualThingClipboard clip = BuilderPlug.Me.VisualClipboard;
+			List<Thing> pasted = General.Map.Map.GetMarkedThings(true);
+			int outside = 0;
+			bool placed = false;
+
+			// Do the pasted things match what was copied?
+			bool matches = (clip != null) && (clip.items.Count == pasted.Count);
+			for(int i = 0; matches && (i < pasted.Count); i++)
+			{
+				VisualThingClipboard.Item item = clip.items[i];
+				matches = (pasted[i].Type == item.type) &&
+						  (Math.Abs(pasted[i].Position.x - item.originalxy.x) < 1.0f) &&
+						  (Math.Abs(pasted[i].Position.y - item.originalxy.y) < 1.0f);
+			}
+
+			if(matches)
+			{
+				float camangle = General.Map.VisualCamera.AngleXY;
+				Vector3D campos = General.Map.VisualCamera.Position;
+				Vector2D campos2d = new Vector2D(campos.x, campos.y);
+
+				// Are we looking at a floor or ceiling? Then find where we look at it.
+				PickTarget();
+				bool onflat = false;
+				Vector2D anchor = new Vector2D(0.0f, 0.0f);
+				BaseVisualGeometrySector flat = (target.picked as BaseVisualGeometrySector);
+				if((flat != null) && ((flat is VisualFloor) || (flat is VisualCeiling)))
+				{
+					// Where the line of sight crosses the height of the floor (or ceiling)
+					float planez = (flat is VisualFloor) ? flat.Sector.Sector.FloorHeight : flat.Sector.Sector.CeilHeight;
+					Vector3D dir = General.Map.VisualCamera.Target - campos;
+					if(Math.Abs(dir.z) > 0.0001f)
+					{
+						float u = (planez - campos.z) / dir.z;
+						if(u > 0.0f)
+						{
+							anchor = new Vector2D(campos.x + dir.x * u, campos.y + dir.y * u);
+							onflat = true;
+						}
+					}
+				}
+
+				for(int i = 0; i < pasted.Count; i++)
+				{
+					VisualThingClipboard.Item item = clip.items[i];
+					bool inside;
+					if(onflat)
+					{
+						// Same layout around the point we look at, turned along with the view. Heights are kept.
+						Vector2D xy = anchor + RotateVector(item.centeroffset, camangle);
+						inside = PlacePastedThing(pasted[i], xy, false, 0.0f, item.anglerel + camangle);
+					}
+					else
+					{
+						// Same distance, direction and height from the view as when it was copied
+						Vector2D xy = campos2d + RotateVector(item.viewoffset, camangle);
+						inside = PlacePastedThing(pasted[i], xy, true, campos.z + item.heightdiff, item.anglerel + camangle);
+					}
+
+					if(!inside) outside++;
+				}
+
+				placed = true;
+			}
+
+			// Show the new things
+			General.Map.IsChanged = true;
+			General.Map.ThingsFilter.Update();
+			RefreshThings();
+
+			if(!placed)
+				General.Interface.DisplayStatus(StatusType.Warning, "Pasted " + pasted.Count + " things at their original positions.");
+			else if(outside > 0)
+				General.Interface.DisplayStatus(StatusType.Warning, "Pasted " + pasted.Count + " things, " + outside + " of them outside the map.");
+			else
+				General.Interface.DisplayStatus(StatusType.Action, "Pasted " + pasted.Count + (pasted.Count == 1 ? " thing." : " things."));
+		}
+
 		// Mouse moves
 		public override void OnMouseMove(MouseEventArgs e)
 		{
@@ -1302,10 +1536,42 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		{
 			PreAction(UndoGroup.None);
 			List<IVisualEventReceiver> objs = GetSelectedObjects(true, true, true);
+
+			// When cutting, only the things are removed (not the textures of selected walls)
+			if(thingsonlydelete) objs = objs.FindAll(delegate(IVisualEventReceiver i) { return (i is BaseVisualThing); });
+			thingsonlydelete = false;
+
+			thingsdeleted = false;
 			foreach(IVisualEventReceiver i in objs) i.OnDelete();
+
+			// Things were removed from the map, so the visual things must be remade
+			if(thingsdeleted)
+			{
+				thingsdeleted = false;
+				General.Map.IsChanged = true;
+				General.Map.ThingsFilter.Update();
+				RefreshThings();
+			}
+
 			PostAction();
 		}
 		
 		#endregion
+	}
+
+	// This remembers how things were placed around the view when they were copied in visual mode
+	internal class VisualThingClipboard
+	{
+		public class Item
+		{
+			public int type;				// To check that the pasted thing is the copied thing
+			public Vector2D originalxy;		// Where the thing was on the map
+			public Vector2D centeroffset;	// Position from the middle of the group, as seen from the view direction
+			public Vector2D viewoffset;		// Position from the camera, as seen from the view direction
+			public float heightdiff;		// Height of the thing base above the camera
+			public float anglerel;			// Angle of the thing minus the view angle
+		}
+
+		public List<Item> items = new List<Item>();
 	}
 }

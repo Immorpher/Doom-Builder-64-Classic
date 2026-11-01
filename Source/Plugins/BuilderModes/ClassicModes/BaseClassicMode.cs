@@ -88,8 +88,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			// Return true when anything is selected so that the copy continues
 			// We only have to check vertices for the geometry, because without selected
 			// vertices, no complete structure can exist.
-			return (General.Map.Map.GetMarkedVertices(true).Count > 0) ||
-				   (General.Map.Map.GetMarkedThings(true).Count > 0);
+			bool anything = (General.Map.Map.GetMarkedVertices(true).Count > 0) ||
+							(General.Map.Map.GetMarkedThings(true).Count > 0);
+
+			// The clipboard is replaced, so what was copied in visual mode is gone
+			if(anything) BuilderPlug.Me.VisualClipboard = null;
+
+			return anything;
 		}
 		
 		// This is called when pasting begins

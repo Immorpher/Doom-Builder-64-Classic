@@ -92,6 +92,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private SidedefProperties copiedsidedefprops;
 		private LinedefProperties copiedlinedefprops;
 		private ThingProperties copiedthingprops;
+		private VisualThingClipboard visualclipboard;	// Things copied in visual mode, and how they were placed around the view
 		private bool viewselectionnumbers;
 		private float stitchrange;
 		private float highlightrange;
@@ -139,6 +140,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public SidedefProperties CopiedSidedefProps { get { return copiedsidedefprops; } set { copiedsidedefprops = value; } }
 		public LinedefProperties CopiedLinedefProps { get { return copiedlinedefprops; } set { copiedlinedefprops = value; } }
 		public ThingProperties CopiedThingProps { get { return copiedthingprops; } set { copiedthingprops = value; } }
+		internal VisualThingClipboard VisualClipboard { get { return visualclipboard; } set { visualclipboard = value; } }
 		public bool ViewSelectionNumbers { get { return viewselectionnumbers; } set { viewselectionnumbers = value; } }
 		public float StitchRange { get { return stitchrange; } }
 		public float HighlightRange { get { return highlightrange; } }

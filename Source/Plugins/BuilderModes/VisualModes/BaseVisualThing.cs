@@ -100,6 +100,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		#region ================== Properties
 
 		public bool Changed { get { return changed; } set { changed |= value; } }
+
+		// World height of the base of the thing
+		internal float WorldBaseZ { get { return boxp1.z; } }
 		
 		#endregion
 		
@@ -526,13 +529,21 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public virtual void OnProcess(double deltatime) { }
 		public virtual void OnTextureFloodfill() { }
 		public virtual void OnInsert() { }
-		public virtual void OnDelete() { }
 		public virtual void ApplyTexture(string texture) { }
 		public virtual void ApplyUpperUnpegged(bool set) { }
 		public virtual void ApplyLowerUnpegged(bool set) { }
 		
 		// Return texture name
 		public virtual string GetTextureName() { return ""; }
+
+		// Delete the thing
+		public virtual void OnDelete()
+		{
+			mode.CreateUndo("Delete thing");
+			mode.SetActionResult("Deleted thing.");
+			Thing.Dispose();
+			mode.ThingsWereDeleted();
+		}
 
 		// Select button pressed
 		public virtual void OnSelectBegin() { }
