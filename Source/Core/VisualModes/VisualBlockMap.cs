@@ -293,6 +293,13 @@ namespace CodeImp.DoomBuilder.VisualModes
 			block.Things.Add(t);
 		}
 
+		// This takes a thing out of the block that it was in at the given (old) position
+		public void RemoveThing(Thing t, Vector2D oldpos)
+		{
+			Point p = GetBlockCoordinates(oldpos);
+			GetBlock(p).Things.Remove(t);
+		}
+
 		// This puts a secotr in the blockmap
 		public void AddSectorsSet(ICollection<Sector> sectors)
 		{

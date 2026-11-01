@@ -63,8 +63,33 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// If this is set to true, the thing will be rebuilt after the action is performed.
 		protected bool changed;
 
+		// Dragging (the thing is carried along with the camera view)
+		private bool thingdragging;
+		private int dragarmedpress = -1;	// Number of the edit button press that the drag start data is for
+		private float dragstartanglexy;
+		private float dragstartanglez;
+		private Vector3D dragstartcampos;
+		private Vector3D dragstartcamvec;
+		private float dragdistance;
+		private List<DragItem> dragitems;
+
 		// Vertex alpha (0-255) for things that are spawned in by a special
 		private const int SPAWNED_THING_ALPHA = 0x80;
+
+		// How far the view must turn (radians) with the select button held before a thing is dragged
+		private const float DRAG_ANGLE_TOLERANCE = 0.06f;
+
+		#endregion
+
+		#region ================== Types
+
+		// A thing that is being carried around with the camera
+		private class DragItem
+		{
+			public BaseVisualThing visual;
+			public Vector2D startxy;	// Map position when the drag started
+			public float startz;		// World height of the thing base when the drag started
+		}
 
 		#endregion
 		
@@ -480,9 +505,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		#region ================== Events
 
 		// Unused
-		public virtual void OnSelectBegin() { }
 		public virtual void OnEditBegin() { }
-		public virtual void OnMouseMove(MouseEventArgs e) { }
 		public virtual void OnChangeTargetBrightness(bool up) { }
 		public virtual void OnChangeTextureOffset(int horizontal, int vertical) { }
 		public virtual void OnSelectTexture() { }
@@ -507,6 +530,9 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		// Return texture name
 		public virtual string GetTextureName() { return ""; }
 
+		// Select button pressed
+		public virtual void OnSelectBegin() { }
+
 		// Select or deselect
 		public virtual void OnSelectEnd()
 		{
@@ -520,6 +546,164 @@ namespace CodeImp.DoomBuilder.BuilderModes
 				this.selected = true;
 				mode.AddSelectedObject(this);
 			}
+		}
+
+		// Mouse moves
+		public virtual void OnMouseMove(MouseEventArgs e)
+		{
+			if(thingdragging)
+			{
+				// Keep carrying the thing with the view
+				UpdateDrag();
+			}
+			else if(General.Actions.CheckActionActive(General.ThisAssembly, "visualedit"))
+			{
+				if(dragarmedpress != mode.EditPressCount)
+				{
+					// The edit button was just pressed on this thing: remember where the view was
+					dragarmedpress = mode.EditPressCount;
+					dragstartanglexy = General.Map.VisualCamera.AngleXY;
+					dragstartanglez = General.Map.VisualCamera.AngleZ;
+					dragstartcampos = General.Map.VisualCamera.Position;
+					dragstartcamvec = General.Map.VisualCamera.Target - General.Map.VisualCamera.Position;
+
+					// Distance from the camera to the middle of the thing. The thing is carried
+					// at this distance in front of the camera while dragging.
+					Vector3D center = new Vector3D(pos2d.x, pos2d.y, boxp1.z + info.Height * 0.5f);
+					dragdistance = Math.Max((center - dragstartcampos).GetLength(), 1.0f);
+				}
+				else
+				{
+					// Start dragging when the view is turned far enough with the edit button held
+					float deltaxy = Math.Abs(Angle2D.Normalized(General.Map.VisualCamera.AngleXY - dragstartanglexy + Angle2D.PI) - Angle2D.PI);
+					float deltaz = Math.Abs(General.Map.VisualCamera.AngleZ - dragstartanglez);
+					if((deltaxy + deltaz) > DRAG_ANGLE_TOLERANCE) BeginDrag();
+				}
+			}
+		}
+
+		// This is called when the edit button is released after dragging
+		internal void EndDrag()
+		{
+			thingdragging = false;
+			dragitems = null;
+		}
+
+		// This starts dragging the thing (and the other selected things, when this one is selected)
+		private void BeginDrag()
+		{
+			mode.PreAction(UndoGroup.None);
+			mode.CreateUndo("Drag thing");
+
+			// This thing is always dragged, the others only when this one is part of the selection
+			dragitems = new List<DragItem>();
+			AddDragItem(this);
+			if(this.selected)
+			{
+				foreach(Thing t in mode.GetSelectedThings())
+				{
+					if((t != this.Thing) && mode.VisualThingExists(t))
+						AddDragItem(mode.GetVisualThing(t) as BaseVisualThing);
+				}
+			}
+
+			// Let the mode know, so releasing the edit button ends the drag instead of opening the dialog
+			mode.SetDraggingThing(this);
+			thingdragging = true;
+			UpdateDrag();
+		}
+
+		// This remembers where a thing was when the drag started
+		private void AddDragItem(BaseVisualThing vt)
+		{
+			if(vt == null) return;
+
+			DragItem item = new DragItem();
+			item.visual = vt;
+			item.startxy = new Vector2D(vt.Thing.Position.x, vt.Thing.Position.y);
+			item.startz = vt.boxp1.z;
+			dragitems.Add(item);
+		}
+
+		// This moves the dragged things along with where the camera is aiming
+		private void UpdateDrag()
+		{
+			// How far the point in front of the camera has moved since the select button was pressed
+			Vector3D campos = General.Map.VisualCamera.Position;
+			Vector3D camvec = General.Map.VisualCamera.Target - campos;
+			Vector3D delta = (campos + camvec * dragdistance) - (dragstartcampos + dragstartcamvec * dragdistance);
+
+			// Move all the things by that amount
+			bool moved = false;
+			foreach(DragItem item in dragitems)
+			{
+				Vector3D newpos = new Vector3D(item.startxy.x + delta.x, item.startxy.y + delta.y, item.startz + delta.z);
+				if(item.visual.MoveToWorldPosition(newpos)) moved = true;
+			}
+
+			if(moved)
+			{
+				mode.ShowTargetInfo();
+				General.Interface.DisplayStatus(StatusType.Action, "Dragging thing at " + Thing.Position.x + ", " + Thing.Position.y + ", height " + Thing.Position.z + ".");
+			}
+		}
+
+		// This moves the thing so that its base is at the given world position.
+		// The height is converted to the height offset the thing stores. Returns true
+		// when the thing has moved. A thing is never moved out of the sectors.
+		private bool MoveToWorldPosition(Vector3D world)
+		{
+			Vector2D newxy = new Vector2D((float)Math.Round(world.x), (float)Math.Round(world.y));
+			Sector s = FindSectorAt(newxy);
+			if(s == null) return false;
+
+			float zoffset = Thing.Position.z;
+			if(General.Map.FormatInterface.HasThingHeight)
+			{
+				if(info.AbsoluteZ)
+				{
+					zoffset = world.z;
+				}
+				else
+				{
+					// Keep the thing between the floor and the ceiling
+					float maxoffset = Math.Max(0.0f, (float)(s.CeilHeight - s.FloorHeight) - info.Height);
+					if(info.Hangs)
+						zoffset = (s.CeilHeight - info.Height) - world.z;
+					else
+						zoffset = world.z - s.FloorHeight;
+
+					zoffset = Math.Max(0.0f, Math.Min(zoffset, maxoffset));
+				}
+
+				zoffset = (float)Math.Round(zoffset);
+			}
+
+			// Nothing changed?
+			if((newxy.x == Thing.Position.x) && (newxy.y == Thing.Position.y) && (zoffset == Thing.Position.z))
+				return false;
+
+			// Move the thing, also in the blockmap
+			Vector2D oldxy = Thing.Position;
+			mode.BlockMap.RemoveThing(Thing, oldxy);
+			Thing.Move(new Vector3D(newxy.x, newxy.y, zoffset));
+			mode.BlockMap.AddThing(Thing);
+
+			// Rebuild the visual thing at the new position
+			Setup();
+			return true;
+		}
+
+		// This finds the sector at the given position
+		private Sector FindSectorAt(Vector2D p)
+		{
+			VisualBlockMap blockmap = mode.BlockMap;
+			foreach(Sector s in blockmap.GetBlock(blockmap.GetBlockCoordinates(p)).Sectors)
+			{
+				if(s.Intersect(p)) return s;
+			}
+
+			return null;
 		}
 		
 		// Copy properties

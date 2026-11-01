@@ -86,6 +86,10 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 		// List of selected objects when an action is performed
 		private List<IVisualEventReceiver> selectedobjects;
+
+		// The thing that is being dragged with the edit button, if any
+		private BaseVisualThing draggingthing;
+		private int editpresscount;
 		
 		#endregion
 		
@@ -163,6 +167,15 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			return renderer.CalculateBrightness(level);
 		}
 		
+		// This counts how many times the edit button was pressed
+		internal int EditPressCount { get { return editpresscount; } }
+
+		// This is called by a thing when it starts being dragged
+		internal void SetDraggingThing(BaseVisualThing t)
+		{
+			draggingthing = t;
+		}
+
 		// This adds a selected object
 		internal void AddSelectedObject(IVisualEventReceiver obj)
 		{
@@ -947,7 +960,13 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		[BeginAction("visualedit", BaseAction = true)]
 		public void BeginEdit()
 		{
+			draggingthing = null;
+			editpresscount++;
 			PreAction(UndoGroup.None);
+
+			// Keep aiming at a thing while the edit button is held, so it can be dragged
+			if(target.picked is BaseVisualThing) LockTarget();
+
 			GetTargetEventReceiver(false).OnEditBegin();
 			PostAction();
 		}
@@ -956,7 +975,19 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		public void EndEdit()
 		{
 			PreActionNoChange();
-			GetTargetEventReceiver(false).OnEditEnd();
+
+			if(draggingthing != null)
+			{
+				// A thing was dragged, so don't open the edit dialog
+				draggingthing.EndDrag();
+				draggingthing = null;
+			}
+			else
+			{
+				GetTargetEventReceiver(false).OnEditEnd();
+			}
+
+			UnlockTarget();
 			PostAction();
 		}
 
