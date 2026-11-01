@@ -73,6 +73,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private float dragdistance;
 		private float draglastanglexy;	// View angle at the previous drag update
 		private float dragangle;		// How far the view has turned since the thing was grabbed
+		private Vector2D dragcenter;	// Middle of all the dragged things when the drag started
 		private List<DragItem> dragitems;
 
 		// Vertex alpha (0-255) for things that are spawned in by a special
@@ -612,6 +613,12 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 			// Let the mode know, so releasing the edit button ends the drag instead of opening the dialog
 			mode.SetDraggingThing(this);
+			// The things turn as a group around the middle (average position) of all of them
+			dragcenter = new Vector2D(0.0f, 0.0f);
+			foreach(DragItem item in dragitems)
+				dragcenter += item.startxy;
+			dragcenter /= (float)dragitems.Count;
+
 			draglastanglexy = dragstartanglexy;
 			dragangle = 0.0f;
 			thingdragging = true;
@@ -646,9 +653,15 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 			// Move all the things by that amount
 			bool moved = false;
+			float sin = (float)Math.Sin(dragangle);
+			float cos = (float)Math.Cos(dragangle);
 			foreach(DragItem item in dragitems)
 			{
-				Vector3D newpos = new Vector3D(item.startxy.x + delta.x, item.startxy.y + delta.y, item.startz + delta.z);
+				// Turn the position around the middle of the group, then move it along with the view
+				Vector2D rel = item.startxy - dragcenter;
+				float turnedx = dragcenter.x + (rel.x * cos) - (rel.y * sin);
+				float turnedy = dragcenter.y + (rel.x * sin) + (rel.y * cos);
+				Vector3D newpos = new Vector3D(turnedx + delta.x, turnedy + delta.y, item.startz + delta.z);
 				if(item.visual.MoveToWorldPosition(newpos)) moved = true;
 				if(item.visual.RotateTo(item.startangle + dragangle)) moved = true;
 			}
