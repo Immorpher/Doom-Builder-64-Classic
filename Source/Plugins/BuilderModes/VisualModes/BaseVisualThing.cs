@@ -71,6 +71,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 		private Vector3D dragstartcampos;
 		private Vector3D dragstartcamvec;
 		private float dragdistance;
+		private float draglastanglexy;	// View angle at the previous drag update
+		private float dragangle;		// How far the view has turned since the thing was grabbed
 		private List<DragItem> dragitems;
 
 		// Vertex alpha (0-255) for things that are spawned in by a special
@@ -89,6 +91,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			public BaseVisualThing visual;
 			public Vector2D startxy;	// Map position when the drag started
 			public float startz;		// World height of the thing base when the drag started
+			public float startangle;	// Angle of the thing when the drag started
 		}
 
 		#endregion
@@ -609,6 +612,8 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 			// Let the mode know, so releasing the edit button ends the drag instead of opening the dialog
 			mode.SetDraggingThing(this);
+			draglastanglexy = dragstartanglexy;
+			dragangle = 0.0f;
 			thingdragging = true;
 			UpdateDrag();
 		}
@@ -622,6 +627,7 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			item.visual = vt;
 			item.startxy = new Vector2D(vt.Thing.Position.x, vt.Thing.Position.y);
 			item.startz = vt.boxp1.z;
+			item.startangle = vt.Thing.Angle;
 			dragitems.Add(item);
 		}
 
@@ -633,18 +639,24 @@ namespace CodeImp.DoomBuilder.BuilderModes
 			Vector3D camvec = General.Map.VisualCamera.Target - campos;
 			Vector3D delta = (campos + camvec * dragdistance) - (dragstartcampos + dragstartcamvec * dragdistance);
 
+			// Turn the things by as much as the view has turned (keeps the angle between the view and the thing)
+			float camangle = General.Map.VisualCamera.AngleXY;
+			dragangle += Angle2D.Normalized(camangle - draglastanglexy + Angle2D.PI) - Angle2D.PI;
+			draglastanglexy = camangle;
+
 			// Move all the things by that amount
 			bool moved = false;
 			foreach(DragItem item in dragitems)
 			{
 				Vector3D newpos = new Vector3D(item.startxy.x + delta.x, item.startxy.y + delta.y, item.startz + delta.z);
 				if(item.visual.MoveToWorldPosition(newpos)) moved = true;
+				if(item.visual.RotateTo(item.startangle + dragangle)) moved = true;
 			}
 
 			if(moved)
 			{
 				mode.ShowTargetInfo();
-				General.Interface.DisplayStatus(StatusType.Action, "Dragging thing at " + Thing.Position.x + ", " + Thing.Position.y + ", height " + Thing.Position.z + ".");
+				General.Interface.DisplayStatus(StatusType.Action, "Dragging thing at " + Thing.Position.x + ", " + Thing.Position.y + ", height " + Thing.Position.z + ", angle " + Thing.AngleDoom + ".");
 			}
 		}
 
@@ -691,6 +703,17 @@ namespace CodeImp.DoomBuilder.BuilderModes
 
 			// Rebuild the visual thing at the new position
 			Setup();
+			return true;
+		}
+
+		// This turns the thing to the given angle (in whole degrees, like the map format stores it).
+		// Returns true when the angle has changed.
+		private bool RotateTo(float angle)
+		{
+			float newangle = Angle2D.DoomToReal(Angle2D.RealToDoom(Angle2D.Normalized(angle)));
+			if(Angle2D.RealToDoom(newangle) == Thing.AngleDoom) return false;
+
+			Thing.Rotate(newangle);
 			return true;
 		}
 
