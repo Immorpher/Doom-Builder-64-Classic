@@ -224,7 +224,6 @@
 #define Purple_Artifact_Switch(tag)                    92:tag
 #define Elevator_MoveBy(tag, value)                    PushVar(value); 214:tag
 #define Pillar_OpenBy(tag, value)                      PushVar(value); 241:tag
-#define delay(tics)                                    203:tics; wait
 #define Floor_RaiseToNearestChangeSlow(tag)            22:tag
 #define Floor_RaiseTwentyFourChangeSlow(tag)           66:tag
 #define Floor_RaiseThirtyTwoChangeSlow(tag)            67:tag
