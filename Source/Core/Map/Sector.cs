@@ -367,13 +367,17 @@ namespace CodeImp.DoomBuilder.Map
                         break;
                     case ViewMode.FloorTextures:
                         if (Renderer.FullBrightness)
-                            brightint = General.Map.Renderer2D.CalculateBrightness(brightness);
+                            // Doom 64's full-bright cheat replaces the sector light color with white.
+                            // Do not retain the sector's scalar brightness here: it dims textured
+                            // floors (including the two independently scrolling liquid layers).
+                            brightint = new PixelColor(255, 255, 255, 255).ToInt();
                         else
                             brightint = this.flrColor.color.ToInt();
                         break;
                     case ViewMode.CeilingTextures:
                         if (Renderer.FullBrightness)
-                            brightint = General.Map.Renderer2D.CalculateBrightness(brightness);
+                            // Match Doom 64's full-bright lighting, which uses white for every sector.
+                            brightint = new PixelColor(255, 255, 255, 255).ToInt();
                         else
                             brightint = this.ceilColor.color.ToInt();
                         break;

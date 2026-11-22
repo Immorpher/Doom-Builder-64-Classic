@@ -78,8 +78,11 @@ float4 ps_fullbright(PixelData pd) : COLOR
 {
 	float4 tcolor = tex2D(texturesamp, pd.uv);
 	
-	// Blend texture color and modulation color
-    return tcolor * modulatecolor;
+	// Ignore vertex RGB for full brightness, but preserve vertex alpha.
+	// Translucent geometry (including the top layer of Doom 64 liquid floors)
+	// stores its opacity in the vertex alpha channel.
+    return float4(tcolor.rgb * modulatecolor.rgb,
+                  tcolor.a * pd.color.a * modulatecolor.a);
 }
 
 // Normal pixel shader with highlight
@@ -101,8 +104,10 @@ float4 ps_fullbright_highlight(PixelData pd) : COLOR
 {
 	float4 tcolor = tex2D(texturesamp, pd.uv);
 	
-	// Blend texture color and modulation color
-	float4 ncolor = tcolor * modulatecolor;
+	// Ignore vertex RGB for full brightness, but preserve vertex alpha.
+	// This keeps translucent geometry translucent while highlighted.
+	float4 ncolor = float4(tcolor.rgb * modulatecolor.rgb,
+	                       tcolor.a * pd.color.a * modulatecolor.a);
 	float4 hcolor = float4(highlightcolor.rgb, ncolor.a);
 	
     //return lerp(ncolor, hcolor, highlightcolor.a);
