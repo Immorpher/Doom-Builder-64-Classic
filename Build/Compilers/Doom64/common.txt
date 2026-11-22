@@ -178,3 +178,58 @@
 #define UnlockCheatMenu                                 253:0
 #define DisplaySkyLogo                                  254:0
 #define No_Op                                           0:0
+
+//
+// BACKWARDS-COMPATIBLE ACTION ALIASES
+//
+#define Door_OpenWaitClose(tag)                        4:tag
+#define Door_CloseWaitLongOpen(tag)                    16:tag
+#define Door_CloseWaitOpen(tag)                        16:tag
+#define Door_OpenWaitCloseFast(tag)                    108:tag
+#define Floor_LowerToNearest(tag)                      19:tag
+#define Floor_LowerToLowestChange(tag)                 37:tag
+#define Floor_LowerToNearestFast(tag)                  36:tag
+#define Floor_RaiseToCeiling(tag)                      5:tag
+#define Floor_RaiseTwentyFour(tag)                     58:tag
+#define Floor_RaiseTwentyFourChange(tag)               59:tag
+#define Floor_MoveBy(tag, value)                       PushVar(value); 212:tag
+#define Floor_MoveByFast(tag, value)                   PushVar(value); 228:tag
+#define Floor_MoveByInstant(tag, value)                PushVar(value); 229:tag
+#define Floor_MoveTo(tag, height)                      PushVar(height); 247:tag
+#define Floor_Set(tag, height)                         PushVar(height); 244:tag
+#define Ceiling_LowerToFloorTwo(tag)                   44:tag
+#define Ceiling_RaiseCrushTwo(tag)                     44:tag
+#define Ceiling_CrushFastLoop(tag)                     6:tag
+#define Ceiling_CrushSlowLoop(tag)                     25:tag
+#define Ceiling_InstantKill(tag)                       141:tag
+#define Ceiling_CrushRaiseFastOnce(tag)                232:tag
+#define Ceiling_MoveBy(tag, value)                     PushVar(value); 210:tag
+#define Ceiling_MoveByFast(tag, value)                 PushVar(value); 226:tag
+#define Ceiling_MoveByInstant(tag, value)              PushVar(value); 227:tag
+#define Ceiling_MoveTo(tag, height)                    PushVar(height); 252:tag
+#define Ceiling_Set(tag, height)                       PushVar(height); 245:tag
+#define Plat_DownWaitUpLoop(tag)                       53:tag
+#define Plat_DownWaitUpBy(tag, value)                  PushVar(value); 236:tag
+#define Plat_DownWaitUpFastBy(tag, value)              PushVar(value); 237:tag
+#define Plat_UpWaitDownBy(tag, value)                  PushVar(value); 238:tag
+#define Plat_UpWaitDownFastBy(tag, value)              PushVar(value); 239:tag
+#define Stairs_BuildEight(tag)                         8:tag
+#define Stairs_BuildSixteenFast(tag)                   100:tag
+#define Teleport_Normal(tid)                           39:tid
+#define Thing_FadeOut(tid)                             242:tid
+#define Thing_SpawnProjectile(tid, type)               PushVar(type); 255:tid
+#define Start_Light_Strobing(tag)                      17:tag
+#define Orange_Artifact_Switch(tag)                    90:tag
+#define Blue_Artifact_Switch(tag)                      91:tag
+#define Purple_Artifact_Switch(tag)                    92:tag
+#define Elevator_MoveBy(tag, value)                    PushVar(value); 214:tag
+#define Pillar_OpenBy(tag, value)                      PushVar(value); 241:tag
+#define delay(tics)                                    203:tics; wait
+#define Floor_RaiseToNearestChangeSlow(tag)            22:tag
+#define Floor_RaiseTwentyFourChangeSlow(tag)           66:tag
+#define Floor_RaiseThirtyTwoChangeSlow(tag)            67:tag
+#define Plat_RaiseByTwentyFourChange(tag)              66:tag
+#define Plat_RaiseByThirtyTwoChange(tag)               67:tag
+#define Stairs_BuildFast(tag)                          100:tag
+#define Teleport_Monster_Only(tid)                     125:tid
+#define Teleport_Silent(tid)                           249:tid
