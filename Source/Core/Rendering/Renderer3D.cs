@@ -769,6 +769,41 @@ namespace CodeImp.DoomBuilder.Rendering
 			graphics.Device.SetRenderState(RenderState.TextureFactor, -1);
 		}
 
+		// Returns the squared distance from the camera to the center of a
+		// geometry's vertices. Squared distance is sufficient for sorting.
+		private float GetGeometryDistanceSquared(VisualGeometry geometry)
+		{
+			WorldVertex[] vertices = geometry.Vertices;
+			if(vertices == null || vertices.Length == 0) return 0.0f;
+
+			float x = 0.0f;
+			float y = 0.0f;
+			float z = 0.0f;
+			for(int i = 0; i < vertices.Length; i++)
+			{
+				x += vertices[i].x;
+				y += vertices[i].y;
+				z += vertices[i].z;
+			}
+			float invcount = 1.0f / vertices.Length;
+			x = x * invcount - cameraposition.x;
+			y = y * invcount - cameraposition.y;
+			z = z * invcount - cameraposition.z;
+			return x * x + y * y + z * z;
+		}
+
+		// A texture group can contain several transparent surfaces. Use its
+		// average center distance to establish a back-to-front order between
+		// texture groups, then sort individual surfaces within each group.
+		private float GetAverageGeometryDistanceSquared(BinaryHeap<VisualGeometry> geometries)
+		{
+			if(geometries.Count == 0) return 0.0f;
+			float total = 0.0f;
+			foreach(VisualGeometry geometry in geometries)
+				total += GetGeometryDistanceSquared(geometry);
+			return total / geometries.Count;
+		}
+
 		// This performs a single render pass
 		private void RenderSinglePass(int pass)
 		{
@@ -805,8 +840,21 @@ namespace CodeImp.DoomBuilder.Rendering
 			// Begin rendering with this shader
 			graphics.Shaders.World3D.BeginPass(shaderpass);
 			
-			// Render the geometry collected
-			foreach(KeyValuePair<ImageData, BinaryHeap<VisualGeometry>> group in geopass)
+			// Render the geometry collected. Transparent geometry must be drawn
+			// back-to-front. Sorting only by sector (the normal BinaryHeap order)
+			// is insufficient because alpha blending does not write to the Z buffer.
+			List<KeyValuePair<ImageData, BinaryHeap<VisualGeometry>>> rendergroups =
+				new List<KeyValuePair<ImageData, BinaryHeap<VisualGeometry>>>(geopass);
+			if(pass == (int)RenderPass.Alpha)
+			{
+				rendergroups.Sort(delegate(KeyValuePair<ImageData, BinaryHeap<VisualGeometry>> a,
+					KeyValuePair<ImageData, BinaryHeap<VisualGeometry>> b)
+				{
+					return GetAverageGeometryDistanceSquared(b.Value).CompareTo(GetAverageGeometryDistanceSquared(a.Value));
+				});
+			}
+
+			foreach(KeyValuePair<ImageData, BinaryHeap<VisualGeometry>> group in rendergroups)
 			{
 				ImageData curtexture;
 
@@ -842,9 +890,18 @@ namespace CodeImp.DoomBuilder.Rendering
                     graphics.Shaders.World3D.Texture1 = curtexture.Texture;
                 }
 				
-				// Go for all geometry that uses this texture
+				// Go for all geometry that uses this texture. Within an alpha
+				// texture group, draw the farthest geometry first as well.
 				VisualSector sector = null;
-				foreach(VisualGeometry g in group.Value)
+				List<VisualGeometry> rendergeometry = new List<VisualGeometry>(group.Value);
+				if(pass == (int)RenderPass.Alpha)
+			{
+				rendergeometry.Sort(delegate(VisualGeometry a, VisualGeometry b)
+				{
+					return GetGeometryDistanceSquared(b).CompareTo(GetGeometryDistanceSquared(a));
+				});
+			}
+				foreach(VisualGeometry g in rendergeometry)
 				{
 					// Changing sector?
 					if(!object.ReferenceEquals(g.Sector, sector))
